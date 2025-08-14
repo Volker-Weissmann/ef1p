@@ -44,16 +44,19 @@ function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponse
                 {response.ip}
             </DynamicOutput>;
             const location = getMapLink(response);
-            const provider = isCountryIpInfoResponse(response) ? <a href={`https://${response.as_domain}`}>{response.as_name}</a> : response.org?.replace(/^AS\d+/, '');
+            const provider = isCountryIpInfoResponse(response)
+                ? <a href={`https://${response.as_domain}`}>{response.as_name}</a>
+                : response.org?.replace(/^AS\d+/, '').replace(/\.$/, '');
             if (store.getCurrentState().ipAddress === '') {
                 return <p className="dynamic-output-pointer">
                     Your IP address is {address}.
-                    You're currently in {location}{provider && <>, using the network of {provider}</>}.
+                    You're currently in {location}
+                    {provider && <>, using the network of {provider}</>}.
                 </p>;
             } else {
                 return <p className="dynamic-output-pointer">
                     The device with the IP address {address} is likely located in {location}.
-                    {provider && <>The network is operated by {provider}.</>}
+                    {provider && <> The network is operated by {provider}.</>}
                 </p>;
             }
         } else {
@@ -81,13 +84,13 @@ async function updateIpInfoResponseParagraph({ ipAddress }: State): Promise<void
 /* ------------------------------ Input ------------------------------ */
 
 const ipAddress: DynamicTextEntry = {
-    label: 'IPv4 address',
-    tooltip: 'The IPv4 address you are interested in or nothing to take yours.',
+    label: 'IPv4 or IPv6 address',
+    tooltip: 'The IPv4 or IPv6 address you are interested in or nothing to take yours.',
     defaultValue: '',
     inputType: 'text',
-    inputWidth: 170, // 145 without placeholder.
+    inputWidth: 220, // 145 without placeholder.
     placeholder: 'defaults to your address',
-    validateIndependently: input => input !== '' && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(input) && 'Please enter an IPv4 address or leave the field empty.',
+    validateIndependently: input => input !== '' && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(input) && !/^([0-9a-f]{0,4}:){1,7}[0-9a-f]{0,4}$/i.test(input) && 'Please enter an IPv4 or IPv6 address or leave the field empty.',
 };
 
 interface State {
@@ -112,7 +115,7 @@ export const toolLookupIpAddress: Tool = [
         <Input
             submit={{
                 label: 'Locate',
-                tooltip: 'Locate the given IPv4 address.',
+                tooltip: 'Locate the given IPv4 of IPv6 address.',
                 // tslint:disable-next-line:no-empty
                 onClick: () => {},
             }}
