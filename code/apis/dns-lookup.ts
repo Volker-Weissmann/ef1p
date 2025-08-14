@@ -112,7 +112,7 @@ export interface DnsRecord {
     name: string;
     ttl: number;
     type: RecordType | number;
-    data: string; // Removed quotes in case of SPF and TXT records, original string otherwise.
+    data: string; // Removed quotes for SPF and TXT records, original string otherwise.
 }
 
 export interface DnsResponse {

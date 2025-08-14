@@ -4,7 +4,7 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { Fragment } from 'react';
+import { Fragment, ReactNode } from 'react';
 
 import { flatten, getLastElement } from '../../utility/array';
 import { copyToClipboard } from '../../utility/clipboard';
@@ -26,7 +26,7 @@ import { VersionedStore } from '../../react/versioned-store';
 
 import { getAllRecords, getDataOfFirstRecord, isAuthenticated, RecordType, resolveDomainName } from '../../apis/dns-lookup';
 import { Configuration, Documentation, findConfigurationFile, Server } from '../../apis/email-configuration';
-import { getIpInfo, IpInfoResponse } from '../../apis/ip-geolocation';
+import { getRenderedIpInfo } from '../../apis/ip-geolocation';
 
 import { DkimState, getDefaultDkimState, setDkimState } from '../format/dkim';
 import { dmarcAddressRegex, DmarcState, getDefaultDmarcState, setDmarcState } from '../format/dmarc';
@@ -34,7 +34,6 @@ import { dmarcAddressRegex, DmarcState, getDefaultDmarcState, setDmarcState } fr
 import { getOpenSslCommand } from '../protocol/managesieve';
 
 import { endpoint, secure } from './email-requests';
-import { getMapLink } from './ip-address';
 
 /* ------------------------------ SRV records ------------------------------ */
 
@@ -339,7 +338,7 @@ interface MxRow {
     priority: number;
     domain: string;
     address: string;
-    location: IpInfoResponse;
+    location: ReactNode;
 }
 
 interface AdRow {
@@ -377,7 +376,7 @@ function RawMxRecordsOutput({ mxRows, adRows, dnssec, error }: Readonly<MxRecord
                                 <td><ClickToCopy>{mxRow.priority}</ClickToCopy></td>
                                 <td><ClickToCopy>{mxRow.domain}</ClickToCopy></td>
                                 <td><ClickToCopy>{mxRow.address}</ClickToCopy></td>
-                                <td>{getMapLink(mxRow.location)}</td>
+                                <td>{mxRow.location}</td>
                             </tr>)}
                         </tbody>
                     </table>
@@ -427,7 +426,7 @@ async function queryMxRecords({ domain }: State): Promise<void> {
                     throw new Error(`${domain} has a null MX record, which means that it does not support email.`);
                 }
                 const address = await getDataOfFirstRecord(mxDomain, 'A');
-                const location = await getIpInfo(address);
+                const location = await getRenderedIpInfo(address);
                 return { priority, domain: mxDomain, address, location } as MxRow;
             }),
         );

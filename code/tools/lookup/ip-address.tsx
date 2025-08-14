@@ -4,7 +4,7 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { Fragment, ReactNode } from 'react';
+import { Fragment } from 'react';
 
 import { copyToClipboard } from '../../utility/clipboard';
 
@@ -16,22 +16,9 @@ import { Store } from '../../react/store';
 import { VersionedStore } from '../../react/versioned-store';
 
 import { getReverseLookupDomain } from '../../apis/dns-lookup';
-import { getIpInfo, IpInfoResponse, isSuccessfulIpInfoResponse } from '../../apis/ip-geolocation';
+import { getIpInfo, getMapLink, IpInfoResponse, isCityIpInfoResponse, isCountryIpInfoResponse } from '../../apis/ip-geolocation';
 
 import { setDnsResolverInputs } from './dns-records';
-
-/* ------------------------------ Utility ------------------------------ */
-
-// https://developers.google.com/maps/documentation/urls/get-started#map-action
-export function getMapLink(response: IpInfoResponse, fallback: ReactNode = 'unknown'): ReactNode {
-    if (isSuccessfulIpInfoResponse(response)) {
-        return <a href={`https://www.google.com/maps/@?api=1&map_action=map&center=${response.loc}&zoom=10`}>
-            {response.city} ({response.country})
-        </a>;
-    } else {
-        return fallback;
-    }
-}
 
 /* ------------------------------ Output ------------------------------ */
 
@@ -44,7 +31,7 @@ function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponse
     if (error) {
         return <p>Could not retrieve information about this IP address. Make sure you have your adblocker disabled for this site.</p>;
     } else if (response) {
-        if (isSuccessfulIpInfoResponse(response)) {
+        if (isCityIpInfoResponse(response) || isCountryIpInfoResponse(response)) {
             const address = <DynamicOutput
                 title="Click to copy. Right click to do a reverse lookup."
                 onClick={_ => copyToClipboard(response.ip)}
@@ -57,17 +44,16 @@ function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponse
                 {response.ip}
             </DynamicOutput>;
             const location = getMapLink(response);
-            const provider = response.org?.replace(/^AS\d+/, '');
+            const provider = isCountryIpInfoResponse(response) ? <a href={`https://${response.as_domain}`}>{response.as_name}</a> : response.org?.replace(/^AS\d+/, '');
             if (store.getCurrentState().ipAddress === '') {
                 return <p className="dynamic-output-pointer">
                     Your IP address is {address}.
-                    You're currently in {location}
-                    {provider ? `, using the network of ${provider}` : ''}.
+                    You're currently in {location}{provider && <>, using the network of {provider}</>}.
                 </p>;
             } else {
                 return <p className="dynamic-output-pointer">
                     The device with the IP address {address} is likely located in {location}.
-                    {provider ? ` The network is operated by ${provider}.` : ''}
+                    {provider && <>The network is operated by {provider}.</>}
                 </p>;
             }
         } else {

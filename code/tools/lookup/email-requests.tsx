@@ -4,7 +4,7 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { Fragment } from 'react';
+import { Fragment, ReactNode } from 'react';
 
 import { copyToClipboard } from '../../utility/clipboard';
 import { getRandomString } from '../../utility/string';
@@ -17,13 +17,11 @@ import { getInput } from '../../react/input';
 import { Store } from '../../react/store';
 import { VersionedStore } from '../../react/versioned-store';
 
-import { getIpInfo, IpInfoResponse } from '../../apis/ip-geolocation';
+import { getRenderedIpInfo } from '../../apis/ip-geolocation';
 
 import { validateWebAddress } from '../utility/address';
 
 import { setBody } from '../protocol/esmtp';
-
-import { getMapLink } from './ip-address';
 
 /* ------------------------------ Configuration ------------------------------ */
 
@@ -61,7 +59,7 @@ interface Request {
     time: string;
     target: string;
     address: string;
-    location: IpInfoResponse;
+    location: ReactNode;
     client: string;
 }
 
@@ -94,7 +92,7 @@ function RawRequestsTable({ subscribing, requests, message, token, link }: Reado
                         <td>{request.time}</td>
                         <td>{request.target}</td>
                         <td><ClickToCopy>{request.address}</ClickToCopy></td>
-                        <td>{getMapLink(request.location)}</td>
+                        <td>{request.location}</td>
                         <td>{request.client}</td>
                     </tr>)}
                 </tbody>
@@ -168,7 +166,7 @@ interface Data {
 
 async function onMessage(message: MessageEvent<string>): Promise<void> {
     const data = JSON.parse(message.data) as Data;
-    const location = await getIpInfo(data.address);
+    const location = await getRenderedIpInfo(data.address);
     requestsStore.setState({ requests: [...requestsStore.getState().requests, {
         time: Time.current().toLocalTime().toGregorianTime(),
         target: data.target,

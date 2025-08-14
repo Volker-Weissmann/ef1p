@@ -1189,7 +1189,7 @@ export const toolProtocolEsmtp: Tool = [
                 className="btn btn-primary btn-sm"
                 onClick={downloadMessage}
                 title="Download the above message as a .eml file to import it into your mail client."
-            >Download message</button>
+            ><i className="fa-solid fa-file-arrow-down"></i> Download message</button>
         </div>
     </Fragment>,
     store,
