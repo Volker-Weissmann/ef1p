@@ -22,7 +22,7 @@ export function report(name: string, props?: Properties, callback?: Callback): v
         plausible(name, { props, callback });
     } else {
         // Log the reports to the console during development:
-        console.log(`Report '${name}':`, props);
+        console.log(`Report event '${name}' with properties ${JSON.stringify(props)}`);
         callback?.();
     }
 }

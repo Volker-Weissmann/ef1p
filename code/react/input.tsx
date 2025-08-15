@@ -188,6 +188,7 @@ export class RawInput<State extends BasicState<State>> extends Component<Provide
         const currentState = this.props.store.getCurrentState();
         this.props.store.onChange?.(currentState, currentState);
         this.props.submit?.onClick(currentState);
+        report('Use tool', { Identifier: this.props.store.identifier, Action: 'Submit' });
     }
 
     private readonly onPrevious = () => {

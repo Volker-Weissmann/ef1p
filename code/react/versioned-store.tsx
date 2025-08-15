@@ -346,7 +346,7 @@ export class VersionedStore<State extends BasicState<State>> extends PersistedSt
                     ],
                     index: this.state.index + 1,
                 }, 'input', 'state');
-                report('Use tool', { Identifier: this.identifier });
+                report('Use tool', { Identifier: this.identifier, Action: 'Create state' });
             } else {
                 super.setState({
                     inputs,
@@ -391,6 +391,7 @@ export class VersionedStore<State extends BasicState<State>> extends PersistedSt
             errors: this.defaultState.errors,
             index: newIndex,
         }, 'input', 'state');
+        report('Use tool', { Identifier: this.identifier, Action: 'Change state' });
     }
 
     /**

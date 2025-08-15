@@ -100,7 +100,7 @@ const scrollToAnchor = (hash: string | null, trigger: 'load' | 'hash' | 'link' |
 
 const production = window.location.hostname !== 'localhost';
 
-if (production) {
+if (production || window.location.hash.includes('&')) { // The second part ensures that tool links work also on localhost.
     // See https://stackoverflow.com/a/39254773/12917821:
     const scrollToTop = () => $(window).scrollTop(0);
     $(window).on('scroll', scrollToTop);
@@ -237,8 +237,8 @@ $('summary').on('click', event => {
     const summary = event.target.closest('summary');
     if (summary !== null) {
         const details = summary.closest('details');
-        if (details !== null && !details.open) {
-            report('Open box', { Anchor: '#' + summary.id });
+        if (details !== null) {
+            report(details.open ? 'Close box' : 'Open box', { Anchor: '#' + summary.id });
         }
     }
 });
@@ -313,6 +313,7 @@ $('#details-collapser').on('click', () => {
     $('#details-collapser').addClass('d-none');
     $('#details-expander').removeClass('d-none');
     scrollToAnchor(hash, 'expand');
+    report('Close box', { Anchor: 'all' });
 });
 
 // Track the number of PDF downloads.
