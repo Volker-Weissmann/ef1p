@@ -29,7 +29,10 @@ interface IpInfoResponseState {
 
 function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponseState>): JSX.Element | null {
     if (error) {
-        return <p>Could not retrieve information about this IP address. Make sure you have your adblocker disabled for this site.</p>;
+        return <p>
+            An error occurred.
+            Make sure that the IP address exists and that you have disabled your adblocker for this site.
+        </p>;
     } else if (response) {
         if (isCityIpInfoResponse(response) || isCountryIpInfoResponse(response)) {
             const address = <DynamicOutput

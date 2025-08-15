@@ -6,7 +6,7 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 
 import { ReactNode } from 'react';
 
-import { fetchWithErrorAndTimeout } from '../utility/fetch';
+import { fetchWithTimeout } from '../utility/fetch';
 
 /* ------------------------------ Response types ------------------------------ */
 
@@ -52,12 +52,18 @@ export function isCountryIpInfoResponse(response: IpInfoResponse): response is C
 
 const token = 'NmFlYzQyMThjNmNiNjBU';
 
+const success = 200;
+const forbidden = 403;
+const tooManyRequests = 429;
+
 export async function getIpInfo(ipAddress?: string): Promise<IpInfoResponse> {
     const bearer = `Bearer ${atob(token).split('').reverse().slice(1).join('')}`;
-    console.log(bearer);
-    // Main API with authentication (the limited city-level API):
-    try {
-        const response = await fetchWithErrorAndTimeout(
+    let status: number;
+    if (window.location.hostname === 'localhost') {
+        status = forbidden;
+    } else {
+        // Main API with authentication (the limited city-level API):
+        const response = await fetchWithTimeout(
             'https://ipinfo.io/' + (ipAddress ?? '') + '/json',
             {
                 headers: {
@@ -66,33 +72,37 @@ export async function getIpInfo(ipAddress?: string): Promise<IpInfoResponse> {
                 },
             },
         );
-        return response.json();
-    } catch (error) {
-        console.warn('Could not retrieve IP info from ipinfo.io with authentication.', error);
+        status = response.status;
+        if (status === success) {
+            return response.json();
+        }
     }
-    // Main API without authentication (when we exceeded the quota):
-    try {
-        const response = await fetchWithErrorAndTimeout('https://ipinfo.io/' + (ipAddress ?? '') + '/json');
-        return response.json();
-    } catch (error) {
-        console.warn('Could not retrieve IP info from ipinfo.io without authentication.', error);
-    }
-    // Lite API with authentication (the unlimited country-level API):
-    try {
-        const response = await fetchWithErrorAndTimeout(
-            'https://api.ipinfo.io/lite/' + (ipAddress || 'me'),
-            {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': bearer,
+    if (status === forbidden || status === tooManyRequests) {
+        // Main API without authentication (when we query from localhost or exceeded the quota):
+        const response = await fetchWithTimeout('https://ipinfo.io/' + (ipAddress ?? '') + '/json');
+        if (response.status === success) {
+            return response.json();
+        }
+        // If the Main API with authentication was forbidden, then so would be the Lite API with authentication.
+        if (status !== forbidden && response.status === tooManyRequests) {
+            // Lite API with authentication (the unlimited country-level API):
+            const response = await fetchWithTimeout(
+                'https://api.ipinfo.io/lite/' + (ipAddress || 'me'),
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': bearer,
+                    },
                 },
-            },
-        );
-        return response.json();
-    } catch (error) {
-        console.warn('Could not retrieve IP info from api.ipinfo.io/lite/ with authentication.', error);
-        throw error;
+            );
+            if (response.status === success) {
+                return response.json();
+            }
+        }
     }
+    // Either the IP address does not exist (404 (Not Found) on the Main API or 400 (Bad Request) on the Lite API)
+    // or there were too many requests to the Main API from localhost without authentication:
+    throw new Error(`Failed to fetch IP info for '${ipAddress}'.`);
 }
 
 /* ------------------------------ Display response ------------------------------ */
@@ -117,6 +127,6 @@ export async function getRenderedIpInfo(ipAddress?: string): Promise<ReactNode> 
         const response = await getIpInfo(ipAddress);
         return getMapLink(response);
     } catch (_) {
-        return 'Error fetching IP info (disable your adblocker?)';
+        return 'Error fetching IP info (adblocker disabled?)';
     }
 }

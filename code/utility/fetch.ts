@@ -29,3 +29,12 @@ export function fetchWithErrorAndTimeout(url: string, options: RequestInit = {},
         ),
     ]);
 }
+
+export function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutInSeconds = 4): Promise<Response> {
+    return Promise.race<Promise<Response>>([
+        fetch(url, { ...defaultOptions, ...options }),
+        new Promise<Response>((_, reject) =>
+            setTimeout(() => reject(new Error(`Custom timeout when fetching ${url} after ${timeoutInSeconds} seconds.`)), timeoutInSeconds * 1000),
+        ),
+    ]);
+}
