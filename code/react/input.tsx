@@ -214,9 +214,8 @@ export class RawInput<State extends BasicState<State>> extends Component<Provide
         if (id) {
             const entries = this.props.sharedEntries !== undefined ? this.props.sharedEntries : this.entries;
             const address = window.location.origin + window.location.pathname + '#' + id + '&' + this.props.store.encodeInputs(entries).join('&');
-            if (copyToClipboardWithAnimation(address, event.currentTarget as HTMLButtonElement, 'scale200')) {
-                report('Copy link', { Anchor: '#' + id });
-            }
+            copyToClipboardWithAnimation(address, event.currentTarget as HTMLButtonElement, 'scale200');
+            report('Copy link', { Anchor: '#' + id });
         } else {
             throw new Error('input.tsx: Could not find the ID of the parent element.');
         }

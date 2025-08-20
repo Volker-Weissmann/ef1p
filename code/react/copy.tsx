@@ -10,8 +10,8 @@ import { AnimationEffect, copyToClipboardWithAnimation } from '../utility/animat
 
 import { Children } from './utility';
 
-function copy(target: EventTarget & HTMLSpanElement): void {
-    if (copyToClipboardWithAnimation(
+async function copy(target: EventTarget & HTMLSpanElement): Promise<void> {
+    if (await copyToClipboardWithAnimation(
         target.innerText + (target.dataset.newline === 'true' ? '\n' : ''),
         target,
         target.dataset.effect as AnimationEffect | undefined,
@@ -25,23 +25,24 @@ function handleClick(event: MouseEvent<HTMLSpanElement>): void {
 }
 
 function handleKeyDown(event: KeyboardEvent<HTMLSpanElement>): void {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         copy(event.currentTarget);
-    }
-    if (event.key === ' ') {
-        event.preventDefault();
     }
 }
 
 function handleKeyUp(event: KeyboardEvent<HTMLSpanElement>): void {
     if (event.key === ' ') {
         event.preventDefault();
-        copy(event.currentTarget);
     }
 }
 
 export interface ClickToCopyProps {
+    /**
+     * The displayed title. Defaults to 'Click to copy.'.
+     */
+    title?: string;
+
     /**
      * Whether to append a newline character to the text. Defaults to false.
      */
@@ -53,13 +54,13 @@ export interface ClickToCopyProps {
     effect?: AnimationEffect;
 }
 
-export function ClickToCopy({ newline, effect, children }: ClickToCopyProps & Children): JSX.Element {
+export function ClickToCopy({ title, newline, effect, children }: ClickToCopyProps & Children): JSX.Element {
     return <span
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         className="click-to-copy"
-        title="Click to copy."
+        title={title ?? 'Click to copy.'}
         tabIndex={0}
         data-newline={newline}
         data-effect={effect}

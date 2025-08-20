@@ -11,12 +11,12 @@ const animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimati
 
 export type AnimationEffect = 'scale125' | 'scale150' | 'scale200' | 'scale400';
 
-export function copyToClipboardWithAnimation(
+export async function copyToClipboardWithAnimation(
     text: string,
     target: HTMLElement,
     effect: AnimationEffect = 'scale150',
-): boolean {
-    if (copyToClipboard(text)) {
+): Promise<boolean> {
+    if (await copyToClipboard(text)) {
         const element = $(target);
         element.addClass(effect).one(animationEnd, () => element.removeClass(effect));
         return true;

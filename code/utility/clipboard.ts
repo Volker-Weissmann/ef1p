@@ -5,7 +5,7 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
 // Adapted from https://gist.githubusercontent.com/Chalarangelo/4ff1e8c0ec03d9294628efbae49216db/raw/cbd2d8877d4c5f2678ae1e6bb7cb903205e5eacc/copyToClipboard.js.
-export function copyToClipboard(text: string): boolean {
+function deprecatedCopyToClipboard(text: string): boolean {
     // Create and append textarea to body:
     const textarea = document.createElement('textarea');
     textarea.setAttribute('readonly', 'true'); // Method needed because of missing TypeScript definition.
@@ -42,4 +42,17 @@ export function copyToClipboard(text: string): boolean {
     }
 
     return success;
+}
+
+export async function copyToClipboard(text: string): Promise<boolean> {
+    try {
+        if (window.isSecureContext && navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } else {
+            return deprecatedCopyToClipboard(text);
+        }
+    } catch {
+        return false;
+    }
 }

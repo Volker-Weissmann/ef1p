@@ -136,9 +136,8 @@ const handleLinkClick = (event: JQuery.TriggeredEvent) => {
             address += window.location.pathname;
         }
         address += href;
-        if (copyToClipboardWithAnimation(address, target, 'scale400')) {
-            report('Copy link', { Anchor: href });
-        }
+        copyToClipboardWithAnimation(address, target, 'scale400');
+        report('Copy link', { Anchor: href });
     } else if (!event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey && scrollToAnchor(href, 'link')) {
         event.preventDefault();
     } else {
