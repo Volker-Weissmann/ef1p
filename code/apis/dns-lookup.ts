@@ -46,8 +46,6 @@ export function mapRecordTypeToGoogle(type: RecordType): string {
             return 'TYPE61';
         case 'SMIMEA':
             return 'TYPE53';
-        case 'CDNSKEY':
-            return 'TYPE60';
         default:
             return type;
     }
@@ -59,8 +57,6 @@ export function mapRecordTypeFromGoogle(type: string): RecordType {
             return 'OPENPGPKEY';
         case 'TYPE53':
             return 'SMIMEA';
-        case 'TYPE60':
-            return 'CDNSKEY';
         default:
             return type as RecordType;
     }

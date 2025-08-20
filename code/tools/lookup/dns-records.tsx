@@ -328,7 +328,7 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
         ],
     },
     CDS: DS,
-    CDNSKEY: DNSKEY, // Google doesn't provide a parsed answer, unfortunately: https://issuetracker.google.com/issues/162137940
+    CDNSKEY: DNSKEY,
 };
 
 function parseDnsData(record: DnsRecord): ReactNode {
