@@ -4,13 +4,16 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { Fragment, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
+import { copyToClipboardWithAnimation } from '../../utility/animation';
+import { filterUndefined } from '../../utility/array';
 import { getErrorMessage } from '../../utility/error';
 import { Dictionary } from '../../utility/record';
 import { Time } from '../../utility/time';
 
-import { DynamicOutput, StaticOutput } from '../../react/code';
+import { StaticOutput } from '../../react/code';
+import { ClickToCopy } from '../../react/copy';
 import { DynamicBooleanEntry, DynamicEntries, DynamicSingleSelectEntry, DynamicTextEntry } from '../../react/entry';
 import { Tool } from '../../react/injection';
 import { getInput } from '../../react/input';
@@ -126,11 +129,17 @@ const tlsaMatchingTypes: Dictionary = {
 
 const tlsaMatchingTypesDefault = 'used for an unassigned purpose';
 
+interface Action {
+    icon: string;
+    title: (field: string) => string;
+    handler: (field: string) => any;
+    skip?: (field: string) => boolean;
+}
+
 interface Field {
     title: string | ((field: string, record: DnsRecord) => string);
-    onClick?: (field: string, record: DnsRecord) => any;
-    onContextMenu?: (field: string, record: DnsRecord) => any;
-    transform?: (field: string, record: DnsRecord) => string;
+    actions?: Action[];
+    transform?: (field: string) => string;
 }
 
 interface Pattern {
@@ -140,9 +149,6 @@ interface Pattern {
 
 type Parser = (record: DnsRecord) => JSX.Element;
 const parseGenericFormat: Parser = record => <StaticOutput title="The data of this record in the hexadecimal generic format.">{record.data.split(' ')[2]?.toUpperCase() ?? record.data}</StaticOutput>;
-
-const onClick = (field: string) => setDnsResolverInputs(field, 'A');
-const onContextMenu = (field: string) => window.open('http://' + field.slice(0, -1));
 
 const DNSKEY: Pattern = {
     regexp: /^\d+ \d+ \d+ ([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/,
@@ -164,19 +170,46 @@ const DS: Pattern = {
     ],
 };
 
+const reverseLookup: Action = {
+    icon: 'address-book',
+    title: field => `Click to do a reverse lookup of ${field}.`,
+    handler: field => setDnsResolverInputs(getReverseLookupDomain(field), 'PTR'),
+};
+
+const geolocateAddress: Action = {
+    icon: 'earth-americas',
+    title: field => `Click to geolocate the IP address ${field}.`,
+    handler: field => { setIpInfoInput(field); window.location.hash = '#tool-lookup-ip-address'; },
+}
+
+const lookUpAddressRecord: Action = {
+    icon: 'magnifying-glass',
+    title: field => `Click to look up the IPv4 address of ${field}`,
+    handler: field => setDnsResolverInputs(field, 'A'),
+    skip: field => field === '.',
+};
+
+const openDomainInBrowser: Action = {
+    icon: 'arrow-up-right-from-square',
+    title: field => `Click to open the domain ${field.slice(0, -1)} in your browser.`,
+    handler: field => window.open('http://' + field.slice(0, -1)),
+};
+
 const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
-    ANY: record => <span>{record.data}</span>, // Only needed for TypeScript.
+    ANY: record => <span>{record.data}</span>, // Entry needed only for TypeScript.
     A: {
         regexp: /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
         fields: [{
-            title: (_, record) => `The IPv4 address of ${record.name} Click to do a reverse lookup. Right click to geolocate the IP address.`,
-            onClick: field => setDnsResolverInputs(getReverseLookupDomain(field), 'PTR'),
-            onContextMenu: field => { setIpInfoInput(field); window.location.hash = '#tool-lookup-ip-address'; },
+            title: (_, record) => `The IPv4 address of ${record.name}`,
+            actions: [reverseLookup, geolocateAddress],
         }],
     },
     AAAA: {
         regexp: /^.+$/,
-        fields: [{ title: (_, record) => `The IPv6 address of ${record.name}` }],
+        fields: [{
+            title: (_, record) => `The IPv6 address of ${record.name}`,
+            actions: [reverseLookup, geolocateAddress],
+        }],
     },
     CAA: {
         regexp: /^\d{1,3} (issue|issuewild|iodef) "\S+"$/,
@@ -196,29 +229,48 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
     },
     CNAME: {
         regexp: /^([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9]\.$/i,
-        fields: [{ title: (_, record) => `The domain name for which ${record.name.slice(0, -1)} is an alias. Click to look up its resource records of the same type. Right click to open the domain in your browser.`, onClick: field => store.setNewStateFromInput('domainName', field), onContextMenu }],
+        fields: [{
+            title: (_, record) => `The domain name for which ${record.name.slice(0, -1)} is an alias.`,
+            actions: [{
+                icon: 'magnifying-glass',
+                title: field => `Click to look up the resource records of the same type for ${field}`,
+                handler: field => store.setNewStateFromInput('domainName', field),
+            }, openDomainInBrowser]
+        }],
     },
     MX: {
         regexp: /^\d+ (([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9])?\.$/i,
         fields: [
             { title: 'The priority of the subsequent host. The lower the value, the higher the priority. Several records with the same priority can be used for load balancing, otherwise additional records simply provide redundancy.' },
-            { title: (field, record) => field === '.' ? `This MX record indicates that ${record.name.slice(0, -1)} doesn't accept mail.` : `A host which handles incoming mail for ${record.name} Click to look up its IPv4 address. The host name must resolve directly to one or more address records without involving CNAME records.`, onClick },
+            {
+                title: (field, record) => field === '.' ? `This MX record indicates that ${record.name.slice(0, -1)} doesn't accept mail.` : `A host which handles incoming mail for ${record.name} The host name must resolve directly to one or more address records without involving CNAME records.`,
+                actions: [lookUpAddressRecord],
+            },
         ],
     },
     NS: {
         regexp: /^([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9]\.$/i,
-        fields: [{ title: (_, record) => `An authoritative name server for the DNS zone starting at ${record.name} Click to look up its IPv4 address.`, onClick }],
+        fields: [{
+            title: (_, record) => `An authoritative name server for the DNS zone starting at ${record.name}`,
+            actions: [lookUpAddressRecord],
+        }],
     },
     OPENPGPKEY: parseGenericFormat,
     PTR: {
         regexp: /^([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9]\.$/i,
-        fields: [{ title: 'This is typically the domain name from a reverse DNS lookup. Click to look up its IPv4 address. If it matches the IP address that was looked up in reverse, then the domain holder also holds that IP address. Without a match, the reference in either direction can be fraudulent. Right click to open the domain in your browser.', onClick, onContextMenu }],
+        fields: [{
+            title: 'This is typically the domain name from a reverse DNS lookup. If its A record matches the IP address that was looked up in reverse, then the domain holder holds that IP address. Without a match, the reference in either direction can be fraudulent.',
+            actions: [lookUpAddressRecord, openDomainInBrowser],
+        }],
     },
     SMIMEA: parseGenericFormat,
     SOA: {
         regexp: /^([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9]\. ([a-z0-9_]+(-[a-z0-9]+)*\\?\.)+[a-z]{2,63}\. \d+ \d+ \d+ \d+ \d+$/i,
         fields: [
-            { title: (_, record) => `The primary name server for the DNS zone ${record.name} Click to look up its IPv4 address.`, onClick },
+            {
+                title: (_, record) => `The primary name server for the DNS zone ${record.name}`,
+                actions: [lookUpAddressRecord],
+            },
             { title: field => 'The email address of the administrator responsible for this zone. The first non-escaped period is replaced with an @, so the address actually is ' + field.replace(/\\\./g, ':').replace('.', '@').replace(/:/g, '.') }, // The closing period is coming from the domain name itself.
             { title: 'The serial number for this zone. If it increases, then the zone has been updated.' },
             { title: 'The number of seconds after which secondary name servers should query the primary name server again in order to refresh their copy.' },
@@ -234,7 +286,10 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             { title: 'The priority of the host at the end of this record. Clients should use the SRV record with the lowest priority value first and fall back to records with higher priority values if the connection fails.' },
             { title: 'A relative weight for records with the same priority. If a service has multiple SRV records with the same priority value, each client should load balance them in proportion to the values of their weight fields.' },
             { title: 'The TCP or UDP port on which the service can be found.' },
-            { title: field => 'The host which provides the service. ' + (field === '.' ? 'The period means that the service is not available at this domain.' : 'Click to look up its IPv4 address.'), onClick },
+            {
+                title: field => field === '.' ? 'The period means that the service is not available at this domain.' : 'The host which provides the service.',
+                actions: [lookUpAddressRecord],
+            },
         ],
     },
     SSHFP: {
@@ -242,7 +297,10 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
         fields: [
             { title: field => `Public key algorithm: ${field} stands for ${sshfpPublicKeyAlgorithms[field] ?? 'an algorithm unknown to this tool'}.` },
             { title: field => `Hash algorithm: ${field} stands for ${sshfpHashAlgorithms[field] ?? 'an algorithm unknown to this tool'}.` },
-            { title: 'The fingerprint of the public key encoded in hexadecimal.', transform: field => field.toUpperCase() },
+            {
+                title: 'The fingerprint of the public key encoded in hexadecimal.',
+                transform: field => field.toUpperCase(),
+            },
         ],
     },
     TLSA: {
@@ -251,72 +309,94 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             { title: field => `Certificate usage: How to verify the server's certificate. ${field} stands for ${tlsaCertificateUsages[field] ?? tlsaCertificateUsagesDefault}` },
             { title: field => `Selector: Which part of the certificate has to match. ${field} means that ${tlsaSelectors[field] ?? tlsaSelectorsDefault}.` },
             { title: field => `Matching type: How the certificate association data is presented. ${field} means that the certificate association data is ${tlsaMatchingTypes[field] ?? tlsaMatchingTypesDefault}.` },
-            { title: 'The certificate association data as indicated by the previous fields.', transform: field => field.toUpperCase() },
+            {
+                title: 'The certificate association data as indicated by the previous fields.',
+                transform: field => field.toUpperCase(),
+            },
         ],
     },
-    TXT: record => <StaticOutput title="The arbitrary, text-based data of this record.">{record.data}</StaticOutput>,
+    TXT: record => <ClickToCopy title="The arbitrary, text-based data of this record. Click to copy."><span className="static-output">{record.data}</span></ClickToCopy>,
     DNSKEY,
     DS,
     RRSIG: {
         regexp: /^[a-z0-9]{1,10} \d+ \d+ \d+ \d+ \d+ \d+ (([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\. ([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/i,
         fields: [
-            { title: field => `Type covered: The record type covered by the signature in this record. A DNSSEC signature covers all the records of the given type. The records are first sorted, then hashed and signed collectively. (${recordTypes[mapRecordTypeFromGoogle(field.toUpperCase())] ?? 'Unsupported record type.'})`, transform: field => mapRecordTypeFromGoogle(field.toUpperCase()) },
+            {
+                title: field => `Type covered: The record type covered by the signature in this record. A DNSSEC signature covers all the records of the given type. The records are first sorted, then hashed and signed collectively. (${recordTypes[mapRecordTypeFromGoogle(field.toUpperCase())] ?? 'Unsupported record type.'})`,
+                transform: field => mapRecordTypeFromGoogle(field.toUpperCase()),
+            },
             { title: field => `Algorithm: This number identifies the cryptographic algorithm used to create and verify the signature. (${field} stands for ${dnskeyAlgorithmsShort[field] ?? 'an unsupported or not recommended algorithm'}.)` },
             { title: `Labels: The number of labels in the domain name to which this record belongs. The empty label for the root and a potential wildcard label are not counted. For example, '*.example.com.' has a label count of 2. This allows a validator to determine whether the answer was synthesized for a wildcard subdomain. Since the signature covers the wildcard label instead of the queried subdomain, a validator needs to be able to detect this in order to verify the signature successfully.` },
             { title: field => `Original TTL: Since the actual time to live value is decremented when a cached record is returned, the original time to live value of the signed record needs to be provided in this RRSIG record in order to be able to verify the signature, which covers this value. (${field} seconds are ${parseTimeToLive(Number.parseInt(field, 10))}.)` },
             { title: field => `Signature expiration: The signature in this record may not be used to authenticate the signed resource records after ${Time.fromUnix(field).toLocalTime().toGregorianDateWithTime()}. The date is encoded as the number of seconds elapsed since 1 January 1970 00:00:00 UTC. For record types other than DNSKEY and DS used for key-signing keys (KSKs), the expiration date shouldn't be too far in the future as it limits for how long an attacker can successfully replay stale resource records, which have been replaced by the domain owner.` },
             { title: field => `Signature inception: The signature in this record may not be used to authenticate the signed resource records before ${Time.fromUnix(field).toLocalTime().toGregorianDateWithTime()}. The date is encoded as the number of seconds elapsed since 1 January 1970 00:00:00 UTC. The inception date allows you to already sign records which you intend to publish at a certain point in the future without risking that the signature can be misused until then.` },
             { title: 'Key tag: This value allows resolvers to quickly determine which key needs to be used to verify the signature in this record. The value is calculated according to appendix B of RFC 4034. It is basically the DNSKEY record data split into chunks of 16 bits and then summed up.' },
-            { title: 'Signer name: The domain name with the DNSKEY record that contains the public key to validate this signature. It has to be the name of the zone that contains the signed resource records. Click to look up the DNSKEY records of this domain.', onClick: field => setDnsResolverInputs(field, 'DNSKEY') },
+            {
+                title: 'Signer name: The domain name with the DNSKEY record that contains the public key to validate this signature. It has to be the name of the zone that contains the signed resource records.',
+                actions: [{
+                    icon: 'magnifying-glass',
+                    title: field => `Click to look up the DNSKEY records of the domain ${field}`,
+                    handler: field => setDnsResolverInputs(field, 'DNSKEY'),
+                }]
+            },
             { title: 'Signature: The signature value encoded in Base64.' },
         ],
     },
     NSEC: record => {
         const availableTypes = record.data.split(' ');
         const nextDomain = availableTypes.splice(0, 1)[0];
-        return <Fragment>
-            <DynamicOutput
-                title={`This is the next domain name in this zone. This record indicates that no domain exists between ${record.name.slice(0, -1)} and ${nextDomain} Click to look up its next domain name. Right click to open the domain in your browser.`}
+        return <>
+            <ClickToCopy title={`This is the next domain name in this zone. This record indicates that no domain exists between ${record.name.slice(0, -1)} and ${nextDomain} Click to copy.`}>
+                <span className="static-output">{nextDomain}</span>
+            </ClickToCopy>
+            <i
+                className="action fa-sm fa-solid fa-magnifying-glass"
+                title={`Click to look up the domain name after ${nextDomain}`}
                 onClick={() => setDnsResolverInputs(nextDomain, 'NSEC')}
-                onContextMenu={event => { onContextMenu(nextDomain); event.preventDefault(); }}
-            >
-                {nextDomain}
-            </DynamicOutput>{' '}
-            {join((availableTypes as RecordType[]).map(
-                recordType => <span
-                    className={recordTypes[recordType] ? 'dynamic-output' : 'static-output'}
-                    title={`This entry indicates that ${record.name.slice(0, -1)} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. Click to look up this record type.`}
-                    onClick={recordTypes[recordType] ? () => setDnsResolverInputs(record.name, recordType) : undefined }
-                >{recordType}</span>,
-            ), ' ')}
-        </Fragment>;
+            ></i>
+            <i
+                className="action fa-sm fa-solid fa-arrow-up-right-from-square"
+                title={`Click to open the domain ${nextDomain.slice(0, -1)} in your browser.`}
+                onClick={() => window.open('http://' + nextDomain.slice(0, -1))}
+            ></i>
+            {join((availableTypes as RecordType[]).map(recordType => <>
+                <ClickToCopy title={`This entry indicates that ${record.name.slice(0, -1)} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. Click to copy.`}>
+                    <span className="static-output">{recordType}</span>
+                </ClickToCopy>
+                {recordTypes[recordType] && <i
+                    className="action fa-sm fa-solid fa-magnifying-glass"
+                    title={`Click to look up the ${recordType} records of ${record.name}`}
+                    onClick={() => setDnsResolverInputs(record.name, recordType)}
+                ></i>}
+            </>), ' ')}
+        </>;
     },
     NSEC3: record => {
         const availableTypes = record.data.split(' ');
         const [ algorithm, flags, iterations, salt, nextDomain ] = availableTypes.splice(0, 5);
         const owner = record.name.substring(0, record.name.indexOf('.'));
-        return <Fragment>
-            <StaticOutput title="Algorithm: This value identifies the cryptographic hash function used to hash the subdomains in this zone. 1 stands for SHA-1, which is the only algorithm currently supported.">
-                {algorithm}
-            </StaticOutput>{' '}
-            <StaticOutput title={`Opt-out flag: If this value is 1, there can be unsigned subzones whose hash is between ${owner} and ${nextDomain}. Otherwise, there are no unsigned subzones that fall in this range. By skipping all subzones that don't deploy DNSSEC, the size of this zone can be reduced as fewer NSEC3 records are required.`}>
-                {flags}
-            </StaticOutput>{' '}
-            <StaticOutput title="Iterations: This value specifies how many additional times the hash function is applied to a subdomain name. (A value of 0 means that the subdomain name is hashed only once in total.) By hashing the result of the hash function again, then its result again and so on, the computational cost to brute-force the name of the hashed subdomain can be increased.">
-                {iterations}
-            </StaticOutput>{' '}
-            <StaticOutput title="Salt: Optionally, an arbitrary value can be provided here to be mixed into the hash function in order to make pre-calculated dictionary attacks harder. This prevents an attacker from simultaneously brute-forcing the subdomains of zones which use different salts.">
-                {salt}
-            </StaticOutput>{' '}
-            <StaticOutput title={`This is the hash of the next domain name in this zone. This record indicates that no other subdomain hashes to a value between ${owner} and ${nextDomain} (with the exception of unsigned subzones if the opt-out flag is set).`}>
-                {nextDomain}
-            </StaticOutput>{' '}
+        return <>
+            <ClickToCopy title="Algorithm: This value identifies the cryptographic hash function used to hash the subdomains in this zone. 1 stands for SHA-1, which is the only algorithm currently supported. Click to copy.">
+                <span className="static-output">{algorithm}</span>
+            </ClickToCopy>{' '}
+            <ClickToCopy title={`Opt-out flag: If this value is 1, there can be unsigned subzones whose hash is between ${owner} and ${nextDomain}. Otherwise, there are no unsigned subzones that fall in this range. By skipping all subzones that don't deploy DNSSEC, the size of this zone can be reduced as fewer NSEC3 records are required. Click to copy.`}>
+                <span className="static-output">{flags}</span>
+            </ClickToCopy>{' '}
+            <ClickToCopy title="Iterations: This value specifies how many additional times the hash function is applied to a subdomain name. (A value of 0 means that the subdomain name is hashed only once in total.) By hashing the result of the hash function again, then its result again and so on, the computational cost to brute-force the name of the hashed subdomain can be increased. Click to copy.">
+                <span className="static-output">{iterations}</span>
+            </ClickToCopy>{' '}
+            <ClickToCopy title="Salt: Optionally, an arbitrary value can be provided here to be mixed into the hash function in order to make pre-calculated dictionary attacks harder. This prevents an attacker from simultaneously brute-forcing the subdomains of zones which use different salts. Click to copy.">
+                <span className="static-output">{salt}</span>
+            </ClickToCopy>{' '}
+            <ClickToCopy title={`This is the hash of the next domain name in this zone. This record indicates that no other subdomain hashes to a value between ${owner} and ${nextDomain} (with the exception of unsigned subzones if the opt-out flag is set). Click to copy.`}>
+                <span className="static-output">{nextDomain}</span>
+            </ClickToCopy>{' '}
             {join((availableTypes as RecordType[]).map(
-                recordType => <StaticOutput title={`This entry indicates that the subdomain which hashes to ${owner} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record.`}>
-                        {recordType}
-                    </StaticOutput>,
+                recordType => <ClickToCopy title={`This entry indicates that the subdomain which hashes to ${owner} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. Click to copy.`}>
+                    <span className="static-output">{recordType}</span>
+                </ClickToCopy>,
             ), ' ')}
-        </Fragment>;
+        </>;
     },
     NSEC3PARAM: {
         regexp: /^\d+ \d+ \d+ ([a-f0-9]+|-)$/,
@@ -342,16 +422,19 @@ function parseDnsData(record: DnsRecord): ReactNode {
         if (pattern.regexp.test(record.data)) {
             const fields = record.data.split(' ');
             return join(fields.map((field, index) => {
-                const title = pattern.fields[index].title;
-                const onClick = pattern.fields[index].onClick;
-                const onContextMenu = pattern.fields[index].onContextMenu;
-                const transform = pattern.fields[index].transform;
-                return <span
-                    className={onClick ? 'dynamic-output' : 'static-output'}
-                    title={typeof title === 'function' ? title(field, record) : title}
-                    onClick={onClick ? () => onClick(field, record) : undefined}
-                    onContextMenu={onContextMenu ? event => { onContextMenu(field, record); event.preventDefault(); } : undefined}
-                >{transform ? transform(field, record) : field}</span>
+                const meta = pattern.fields[index];
+                return <>
+                    <ClickToCopy
+                        title={(typeof meta.title === 'function' ? meta.title(field, record) : meta.title) + ' Click to copy.'}
+                    >
+                        <span className="static-output">{meta.transform ? meta.transform(field) : field}</span>
+                    </ClickToCopy>
+                    {join(filterUndefined((meta.actions ?? []).map(action => action.skip?.(field) ? undefined : <i
+                        className={'action fa-sm fa-solid fa-' + action.icon}
+                        title={action.title(field)}
+                        onClick={() => action.handler(field)}
+                    ></i>)), '')}
+                </>
             }), ' ');
         } else {
             console.error(`The ${record.type} record '${record.data}' didn't match the expected pattern.`);
@@ -361,7 +444,7 @@ function parseDnsData(record: DnsRecord): ReactNode {
 }
 
 function turnRecordsIntoTable(records: DnsRecord[]): ReactNode {
-    return <table className="text-nowrap dynamic-output-pointer">
+    return <table className="text-nowrap fa-width-auto">
         <thead>
             <th>Domain name</th>
             <th>Time to live</th>
@@ -370,10 +453,19 @@ function turnRecordsIntoTable(records: DnsRecord[]): ReactNode {
         </thead>
         <tbody>
             {records.map(record => <tr key={getUniqueKey()}>
-                <td>{record.name}</td>
+                <td><ClickToCopy>{record.name}</ClickToCopy></td>
                 <td title={record.ttl + ' seconds'}>{parseTimeToLive(record.ttl)}</td>
                 <td>{typeof record.type === 'number' ? 'Unsupported type ' + record.type : recordTypes[record.type]}</td>
-                <td>{parseDnsData(record)}</td>
+                <td>
+                    <span className="d-inline-block">
+                        {parseDnsData(record)}
+                        <i
+                            className="action fa-sm fa-solid fa-clipboard"
+                            title="Click to copy all data for this record."
+                            onClick={event => copyToClipboardWithAnimation(record.data, event.currentTarget.parentElement!)}
+                        ></i>
+                    </span>
+                </td>
             </tr>)}
         </tbody>
     </table>;
@@ -383,7 +475,7 @@ function RawDnsResponseTable({ response, error }: DnsResponseState): JSX.Element
     if (error) {
         return <p>The domain name could not be resolved. Reason: {error}</p>;
     } else if (response) {
-        return <Fragment>
+        return <>
             {
                 response.status !== 0 &&
                 <p className="text-center">{responseStatusCodes[response.status] ?? 'The response has a status code which is not supported by this tool.'}</p>
@@ -402,10 +494,10 @@ function RawDnsResponseTable({ response, error }: DnsResponseState): JSX.Element
             }
             {
                 response.authority.length > 0 &&
-                <Fragment>
+                <>
                     <p className="table-title">Authority section</p>
                     {turnRecordsIntoTable(response.authority)}
-                </Fragment>
+                </>
             }
             {
                 (response.answer.length > 0 || response.authority.length > 0) && store.getCurrentState().dnssecOk &&
@@ -414,7 +506,7 @@ function RawDnsResponseTable({ response, error }: DnsResponseState): JSX.Element
                     If you rely on its answers, you do so at your own risk!
                 </p>
             }
-        </Fragment>;
+        </>;
     } else {
         return null; // Nothing is displayed initially.
     }
@@ -491,7 +583,7 @@ export function setDnsResolverInputs(domainName: string, recordType: RecordType,
 /* ------------------------------ Tool ------------------------------ */
 
 export const toolLookupDnsRecords: Tool = [
-    <Fragment>
+    <>
         <Input
             submit={{
                 label: 'Query',
@@ -501,6 +593,6 @@ export const toolLookupDnsRecords: Tool = [
             }}
         />
         <DnsResponseTable/>
-    </Fragment>,
+    </>,
     store,
 ];

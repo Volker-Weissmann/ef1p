@@ -14,6 +14,22 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
   margin-left: .375em;
 }
 
+.action {
+  width: auto;
+  margin-right: .375em;
+  margin-left: .375em;
+  color: $success;
+  cursor: pointer;
+
+  @include hover() {
+    color: darken($success, 10%);
+  }
+}
+
+.action + .action{
+  margin-left: 0;
+}
+
 .fa-ul {
   margin-left: 2.2em !important;
 }
