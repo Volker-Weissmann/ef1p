@@ -132,8 +132,76 @@ export function isAuthenticated(response: DnsResponse, domain: string, type: Rec
     ).length === 1;
 }
 
+/**
+ * This function supports both IPv4 and IPv6 addresses.
+ */
 export function getReverseLookupDomain(ipAddress: string): string {
-    return ipAddress.split('.').reverse().join('.') + '.in-addr.arpa';
+    // Normalize to lowercase and remove (IPv6) zone id (e.g., %eth0).
+    let address = ipAddress.toLowerCase().split('%')[0].trim();
+
+    // It's an IPv4 address if it doesn't contain a colon (':').
+    if (!address.includes(':')) {
+        return address.split('.').reverse().join('.') + '.in-addr.arpa';
+    }
+
+    // Handle embedded IPv4 at the end (e.g., '::ffff:192.0.2.128')
+    if (address.includes('.')) {
+        // There is at least one colon, as the address would have been handled as an IPv4 address otherwise.
+        const indexOfLastColon = address.lastIndexOf(':');
+        const embeddedIPv4Address = address.slice(indexOfLastColon + 1);
+        const octetStrings = embeddedIPv4Address.split('.');
+        if (octetStrings.length !== 4) {
+            throw new Error(`The IPv6 address '${address}' ends with an invalid IPv4 part. (${octetStrings.length} octets instead of 4.)`);
+        }
+        const octetNumbers = octetStrings.map(octetString => {
+            if (!/^\d{1,3}$/.test(octetString)) {
+                throw new Error(`The IPv6 address '${address}' contains the invalid IPv4 octet '${octetString}'.`);
+            }
+            const octetNumber = Number(octetString);
+            if (octetNumber < 0 || octetNumber > 255) {
+                throw new Error(`The IPv6 address '${address}' contains the IPv4 octet '${octetNumber}', which is out of range.`);
+            }
+            return octetNumber;
+        });
+        const hexString = octetNumbers.map(octetNumber => octetNumber.toString(16).padStart(2, '0')).join('');
+        address = address.slice(0, indexOfLastColon + 1) + hexString.slice(0, 4) + ':' + hexString.slice(4, 8);
+    }
+
+    // Split on '::' to expand zero compression.
+    const doubleColonParts = address.split('::');
+    if (doubleColonParts.length > 2) {
+        throw new Error(`The IPv6 address '${address}' contains more than one double colon ('::').`);
+    }
+
+    const hextetsLeftOfDoubleColon = doubleColonParts[0] !== '' ? doubleColonParts[0].split(':') : [];
+    if (doubleColonParts.length === 1 && hextetsLeftOfDoubleColon.length !== 8) {
+        throw new Error(`The uncompressed IPv6 address '${address}' consists of ${hextetsLeftOfDoubleColon.length} hextets instead of 8.`);
+    }
+
+    const hextetsRightOfDoubleColon = doubleColonParts.length === 2 && doubleColonParts[1] !== '' ? doubleColonParts[1].split(':') : [];
+    const hextetCount = hextetsLeftOfDoubleColon.length + hextetsRightOfDoubleColon.length;
+    if (doubleColonParts.length === 2 && hextetCount > 6) { // Zero compression replaces at least two zero hextets.
+        throw new Error(`The compressed IPv6 address '${address}' consists of more hextets than allowed.`);
+    }
+
+    // Combine the hextets to the left and to the right of the double colon without zero compression.
+    const combinedHextets = [
+        ...hextetsLeftOfDoubleColon,
+        ...Array<string>(8 - hextetCount).fill('0'),
+        ...hextetsRightOfDoubleColon,
+    ];
+
+    // Pad all hextets with leading zeros.
+    const paddedHextets = combinedHextets.map(hextet => {
+        if (!/^[0-9a-f]{1,4}$/i.test(hextet)) {
+            throw new Error(`The hextet ${hextet} in the IPv6 address '${address}' is invalid.`);
+        }
+        return hextet.padStart(4, '0');
+    });
+
+    // Create the nibble-reversed domain.
+    const nibbles = paddedHextets.join('').split('');
+    return nibbles.reverse().join('.') + '.ip6.arpa';
 }
 
 /* ------------------------------ Google DNS API ------------------------------ */
