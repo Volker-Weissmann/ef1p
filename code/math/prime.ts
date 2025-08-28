@@ -4,7 +4,7 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { areCoprime, five, getRandomInteger, halve, isEven, modulo, one, three, two, zero } from './utility';
+import { areCoprime, five, getRandomInteger, halve, isEven, one, three, two, zero } from './utility';
 
 /**
  * The first 50 prime numbers.

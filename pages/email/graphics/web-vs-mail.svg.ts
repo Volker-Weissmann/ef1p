@@ -14,7 +14,7 @@ import { Ellipse } from '../../../code/svg/elements/ellipse';
 import { Line } from '../../../code/svg/elements/line';
 import { Rectangle } from '../../../code/svg/elements/rectangle';
 import { printSVG } from '../../../code/svg/elements/svg';
-import { bold, HorizontalAlignment, Text } from '../../../code/svg/elements/text';
+import { bold, Text } from '../../../code/svg/elements/text';
 
 const gapX = 80;
 const gapY = 80;

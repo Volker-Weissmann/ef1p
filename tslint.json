@@ -20,7 +20,7 @@
         "prefer-for-of": false,
         "quotemark": [true, "single", "jsx-double", "avoid-escape"],
         "trailing-comma": [
-            true,
+            false,
             {
                 "multiline": "always",
                 "singleline": "never",

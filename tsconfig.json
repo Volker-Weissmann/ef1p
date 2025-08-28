@@ -9,7 +9,7 @@
         "module": "CommonJS",
         "moduleResolution": "node",
         "noImplicitReturns": true,
-        "noUnusedLocals": false,
+        "noUnusedLocals": true,
         "noUnusedParameters": false,
         "outDir": "./assets/scripts/internal/",
         "removeComments": true,

@@ -136,6 +136,7 @@ function squareRootsOfCoprimeElement(p: bigint, e: bigint, m: bigint, a: bigint)
     return sortIntegers(xs);
 }
 
+/*
 function bruteForce(m: bigint, a: bigint): JSX.Element {
     const xs: bigint[] = [];
     for (let i = zero; i < m; i++) {
@@ -145,6 +146,7 @@ function bruteForce(m: bigint, a: bigint): JSX.Element {
     }
     return <Fragment><br/>x ∈ {'{'}{join(xs.map(x => <Integer integer={x}/>))}{'}'}</Fragment>;
 }
+*/
 
 interface Subproblem {
     p: bigint;
