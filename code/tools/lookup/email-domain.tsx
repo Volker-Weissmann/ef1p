@@ -229,7 +229,7 @@ const authentication: Dictionary<Explanation> = {
 function lookUp(dictionary: Dictionary<Explanation>, key: string): JSX.Element {
     const explanation = dictionary[key];
     if (explanation !== undefined) {
-        return <span className="cursor-help" title={explanation.tooltip}>{explanation.content}<i className="icon-right fas fa-info-circle"></i></span>;
+        return <span className="cursor-help" title={explanation.tooltip}>{explanation.content}<i className="icon-right fas fa-info-circle d-print-none"></i></span>;
     } else {
         return <Fragment>{key}</Fragment>;
     }
@@ -243,11 +243,11 @@ function renderServers(label: string, servers: Server[]): JSX.Element[] {
         <tbody>
             <tr>
                 <td style={{ width: 130 }}>Host name:</td>
-                <td><ClickToCopy>{server.host}<i className="icon-right fas fa-clipboard"></i></ClickToCopy></td>
+                <td><ClickToCopy>{server.host}<i className="icon-right fas fa-clipboard d-print-none"></i></ClickToCopy></td>
             </tr>
             <tr>
                 <td>Port number:</td>
-                <td><ClickToCopy>{server.port}<i className="icon-right fas fa-clipboard"></i></ClickToCopy></td>
+                <td><ClickToCopy>{server.port}<i className="icon-right fas fa-clipboard d-print-none"></i></ClickToCopy></td>
             </tr>
             <tr>
                 <td>Encryption:</td>
@@ -1992,7 +1992,7 @@ const domain: DynamicTextEntry = {
     inputWidth,
     validateIndependently: input =>
         input === '' && 'The domain name may not be empty.' ||
-        input.includes(' ') && 'The domain name may not contain spaces.' || // Redundant to the regular expression, just a more specific error message.
+        /\s/.test(input) && 'The domain name may not contain spaces or tabs.' || // Redundant to the regular expression, just a more specific error message.
         input.length > 253 && 'The domain name may be at most 253 characters long.' ||
         !input.split('.').every(label => label.length < 64) && 'Each label may be at most 63 characters long.' || // Redundant to the regular expression, just a more specific error message.
         !/^[-a-z0-9\.]+$/i.test(input) && 'You can use only English letters, digits, hyphens, and dots.' || // Redundant to the regular expression, just a more specific error message.

@@ -9,8 +9,7 @@ import { normalizeToArray } from '../utility/normalization';
 
 /* ------------------------------ Record types ------------------------------ */
 
-// https://en.wikipedia.org/wiki/List_of_DNS_record_types
-export const recordTypes = {
+const internalQueryRecordTypes = {
     A: 'A: IPv4 address',
     AAAA: 'AAAA: IPv6 address',
     ANY: 'ANY: return all types',
@@ -37,30 +36,35 @@ export const recordTypes = {
     CDNSKEY: 'CDNSKEY: child DNSKEY',
 };
 
-export type RecordType = keyof typeof recordTypes;
+/**
+ * Record types which you can query with the DNS resolver tool.
+ * See https://en.wikipedia.org/wiki/List_of_DNS_record_types.
+ */
+export const queryRecordTypes: Record<string, string> = internalQueryRecordTypes;
 
-// Google's API doesn't understand the following record types.
-export function mapRecordTypeToGoogle(type: RecordType): string {
-    switch (type) {
-        case 'OPENPGPKEY':
-            return 'TYPE61';
-        case 'SMIMEA':
-            return 'TYPE53';
-        default:
-            return type;
-    }
-}
+const internalReplyRecordTypes = {
+    BIND: 'BIND: DNSSEC operations',
+    CERT: 'CERT: certificate (RFC 4398)',
+    HINFO: 'HINFO: host information (RFC 1035)',
+    HIP: 'HIP: Host Identity Protocol (RFC 8005)',
+    HTTPS: 'HTTPS: SVCB-compatible type for use with HTTP (RFC 9460)',
+    LOC: 'LOC: geographic location (RFC 1876)',
+    NAPTR: 'NAPTR: Naming Authority Pointer (RFC 3403)',
+    NXNAME: 'NXNAME: NXDOMAIN indicator for Compact Denial of Existence',
+    SVCB: 'SVCB: general-purpose service binding (RFC 9460)',
+    URI: 'URI: Uniform Resource Identifier (RFC 7553)',
+};
 
-export function mapRecordTypeFromGoogle(type: string): RecordType {
-    switch (type) {
-        case 'TYPE61':
-            return 'OPENPGPKEY';
-        case 'TYPE53':
-            return 'SMIMEA';
-        default:
-            return type as RecordType;
-    }
-}
+/**
+ * Record types which can appear in DNS replies when you query ANY, NSEC, or NSEC3.
+ */
+export const replyRecordTypes: Record<string, string> = internalReplyRecordTypes;
+
+const internalAllRecordTypes = { ...internalQueryRecordTypes, ...internalReplyRecordTypes };
+
+export const allRecordTypes: Record<string, string> = internalAllRecordTypes;
+
+export type RecordType = keyof typeof internalAllRecordTypes;
 
 // https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4
 export const recordTypesById: { [key: number]: RecordType | undefined } = {
@@ -88,6 +92,45 @@ export const recordTypesById: { [key: number]: RecordType | undefined } = {
     51: 'NSEC3PARAM',
     59: 'CDS',
     60: 'CDNSKEY',
+    65534: 'BIND',
+    37: 'CERT',
+    13: 'HINFO',
+    55: 'HIP',
+    65: 'HTTPS',
+    29: 'LOC',
+    35: 'NAPTR',
+    128: 'NXNAME',
+    64: 'SVCB',
+    256: 'URI',
+}
+
+// Construct the reverse lookup table (with ids as strings).
+const idsByRecordType: { [K in RecordType]?: string } = {};
+for (const [id, recordType] of Object.entries(recordTypesById)) {
+    idsByRecordType[recordType!] = id;
+}
+
+const recordTypesNotUnderstoodByGoogle: RecordType[] = ['OPENPGPKEY', 'SMIMEA', 'HIP', 'LOC', 'URI', 'NXNAME'];
+
+function mapRecordTypeToGoogle(type: RecordType): string {
+    if (recordTypesNotUnderstoodByGoogle.includes(type)) {
+        return 'TYPE' + idsByRecordType[type];
+    }
+    return type;
+}
+
+/**
+ * Note that unknown record types are returned as 'TYPE' + id,
+ * which means you don't find them in `allRecordTypes`.
+ */
+export function mapRecordTypeFromGoogle(type: string): RecordType | string {
+    if (type.startsWith('TYPE')) {
+        const recordType = recordTypesById[parseInt(type.slice(4), 10)];
+        if (recordType !== undefined) {
+            return recordType;
+        }
+    }
+    return type;
 }
 
 // See https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6.

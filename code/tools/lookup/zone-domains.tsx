@@ -4,7 +4,7 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-import { Fragment } from 'react';
+import { ReactNode } from 'react';
 
 import { DynamicEntries, DynamicRangeEntry, DynamicTextEntry } from '../../react/entry';
 import { Tool } from '../../react/injection';
@@ -13,9 +13,9 @@ import { Store } from '../../react/store';
 import { join } from '../../react/utility';
 import { VersionedStore } from '../../react/versioned-store';
 
-import { getAllRecords, RecordType, recordTypes, resolveDomainName } from '../../apis/dns-lookup';
+import { allRecordTypes, getAllRecords, mapRecordTypeFromGoogle, queryRecordTypes, RecordType, resolveDomainName } from '../../apis/dns-lookup';
 
-import { setDnsResolverInputs } from './dns-records';
+import { domainName, setDnsResolverInputs } from './dns-records';
 
 /* ------------------------------ Output ------------------------------ */
 
@@ -26,15 +26,15 @@ interface Row {
 
 interface ZoneWalkerResponseState {
     rows: Row[];
-    message?: string | undefined;
-    nextQuery?: string | undefined;
+    message?: ReactNode;
+    nextQuery?: string;
 }
 
 function RawZoneWalkerResponseTable({ rows, message, nextQuery }: Readonly<ZoneWalkerResponseState>): JSX.Element {
-    return <Fragment>
+    return <>
         {
             rows.length > 0 &&
-            <Fragment>
+            <>
                 <p className="text-center">
                     ⚠️ You click on links at your own risk! The linked websites can contain malware or disturbing content.
                 </p>
@@ -48,17 +48,17 @@ function RawZoneWalkerResponseTable({ rows, message, nextQuery }: Readonly<ZoneW
                             <td>{
                                 (row.types.includes('CNAME') || row.types.includes('A') || row.types.includes('AAAA') || row.types.includes('NS')) ?
                                     <a href={'http://' + row.name.slice(0, -1)} title="Open this domain in a new browser window.">{row.name}</a> :
-                                    <Fragment>{row.name}</Fragment>
+                                    <>{row.name}</>
                             }</td>
-                            <td>{join(row.types.filter(type => type !== 'NSEC' && type !== 'RRSIG').map(
-                                type => recordTypes[type as RecordType] !== undefined ?
-                                    <a href="#tool-lookup-dns-records" title="Look up this record type with the DNS tool." onClick={() => setDnsResolverInputs(row.name, type as RecordType)}>{type}</a> :
-                                    <Fragment>{type}</Fragment>,
+                            <td>{join(row.types.map(
+                                type => queryRecordTypes[type] !== undefined ?
+                                    <a href="#tool-lookup-dns-records" title={`Look up this record type with the DNS tool. (${queryRecordTypes[type]})`} onClick={() => setDnsResolverInputs(row.name, type as RecordType)}>{type}</a> :
+                                    <span title={allRecordTypes[type] ?? 'Unsupported record type.'}>{type}</span>,
                             ))}</td>
                         </tr>)}
                     </tbody>
                 </table>
-            </Fragment>
+            </>
         }
         {
             message &&
@@ -76,7 +76,7 @@ function RawZoneWalkerResponseTable({ rows, message, nextQuery }: Readonly<ZoneW
                 </a>
             </p>
         }
-    </Fragment>;
+    </>;
 }
 
 const zoneWalkerResponseStore = new Store<ZoneWalkerResponseState>({ rows: [] });
@@ -91,6 +91,8 @@ function appendAsteriskToFirstLabel(domainName: string): string {
     labels[0] += '*';
     return labels.join('.');
 }
+
+const filteredTypes = ['NSEC', 'RRSIG'];
 
 async function walkZone({ startDomain, resultLimit }: State): Promise<void> {
     const index = store.getState().index;
@@ -119,14 +121,26 @@ async function walkZone({ startDomain, resultLimit }: State): Promise<void> {
             zoneWalkerResponseStore.setState({ message: 'Could not find an NSEC record for ' + currentDomain });
             return;
         }
-        const types = nsecRecords[0].data.split(' ');
-        const nextDomain = types.splice(0, 1)[0];
+        const parts = nsecRecords[0].data.split(' ');
+        const nextDomain = parts.shift()!;
+        const types = parts.map(mapRecordTypeFromGoogle).filter(type => !filteredTypes.includes(type));
         if (counter > 0 && types.includes('SOA') && !currentDomainForQuery.includes('*')) {
             // We're in a subdomain which does have NSEC records. Let's get out of it again.
             currentDomainForQuery = appendAsteriskToFirstLabel(currentDomain);
             continue;
         }
-        zoneWalkerResponseStore.setState({ rows: [...zoneWalkerResponseStore.getState().rows, { name: currentDomain, types }] });
+        zoneWalkerResponseStore.setState({
+            rows: [
+                ...zoneWalkerResponseStore.getState().rows,
+                { name: currentDomain, types },
+            ],
+        });
+        if (types.includes('NXNAME') || nextDomain === '\\000.' + currentDomain) {
+            zoneWalkerResponseStore.setState({ message: <>
+                This zone uses <a href="https://datatracker.ietf.org/doc/draft-ietf-dnsop-compact-denial-of-existence/07/">Compact Denial of Existence</a> and thus cannot be walked.
+            </> });
+            return;
+        }
         if (currentDomain.endsWith(nextDomain)) {
             zoneWalkerResponseStore.setState({ message: 'You reached the end of the zone ' + nextDomain });
             return;
@@ -144,18 +158,9 @@ async function walkZone({ startDomain, resultLimit }: State): Promise<void> {
 /* ------------------------------ Input ------------------------------ */
 
 const startDomain: DynamicTextEntry = {
+    ...domainName,
     label: 'Start domain',
     tooltip: 'The domain name from which you would like to list the next domain names.',
-    defaultValue: 'ietf.org',
-    inputType: 'text',
-    inputWidth: 220,
-    validateIndependently: input =>
-        input === '' && 'The domain name may not be empty.' ||
-        input.includes(' ') && 'The domain name may not contain spaces.' || // Redundant to the regular expression, just a more specific error message.
-        input.length > 253 && 'The domain name may be at most 253 characters long.' ||
-        !input.split('.').every(label => label.length < 64) && 'Each label may be at most 63 characters long.' || // Redundant to the regular expression, just a more specific error message.
-        !/^[-a-z0-9_\.\*]+$/i.test(input) && 'You can use only English letters, digits, hyphens, underlines, and dots.' || // Redundant to the regular expression, just a more specific error message.
-        !/^(([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\*?\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
 };
 
 const resultLimit: DynamicRangeEntry = {
@@ -192,7 +197,7 @@ function setZoneWalkerInputFields(startDomain: string, resultLimit?: number): vo
 /* ------------------------------ Tool ------------------------------ */
 
 export const toolLookupZoneDomains: Tool = [
-    <Fragment>
+    <>
         <Input
             submit={{
                 label: 'Walk',
@@ -201,7 +206,7 @@ export const toolLookupZoneDomains: Tool = [
             }}
         />
         <ZoneWalkerResponseTable/>
-    </Fragment>,
+    </>,
     store,
     walkZone,
 ];

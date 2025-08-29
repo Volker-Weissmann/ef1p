@@ -21,7 +21,7 @@ import { Store } from '../../react/store';
 import { getUniqueKey, join } from '../../react/utility';
 import { VersionedStore } from '../../react/versioned-store';
 
-import { DnsRecord, DnsResponse, getReverseLookupDomain, mapRecordTypeFromGoogle, RecordType, recordTypes, resolveDomainName, responseStatusCodes } from '../../apis/dns-lookup';
+import { allRecordTypes, DnsRecord, DnsResponse, getReverseLookupDomain, mapRecordTypeFromGoogle, queryRecordTypes, RecordType, resolveDomainName, responseStatusCodes } from '../../apis/dns-lookup';
 
 import { setIpInfoInput } from './ip-address';
 
@@ -148,7 +148,7 @@ interface Pattern {
 }
 
 type Parser = (record: DnsRecord) => JSX.Element;
-const parseGenericFormat: Parser = record => <StaticOutput title="The data of this record in the hexadecimal generic format.">{record.data.split(' ')[2]?.toUpperCase() ?? record.data}</StaticOutput>;
+const parseGenericFormat: Parser = record => <ClickToCopy title="The data of this record in the hexadecimal generic format. Click to copy."><span className="static-output">{record.data.split(' ')[2]?.toUpperCase() ?? record.data}</span></ClickToCopy>;
 
 const DNSKEY: Pattern = {
     regexp: /^\d+ \d+ \d+ ([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/,
@@ -172,31 +172,30 @@ const DS: Pattern = {
 
 const reverseLookup: Action = {
     icon: 'address-book',
-    title: field => `Click to do a reverse lookup of ${field}.`,
+    title: field => `Do a reverse lookup of ${field}.`,
     handler: field => setDnsResolverInputs(getReverseLookupDomain(field), 'PTR'),
 };
 
 const geolocateAddress: Action = {
     icon: 'earth-americas',
-    title: field => `Click to geolocate the IP address ${field}.`,
+    title: field => `Geolocate the IP address ${field}.`,
     handler: field => { setIpInfoInput(field); window.location.hash = '#tool-lookup-ip-address'; },
 }
 
 const lookUpAddressRecord: Action = {
     icon: 'magnifying-glass',
-    title: field => `Click to look up the IPv4 address of ${field}`,
+    title: field => `Look up the IPv4 address of ${field}`,
     handler: field => setDnsResolverInputs(field, 'A'),
     skip: field => field === '.',
 };
 
 const openDomainInBrowser: Action = {
     icon: 'arrow-up-right-from-square',
-    title: field => `Click to open the domain ${field.slice(0, -1)} in your browser.`,
+    title: field => `Open the domain ${field.slice(0, -1)} in your browser.`,
     handler: field => window.open('http://' + field.slice(0, -1)),
 };
 
-const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
-    ANY: record => <span>{record.data}</span>, // Entry needed only for TypeScript.
+const recordTypePatterns: { [key in RecordType]?: Pattern | Parser } = {
     A: {
         regexp: /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
         fields: [{
@@ -211,6 +210,16 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             actions: [reverseLookup, geolocateAddress],
         }],
     },
+    BIND: record => /^\\# 5 [0-9a-f]{10}$/.test(record.data) ? <>
+        <ClickToCopy title="This private record type is used by BIND to track DNSSEC operations. Click to copy.">
+            <span className="static-output">{record.data.split(' ')[2]}</span>
+        </ClickToCopy>
+        <i
+            className="action fa-sm fa-solid fa-arrow-up-right-from-square"
+            title="Look up the documentation of BIND's private record type."
+            onClick={() => window.open('https://bind9.readthedocs.io/en/v9.16.21/advanced.html#private-type-records')}
+        ></i>
+    </> : <span title="The format of this record is not as expected.">{record.data}</span>,
     CAA: {
         regexp: /^\d{1,3} (issue|issuewild|iodef) "\S+"$/,
         fields: [
@@ -233,7 +242,7 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             title: (_, record) => `The domain name for which ${record.name.slice(0, -1)} is an alias.`,
             actions: [{
                 icon: 'magnifying-glass',
-                title: field => `Click to look up the resource records of the same type for ${field}`,
+                title: field => `Look up the resource records of the same type for ${field}`,
                 handler: field => store.setNewStateFromInput('domainName', field),
             }, openDomainInBrowser]
         }],
@@ -322,7 +331,7 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
         regexp: /^[a-z0-9]{1,10} \d+ \d+ \d+ \d+ \d+ \d+ (([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\. ([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/i,
         fields: [
             {
-                title: field => `Type covered: The record type covered by the signature in this record. A DNSSEC signature covers all the records of the given type. The records are first sorted, then hashed and signed collectively. (${recordTypes[mapRecordTypeFromGoogle(field.toUpperCase())] ?? 'Unsupported record type.'})`,
+                title: field => `Type covered: The record type covered by the signature in this record. A DNSSEC signature covers all the records of the given type. The records are first sorted, then hashed and signed collectively. (${allRecordTypes[mapRecordTypeFromGoogle(field.toUpperCase())] ?? 'Unsupported record type.'})`,
                 transform: field => mapRecordTypeFromGoogle(field.toUpperCase()),
             },
             { title: field => `Algorithm: This number identifies the cryptographic algorithm used to create and verify the signature. (${field} stands for ${dnskeyAlgorithmsShort[field] ?? 'an unsupported or not recommended algorithm'}.)` },
@@ -335,7 +344,7 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
                 title: 'Signer name: The domain name with the DNSKEY record that contains the public key to validate this signature. It has to be the name of the zone that contains the signed resource records.',
                 actions: [{
                     icon: 'magnifying-glass',
-                    title: field => `Click to look up the DNSKEY records of the domain ${field}`,
+                    title: field => `Look up the DNSKEY records of the domain ${field}`,
                     handler: field => setDnsResolverInputs(field, 'DNSKEY'),
                 }]
             },
@@ -351,22 +360,22 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             </ClickToCopy>
             <i
                 className="action fa-sm fa-solid fa-magnifying-glass"
-                title={`Click to look up the domain name after ${nextDomain}`}
+                title={`Look up the domain name after ${nextDomain}`}
                 onClick={() => setDnsResolverInputs(nextDomain, 'NSEC')}
             ></i>
             <i
                 className="action fa-sm fa-solid fa-arrow-up-right-from-square"
-                title={`Click to open the domain ${nextDomain.slice(0, -1)} in your browser.`}
+                title={`Open the domain ${nextDomain.slice(0, -1)} in your browser.`}
                 onClick={() => window.open('http://' + nextDomain.slice(0, -1))}
             ></i>
-            {join((availableTypes as RecordType[]).map(recordType => <>
-                <ClickToCopy title={`This entry indicates that ${record.name.slice(0, -1)} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. Click to copy.`}>
+            {join(availableTypes.map(mapRecordTypeFromGoogle).map(recordType => <>
+                <ClickToCopy title={`This entry indicates that ${record.name.slice(0, -1)} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. (${allRecordTypes[recordType] ?? 'Unsupported record type.'}) Click to copy.`}>
                     <span className="static-output">{recordType}</span>
                 </ClickToCopy>
-                {recordTypes[recordType] && <i
+                {queryRecordTypes[recordType] && <i
                     className="action fa-sm fa-solid fa-magnifying-glass"
-                    title={`Click to look up the ${recordType} records of ${record.name}`}
-                    onClick={() => setDnsResolverInputs(record.name, recordType)}
+                    title={`Look up the ${recordType} records of ${record.name}`}
+                    onClick={() => setDnsResolverInputs(record.name, recordType as RecordType)}
                 ></i>}
             </>), ' ')}
         </>;
@@ -391,8 +400,8 @@ const recordTypePatterns: { [key in RecordType]: Pattern | Parser } = {
             <ClickToCopy title={`This is the hash of the next domain name in this zone. This record indicates that no other subdomain hashes to a value between ${owner} and ${nextDomain} (with the exception of unsigned subzones if the opt-out flag is set). Click to copy.`}>
                 <span className="static-output">{nextDomain}</span>
             </ClickToCopy>{' '}
-            {join((availableTypes as RecordType[]).map(
-                recordType => <ClickToCopy title={`This entry indicates that the subdomain which hashes to ${owner} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. Click to copy.`}>
+            {join(availableTypes.map(mapRecordTypeFromGoogle).map(
+                recordType => <ClickToCopy title={`This entry indicates that the subdomain which hashes to ${owner} has ${['A', 'M', 'N', 'R', 'S'].includes(recordType[0]) ? 'an' : 'a'} ${recordType} record. (${allRecordTypes[recordType] ?? 'Unsupported record type.'}) Click to copy.`}>
                     <span className="static-output">{recordType}</span>
                 </ClickToCopy>,
             ), ' ')}
@@ -416,7 +425,9 @@ function parseDnsData(record: DnsRecord): ReactNode {
         return <span title="The data of this unsupported record type.">{record.data}</span>;
     }
     const pattern = recordTypePatterns[record.type];
-    if (typeof pattern === 'function') {
+    if (pattern === undefined) {
+        return <span title="The data of this record type.">{record.data}</span>;
+    } else if (typeof pattern === 'function') {
         return pattern(record);
     } else {
         if (pattern.regexp.test(record.data)) {
@@ -455,7 +466,7 @@ function turnRecordsIntoTable(records: DnsRecord[]): ReactNode {
             {records.map(record => <tr key={getUniqueKey()}>
                 <td><ClickToCopy>{record.name}</ClickToCopy></td>
                 <td title={record.ttl + ' seconds'}>{parseTimeToLive(record.ttl)}</td>
-                <td>{typeof record.type === 'number' ? 'Unsupported type ' + record.type : recordTypes[record.type]}</td>
+                <td>{typeof record.type === 'number' ? 'Unsupported type ' + record.type : allRecordTypes[record.type]}</td>
                 <td>
                     <span className="d-inline-block">
                         {parseDnsData(record)}
@@ -526,7 +537,7 @@ async function updateDnsResponseTable({ domainName, recordType, dnssecOk }: Stat
 
 /* ------------------------------ Input ------------------------------ */
 
-const domainName: DynamicTextEntry = {
+export const domainName: DynamicTextEntry = {
     label: 'Domain',
     tooltip: 'The domain name you are interested in.',
     defaultValue: 'ef1p.com',
@@ -534,11 +545,11 @@ const domainName: DynamicTextEntry = {
     inputWidth: 222,
     validateIndependently: input =>
         input === '' && 'The domain name may not be empty.' ||
-        input.includes(' ') && 'The domain name may not contain spaces.' || // Redundant to the regular expression, just a more specific error message.
+        /\s/.test(input) && 'The domain name may not contain spaces or tabs.' || // Redundant to the regular expression, just a more specific error message.
         input.length > 253 && 'The domain name may be at most 253 characters long.' ||
         !input.split('.').every(label => label.length < 64) && 'Each label may be at most 63 characters long.' || // Redundant to the regular expression, just a more specific error message.
-        !/^[-a-z0-9_\.]+$/i.test(input) && 'You can use only English letters, digits, hyphens, underlines, and dots.' || // Redundant to the regular expression, just a more specific error message.
-        !/^(([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
+        !/^[-a-z0-9_\.\\]+$/i.test(input) && 'You can use only English letters, digits, hyphens, underlines, dots, and backslashes.' || // Redundant to the regular expression, just a more specific error message.
+        !/^(((\\000|[a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?)\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
 };
 
 const recordType: DynamicSingleSelectEntry = {
@@ -546,7 +557,7 @@ const recordType: DynamicSingleSelectEntry = {
     tooltip: 'The DNS record type you want to query.',
     defaultValue: 'A',
     inputType: 'select',
-    selectOptions: recordTypes,
+    selectOptions: queryRecordTypes,
 };
 
 const dnssecOk: DynamicBooleanEntry = {
