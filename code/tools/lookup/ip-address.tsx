@@ -6,9 +6,9 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 
 import { Fragment } from 'react';
 
-import { copyToClipboard } from '../../utility/clipboard';
+import { scrollToAnchor } from '../../utility/scrolling';
 
-import { DynamicOutput } from '../../react/code';
+import { ClickToCopy } from '../../react/copy';
 import { DynamicEntries, DynamicTextEntry } from '../../react/entry';
 import { Tool } from '../../react/injection';
 import { getInput } from '../../react/input';
@@ -31,20 +31,26 @@ function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponse
     if (error) {
         return <p>
             An error occurred.
-            Make sure that the IP address exists and that you have disabled your adblocker for this site.
+            Make sure that the IP address exists and that you have disabled
+            your <a href="https://en.wikipedia.org/wiki/Ad_blocking">adblocker</a>
+            or your browser's <a href="https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/Firefox_tracking_protection">tracking protection</a>
+            for this site.
         </p>;
     } else if (response) {
         if (isCityIpInfoResponse(response) || isCountryIpInfoResponse(response)) {
-            const address = <DynamicOutput
-                title="Click to copy. Right click to do a reverse lookup."
-                onClick={_ => copyToClipboard(response.ip)}
-                onContextMenu={event => {
-                    setDnsResolverInputs(getReverseLookupDomain(response.ip), 'PTR');
+            const address = <>
+                <ClickToCopy>
+                    {response.ip}
+                </ClickToCopy>
+                <i
+                    className="action fa-sm fa-solid fa-address-book"
+                    title="Do a reverse lookup."
+                    onClick={() => {
+                        setDnsResolverInputs(getReverseLookupDomain(response.ip), 'PTR');
                         scrollToAnchor('#tool-lookup-dns-records');
-                }}
-            >
-                {response.ip}
-            </DynamicOutput>;
+                    }}
+                ></i>
+            </>;
             const location = getMapLink(response);
             const provider = isCountryIpInfoResponse(response)
                 ? <a href={`https://${response.as_domain}`}>{response.as_name}</a>
