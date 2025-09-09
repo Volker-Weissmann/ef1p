@@ -712,8 +712,10 @@ If you don't provide the attribute `data-default`, the first area is displayed b
 
 #### Undesirable line breaks
 
-You can prevent undesirable line breaks by wrapping the text
-in `<span class="text-nowrap" markdown="span">…</span>`.
+You can prevent undesirable line breaks next to mathematical expressions
+by wrapping the text in `<span class="text-nowrap" markdown="span">…</span>`.
+For example, `<span class="text-nowrap" markdown="span">If $$\mathbb{G}$$</span>`.
+In other places, you can simply use `&nbsp;`.
 
 
 #### Header IDs
