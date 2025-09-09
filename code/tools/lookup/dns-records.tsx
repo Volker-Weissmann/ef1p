@@ -588,7 +588,7 @@ export function setDnsResolverInputs(domainName: string, recordType: RecordType,
     if (dnssecOk !== undefined) {
         store.setInput('dnssecOk', dnssecOk, true);
     }
-    store.setNewStateFromCurrentInputs();
+    store.setNewStateFromCurrentInputs(true);
 }
 
 /* ------------------------------ Tool ------------------------------ */

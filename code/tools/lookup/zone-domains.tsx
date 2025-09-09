@@ -191,7 +191,7 @@ function setZoneWalkerInputFields(startDomain: string, resultLimit?: number): vo
     if (resultLimit !== undefined) {
         store.setInput('resultLimit', resultLimit, true);
     }
-    store.setNewStateFromCurrentInputs();
+    store.setNewStateFromCurrentInputs(true);
 }
 
 /* ------------------------------ Tool ------------------------------ */

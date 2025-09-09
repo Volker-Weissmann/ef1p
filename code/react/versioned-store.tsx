@@ -217,7 +217,7 @@ export class VersionedStore<State extends BasicState<State>> extends PersistedSt
         key: keyof State,
         error: InputError,
         dependent: boolean = false,
-        skipUpdate = false,
+        skipUpdate: boolean = false,
     ): void {
         super.setState({
             errors: { ...this.getErrors(), [key]: error },
@@ -228,11 +228,7 @@ export class VersionedStore<State extends BasicState<State>> extends PersistedSt
     /**
      * Sets a new state based on the current inputs.
      */
-    public async setNewStateFromCurrentInputs(): Promise<void> {
-        this.setNewStateFromCurrentInputsInternally();
-    }
-
-    protected async setNewStateFromCurrentInputsInternally(
+    public async setNewStateFromCurrentInputs(
         callOnChangeEvenWhenNothingChanged: boolean = false,
         triggerUpdates: boolean = true,
     ): Promise<void> {
@@ -469,7 +465,7 @@ export class VersionedStore<State extends BasicState<State>> extends PersistedSt
             super.setState({
                 inputs: newInputs,
             });
-            this.setNewStateFromCurrentInputsInternally(true, false);
+            this.setNewStateFromCurrentInputs(true, false);
             if (submit !== undefined && this.hasNoErrors()) {
                 submit(this.getCurrentState());
             }
