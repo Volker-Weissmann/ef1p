@@ -151,7 +151,7 @@ export interface DnsRecord {
     name: string;
     ttl: number;
     type: RecordType | number;
-    data: string; // Removed quotes for SPF and TXT records, original string otherwise.
+    data: string; // Removed quotes for SPF and TXT records, original (but trimmed) string otherwise.
 }
 
 export interface DnsResponse {
@@ -276,7 +276,7 @@ function normalizeRecord(record: GoogleDnsRecord): DnsRecord {
     const type = recordTypesById[record.type] ?? record.type;
     const live = record.TTL;
     const data = ((type === 'SPF' || type === 'TXT') && record.data.startsWith('"') && record.data.endsWith('"')) ? record.data.slice(1, -1).replace(/""/g, '') : record.data;
-    return { name, type, ttl: live, data };
+    return { name, type, ttl: live, data: data.trim() };
 }
 
 export async function resolveDomainName(domain: string, type: RecordType, dnssec: boolean = false): Promise<DnsResponse> {

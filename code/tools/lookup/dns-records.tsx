@@ -10,6 +10,7 @@ import { copyToClipboardWithAnimation } from '../../utility/animation';
 import { filterUndefined } from '../../utility/array';
 import { getErrorMessage } from '../../utility/error';
 import { Dictionary } from '../../utility/record';
+import { scrollToAnchor } from '../../utility/scrolling';
 import { Time } from '../../utility/time';
 
 import { StaticOutput } from '../../react/code';
@@ -246,6 +247,19 @@ const recordTypePatterns: { [key in RecordType]?: Pattern | Parser } = {
                 handler: field => store.setNewStateFromInput('domainName', field),
             }, openDomainInBrowser]
         }],
+    },
+    HINFO: {
+        regexp: /^RFC8482$/i,
+        fields: [
+            {
+                title: 'This DNS record allows the authoritative DNS server to provide a minimal-sized response to ANY queries according to RFC 8482 (effectively disallowing ANY queries), which also mitigates DNS amplification attacks.',
+                actions: [{
+                    icon: 'arrow-up-right-from-square',
+                    title: _ => 'Open the RFC 8482 in a new window.',
+                    handler: () => window.open('https://datatracker.ietf.org/doc/html/rfc8482'),
+                }],
+            },
+        ],
     },
     MX: {
         regexp: /^\d+ (([a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?\.)+[a-z][-a-z0-9]{0,61}[a-z0-9])?\.$/i,
@@ -542,7 +556,7 @@ export const domainName: DynamicTextEntry = {
     tooltip: 'The domain name you are interested in.',
     defaultValue: 'ef1p.com',
     inputType: 'text',
-    inputWidth: 222,
+    inputWidth: 215,
     validateIndependently: input =>
         input === '' && 'The domain name may not be empty.' ||
         /\s/.test(input) && 'The domain name may not contain spaces or tabs.' || // Redundant to the regular expression, just a more specific error message.
