@@ -23,14 +23,17 @@ function isValidTarget(href: string): boolean {
             if (window.handleToolUpdate) {
                 return window.handleToolUpdate(parts, true);
             } else {
-                console.error('ready.ts: There is no handler for tool updates on this page.');
+                console.error('links.ts: There is no handler for tool updates on this page.');
                 return false;
             }
         } else {
             return document.getElementById(href.slice(1)) !== null;
         }
+    } else if (href.startsWith('/')) {
+        // Links to the current page should skip the path (with the exception of the donation link in the footer).
+        return !href.startsWith(window.location.pathname + '#') || href === '/#donate';
     } else {
-        return href.startsWith('https://') || href.startsWith('http://') || href.startsWith('mailto:') || href.startsWith('/');
+        return href.startsWith('https://') || href.startsWith('http://') || href.startsWith('mailto:');
     }
 }
 
@@ -51,7 +54,9 @@ for (const element of document.querySelectorAll('[id]')) {
     if (ids.has(element.id)) {
         console.error(`The following elements have the same ID '${element.id}':`, document.querySelectorAll('#' + element.id));
     } else {
-        if (!desiredId.test(element.id) && element.tagName !== 'DATALIST') {
+        if (element.id.startsWith('#')) {
+            console.error(`The ID '${element.id}' of the following element should not start with a '#':`, element);
+        } else if (!desiredId.test(element.id) && element.tagName !== 'DATALIST') {
             console.error(`The following element has an undesired ID of '${element.id}':`, element);
         }
         ids.add(element.id);
