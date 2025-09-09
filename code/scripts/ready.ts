@@ -6,102 +6,13 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 
 import { report } from '../utility/analytics';
 import { copyToClipboardWithAnimation } from '../utility/animation';
-
-// If the hash ends with one of the following endings, remove the ending.
-const endings = ['.', ',', ':', '?', '!', ')', '.)', '?)', '!)'];
-function sanitize(hash: string): string {
-    for (const ending of endings) {
-        if (hash.endsWith(ending)) {
-            return hash.slice(0, -ending.length);
-        }
-    }
-    return hash;
-}
-
-/* Animated scrolling to anchor with updating window title and browser history. */
-
-const originalTitle = document.title;
-
-const getTitle = (hashOrElement: string | HTMLElement) => {
-    return originalTitle + ' at ' + $(hashOrElement as any).text();
-};
-
-const scrollToAnchor = (hash: string | null, trigger: 'load' | 'hash' | 'link' | 'jump' | 'expand') => {
-    if (!hash || !/^#[^ ]+$/.test(hash)) {
-        return false;
-    }
-
-    const parts = hash.split('&');
-    if (parts.length > 1) {
-        hash = parts[0];
-    }
-
-    const anchor = trigger === 'load' ? sanitize(hash) : hash;
-    const url = window.location.pathname + anchor;
-    const target = document.getElementById(anchor.slice(1));
-    if (!target) {
-        if (trigger === 'load') {
-            report('Not found', { Type: 'Anchor', Anchor: anchor });
-        }
-        return false;
-    }
-
-    const details = target.closest('details');
-    if (details !== null) {
-        details.classList.remove('d-none');
-        details.open = true;
-        if (anchor === '#cite-this-article') {
-            report('Cite article', { Trigger: trigger });
-        }
-    }
-
-    let margin = 0;
-    const content = target.closest('.tabbed > *') as HTMLElement;
-    if (content !== null) {
-        const container = $(content.parentElement!);
-        const children = container.children();
-        const tabs = children.eq(0).children();
-        tabs.removeClass('active');
-        tabs.eq(Array.from(children).indexOf(content) - 1).addClass('active');
-        children.removeClass('shown');
-        $(content).addClass('shown');
-        margin = 20;
-    }
-
-    const offset = $(target).offset();
-    if (!offset) {
-        return false;
-    }
-
-    if (trigger !== 'load' && window.history && window.history.pushState) {
-        document.title = getTitle(anchor);
-        window.history.pushState(null, document.title, url);
-    }
-
-    $('html, body').animate({ scrollTop: offset.top - 75 - margin });
-
-    if (parts.length > 1) {
-        if (window.handleToolUpdate) {
-            window.handleToolUpdate(parts);
-        } else {
-            console.error('ready.ts: There is no handler for tool updates on this page.');
-        }
-    }
-
-    if (trigger === 'load') {
-        report('Load target', {
-            Anchor: anchor,
-            interactive: false, // This excludes the event from bounce-rate calculations, see https://plausible.io/docs/custom-event-goals#trigger-custom-events-manually-with-a-javascript-function.
-        });
-    }
-
-    return true;
-};
+import { getTitle, originalTitle, scrollToAnchor } from '../utility/scrolling';
 
 const production = window.location.hostname !== 'localhost';
 
 if (production || window.location.hash.includes('&')) { // The second part ensures that tool links work also on localhost.
-    // See https://stackoverflow.com/a/39254773/12917821:
+    // The following lines with `scrollToTop` prevent the browser from automatically jumping to the anchor when the page loads,
+    // allowing us to scroll programmatically to the anchor with a nice animation (see https://stackoverflow.com/a/39254773/12917821).
     const scrollToTop = () => $(window).scrollTop(0);
     $(window).on('scroll', scrollToTop);
     window.addEventListener('load', () => {
@@ -110,13 +21,17 @@ if (production || window.location.hash.includes('&')) { // The second part ensur
     });
 }
 
-const handleHashChange = (event: JQuery.Event) => {
-    if (scrollToAnchor(window.location.hash, 'hash')) {
-        event.preventDefault();
-    }
+// Since the browser jumps to the anchor before running the handler,
+// you shouldn't set the hash with `window.location.hash = '#anchor'`.
+// Use `scrollToAnchor('#anchor')` instead.
+// I leave the handler as a fallback.
+const handleHashChange = (event: HashChangeEvent) => {
+    scrollToAnchor(new URL(event.newURL).hash, 'hash');
 };
-$(window).on('hashchange', handleHashChange);
+window.addEventListener('hashchange', handleHashChange);
 
+// Whether the page has been published.
+// (Non-articles are always considered published, articles only when they have a <meta property="article:published_time">.)
 const published = document.querySelector('meta[property="og:type"]')?.getAttribute('content') !== 'article'
     || document.querySelector('meta[property="article:published_time"]') !== null;
 
@@ -176,7 +91,7 @@ if (window.history && window.history.replaceState) {
         }
         for (let i = headings.length - 1; i >= 0; i--) {
             const heading = headings[i];
-            if (window.pageYOffset > heading.offset) {
+            if (heading.offset < window.pageYOffset) {
                 if (currentHeading !== heading.element) {
                     currentHeading = heading.element;
                     document.title = getTitle(heading.element);
@@ -185,14 +100,15 @@ if (window.history && window.history.replaceState) {
                 return;
             }
         }
-        if (location.hash) {
+        // Remove the hash when you scroll past the first heading towards the top.
+        if (window.location.hash !== '') {
             currentHeading = undefined;
             document.title = originalTitle;
             window.history.replaceState(null, document.title, location.pathname);
         }
     };
 
-    window.addEventListener('load', () => $(window).on('scroll', handleWindowScroll));
+    window.addEventListener('load', () => window.addEventListener('scroll', handleWindowScroll, { passive: true }));
 }
 
 /* Toggling the table of contents on small screens. */

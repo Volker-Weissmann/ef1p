@@ -40,8 +40,7 @@ function RawIpInfoResponseParagraph({ response, error }: Readonly<IpInfoResponse
                 onClick={_ => copyToClipboard(response.ip)}
                 onContextMenu={event => {
                     setDnsResolverInputs(getReverseLookupDomain(response.ip), 'PTR');
-                    window.location.hash = '#tool-lookup-dns-records';
-                    event.preventDefault();
+                        scrollToAnchor('#tool-lookup-dns-records');
                 }}
             >
                 {response.ip}

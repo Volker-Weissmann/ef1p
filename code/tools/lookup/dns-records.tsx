@@ -179,7 +179,7 @@ const reverseLookup: Action = {
 const geolocateAddress: Action = {
     icon: 'earth-americas',
     title: field => `Geolocate the IP address ${field}.`,
-    handler: field => { setIpInfoInput(field); window.location.hash = '#tool-lookup-ip-address'; },
+    handler: field => { setIpInfoInput(field); scrollToAnchor('#tool-lookup-ip-address'); },
 }
 
 const lookUpAddressRecord: Action = {
