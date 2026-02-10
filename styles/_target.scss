@@ -4,8 +4,11 @@ Work: Explained from First Principles (https://ef1p.com/)
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 */
 
-:target {
+[id] {
   scroll-margin-top: $body-padding-top;
+}
+
+:target {
   animation-name: target-fade;
   animation-duration: 1s;
   animation-timing-function: ease-in;
