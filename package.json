@@ -31,6 +31,7 @@
         "md-build": "bundle exec jekyll build",
         "md-lint": "markdownlint .",
         "md-watch": "bundle exec jekyll serve --incremental --livereload 2>/dev/null",
+        "md-watch-network": "bundle exec jekyll serve --incremental --livereload --host 0.0.0.0 --port 4000 2>/dev/null",
         "npm-upgrade": "npm-check-updates --reject @types/anchor-js,@types/react,@types/react-dom,anchor-js,bootstrap,bootswatch,react,react-dom,readable-stream --upgrade",
         "ots-info": "info() { ots-cli.js info \"pages/$1/$1.md.ots\"; find \"pages/$1/generated\" -name '*.pdf.ots' -exec ots-cli.js info {} +; }; info",
         "ots-remove": "remove() { rm \"pages/$1/$1.md.ots\"; find \"pages/$1/generated\" -name '*.pdf.ots' -exec rm {} +; }; remove",
@@ -66,7 +67,7 @@
         "scss-watch-light": "watch 'npm run scss-build-light' styles",
         "security": "gpg --clearsign -u 0x6B143BF1470C9367 -o .well-known/security.txt .well-known/security.unsigned.txt",
         "serve": "bundle exec jekyll serve",
-        "serve-network": "bundle exec jekyll serve --host 0.0.0.0 --port 5000",
+        "serve-network": "bundle exec jekyll serve --host 0.0.0.0 --port 4000",
         "sort-package": "sort-package-json",
         "start": "npm run watch",
         "svg-build": "ts-node code/node/graphics.ts",
@@ -80,7 +81,8 @@
         "ts-lint": "tslint --exclude 'node_modules/**/*' --exclude '_site/**/*' '**/*.ts?(x)'",
         "ts-stats": "webpack --json > webpack-stats.json",
         "ts-watch": "webpack --watch",
-        "watch": "npm-run-all --parallel scss-watch img-watch md-watch svg-watch ts-watch"
+        "watch": "npm-run-all --parallel scss-watch img-watch md-watch svg-watch ts-watch",
+        "watch-network": "npm-run-all --parallel scss-watch img-watch md-watch-network svg-watch ts-watch"
     },
     "devDependencies": {
         "@fortawesome/fontawesome-free": "7.0.0",
@@ -127,6 +129,7 @@
         "stylelint": "16.23.1",
         "stylelint-config-twbs-bootstrap": "16.1.0",
         "svgexport": "0.4.2",
+        "text-fragments-polyfill": "6.7.0",
         "ts-loader": "9.5.2",
         "ts-node": "10.9.2",
         "tslint": "6.1.3",
