@@ -15,7 +15,7 @@ import { VersionedStore } from '../../react/versioned-store';
 
 import { allRecordTypes, getAllRecords, mapRecordTypeFromGoogle, queryRecordTypes, RecordType, resolveDomainName } from '../../apis/dns-lookup';
 
-import { domainName, setDnsResolverInputs } from './dns-records';
+import { setDnsResolverInputs } from './dns-records';
 
 /* ------------------------------ Output ------------------------------ */
 
@@ -137,11 +137,15 @@ async function walkZone({ startDomain, resultLimit }: State): Promise<void> {
         });
         if (types.includes('NXNAME') || nextDomain === '\\000.' + currentDomain) {
             zoneWalkerResponseStore.setState({ message: <>
-                This zone uses <a href="https://datatracker.ietf.org/doc/draft-ietf-dnsop-compact-denial-of-existence/07/">Compact Denial of Existence</a> and thus cannot be walked.
+                This zone uses {
+                    window.location.pathname === '/internet/' ?
+                    <a href="#compact-denial-of-existence">Compact Denial of Existence</a> :
+                    <a href="https://datatracker.ietf.org/doc/html/rfc9824">Compact Denial of Existence (RFC 9824)</a>
+                } and thus cannot be walked.
             </> });
             return;
         }
-        if (currentDomain.endsWith(nextDomain)) {
+        if (currentDomain.endsWith('.' + nextDomain)) {
             zoneWalkerResponseStore.setState({ message: 'You reached the end of the zone ' + nextDomain });
             return;
         }
@@ -158,18 +162,28 @@ async function walkZone({ startDomain, resultLimit }: State): Promise<void> {
 /* ------------------------------ Input ------------------------------ */
 
 const startDomain: DynamicTextEntry = {
-    ...domainName,
     label: 'Start domain',
     tooltip: 'The domain name from which you would like to list the next domain names.',
+    defaultValue: 'ef1p.com',
+    inputType: 'text',
+    inputWidth: 220,
+    validateIndependently: input =>
+        input === '' && 'The domain name may not be empty.' ||
+        /\s/.test(input) && 'The domain name may not contain spaces or tabs.' || // Redundant to the regular expression, just a more specific error message.
+        input.length > 253 && 'The domain name may be at most 253 characters long.' ||
+        !input.split('.').every(label => label.length < 64) && 'Each label may be at most 63 characters long.' || // Redundant to the regular expression, just a more specific error message.
+        // Please note that the following two lines are different from validateIndependently of domainName in dns-records.tsx because we also allow a single asterisk at the end of a label here.
+        !/^[-a-z0-9_\.\*\\]+$/i.test(input) && 'You can use only English letters, digits, hyphens, underlines, dots, and backslashes.' || // Redundant to the regular expression, just a more specific error message.
+        !/^(((\\000|[a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?(\\000)?)\*?\.)*[a-z][-a-z0-9]{0,61}[a-z0-9]\*?)?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
 };
 
 const resultLimit: DynamicRangeEntry = {
     label: 'Result limit',
     tooltip: 'Configure the maximum number of results to be returned.',
-    defaultValue: 20,
+    defaultValue: 10,
     inputType: 'range',
     minValue: 10,
-    maxValue: 150,
+    maxValue: 100,
     stepValue: 10,
 };
 
