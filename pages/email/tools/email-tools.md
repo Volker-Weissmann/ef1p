@@ -81,7 +81,7 @@ Each title links to where the respective tool is explained.
 
 ### [ESMTP](/email/#esmtp-tool)
 
-<div id="tool-protocol-esmtp"></div>
+<div id="tool-protocol-esmtp" class="mb-3"></div>
 
 **Examples:**
 - <a href="#tool-protocol-esmtp&content=text%2Fenriched&body=%3Cbold%3ERoses%3C%2Fbold%3E+%3Citalic%3Eare%3C%2Fitalic%3E%0A%3Ccolor%3E%3Cparam%3Ered%3C%2Fparam%3Ered%3C%2Fcolor%3E." title="Set the body of the ESMTP tool to a text/enriched example.">`text/enriched`</a>

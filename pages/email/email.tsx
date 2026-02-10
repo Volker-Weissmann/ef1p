@@ -114,7 +114,7 @@ injectElement('code-gmail-smtp-extensions', <CodeBlock>
 </CodeBlock>);
 
 injectElement('code-starttls-extension', <CodeBlock>
-    <StaticPrompt>telnet smtp.gmail.com 587</StaticPrompt>
+    <StaticPrompt>nc -c smtp.gmail.com 587</StaticPrompt>
     <SystemReply>Trying 108.177.126.109...</SystemReply>
     <SystemReply>Connected to smtp.gmail.com.</SystemReply>
     <SystemReply>Escape character is '^]'.</SystemReply>
@@ -152,7 +152,7 @@ injectElement('code-gmail-help-command', <CodeBlock>
 </CodeBlock>);
 
 injectElement('code-gandi-pop3-extensions', <CodeBlock>
-    <StaticPrompt>telnet mail.gandi.net 110</StaticPrompt>
+    <StaticPrompt>nc -c mail.gandi.net 110</StaticPrompt>
     <SystemReply>Trying 217.70.178.9...</SystemReply>
     <SystemReply>Connected to mail.gandi.net.</SystemReply>
     <SystemReply>Escape character is '^]'.</SystemReply>
@@ -253,7 +253,7 @@ injectElement('code-install-openssl', <CodeBlock>
 </CodeBlock>);
 
 injectElement('code-installed-openssl', <CodeBlock>
-    <StaticPrompt>/usr/local/opt/openssl/bin/openssl version</StaticPrompt>
+    <StaticPrompt>/opt/homebrew/opt/openssl@3/bin/openssl version</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-message-decompression', <CodeBlock>
@@ -262,58 +262,58 @@ injectElement('code-message-decompression', <CodeBlock>
 </CodeBlock>);
 
 injectElement('code-encoding-with-qprint', <CodeBlock>
-    <StaticPrompt noNewline>qprint -e</StaticPrompt>
-    <StaticPrompt noNewline>qprint -d</StaticPrompt>
+    <StaticPrompt>qprint -e</StaticPrompt>
+    <StaticPrompt>qprint -d</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-encoding-with-node', <CodeBlock>
     <Comment># You have to install the package only once:</Comment>
-    <StaticPrompt noNewline>npm install -g quoted-printable</StaticPrompt>
-    <StaticPrompt noNewline>quoted-printable -e</StaticPrompt>
-    <StaticPrompt noNewline>quoted-printable -d</StaticPrompt>
+    <StaticPrompt>npm install -g quoted-printable</StaticPrompt>
+    <StaticPrompt>quoted-printable -e</StaticPrompt>
+    <StaticPrompt>quoted-printable -d</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-encoding-with-openssl', <CodeBlock>
-    <StaticPrompt noNewline>openssl base64 -e</StaticPrompt>
-    <StaticPrompt noNewline>openssl base64 -d</StaticPrompt>
+    <StaticPrompt>openssl base64 -e</StaticPrompt>
+    <StaticPrompt>openssl base64 -d</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-encoding-with-perl', <CodeBlock>
-    <StaticPrompt noNewline>perl -MMIME::QuotedPrint -0777 -nle 'print encode_qp($_)'</StaticPrompt>
-    <StaticPrompt noNewline>perl -MMIME::QuotedPrint -0777 -nle 'print decode_qp($_)'</StaticPrompt>
+    <StaticPrompt>perl -MMIME::QuotedPrint -0777 -nle 'print encode_qp($_)'</StaticPrompt>
+    <StaticPrompt>perl -MMIME::QuotedPrint -0777 -nle 'print decode_qp($_)'</StaticPrompt>
     <br/>
-    <StaticPrompt noNewline>perl -MMIME::Base64 -0777 -ne 'print encode_base64($_)'</StaticPrompt>
-    <StaticPrompt noNewline>perl -MMIME::Base64 -0777 -ne 'print decode_base64($_)'</StaticPrompt>
+    <StaticPrompt>perl -MMIME::Base64 -0777 -ne 'print encode_base64($_)'</StaticPrompt>
+    <StaticPrompt>perl -MMIME::Base64 -0777 -ne 'print decode_base64($_)'</StaticPrompt>
     <br/>
-    <StaticPrompt noNewline>perl -MURI::Escape -0777 -ne 'print uri_escape($_)'</StaticPrompt>
-    <StaticPrompt noNewline>perl -MURI::Escape -0777 -ne 'print uri_unescape($_)'</StaticPrompt>
+    <StaticPrompt>perl -MURI::Escape -0777 -ne 'print uri_escape($_)'</StaticPrompt>
+    <StaticPrompt>perl -MURI::Escape -0777 -ne 'print uri_unescape($_)'</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-encoding-with-python', <CodeBlock>
-    <StaticPrompt noNewline>python3 -c 'import sys, quopri; sys.stdout.buffer.write(quopri.encodestring(sys.stdin.buffer.read()))'</StaticPrompt>
-    <StaticPrompt noNewline>python3 -c 'import sys, quopri; sys.stdout.buffer.write(quopri.decodestring(sys.stdin.buffer.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, quopri; sys.stdout.buffer.write(quopri.encodestring(sys.stdin.buffer.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, quopri; sys.stdout.buffer.write(quopri.decodestring(sys.stdin.buffer.read()))'</StaticPrompt>
     <br/>
-    <StaticPrompt noNewline>python3 -c 'import sys, base64; sys.stdout.buffer.write(base64.b64encode(sys.stdin.buffer.read()))'</StaticPrompt>
-    <StaticPrompt noNewline>python3 -c 'import sys, base64; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, base64; sys.stdout.buffer.write(base64.b64encode(sys.stdin.buffer.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, base64; sys.stdout.buffer.write(base64.b64decode(sys.stdin.buffer.read()))'</StaticPrompt>
     <br/>
-    <StaticPrompt noNewline>python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read()))'</StaticPrompt>
-    <StaticPrompt noNewline>python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read()))'</StaticPrompt>
+    <StaticPrompt>python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read()))'</StaticPrompt>
 </CodeBlock>);
 
 injectElement('code-whois-queries', <CodeBlock>
-    <StaticPrompt>telnet whois.iana.org 43</StaticPrompt>
+    <StaticPrompt>nc -c whois.iana.org 43</StaticPrompt>
     <UserCommand>com</UserCommand>
     <SystemReply>[…]</SystemReply>
     <SystemReply>whois: whois.verisign-grs.com</SystemReply>
     <SystemReply>[…]</SystemReply>
     <SystemReply>Connection closed by foreign host.</SystemReply>
-    <StaticPrompt>telnet whois.verisign-grs.com 43</StaticPrompt>
+    <StaticPrompt>nc -c whois.verisign-grs.com 43</StaticPrompt>
     <UserCommand>ef1p.com</UserCommand>
     <SystemReply>[…]</SystemReply>
     <SystemReply>Registrar WHOIS Server: whois.gandi.net</SystemReply>
     <SystemReply>[…]</SystemReply>
     <SystemReply>Connection closed by foreign host.</SystemReply>
-    <StaticPrompt>telnet whois.gandi.net 43</StaticPrompt>
+    <StaticPrompt>nc -c whois.gandi.net 43</StaticPrompt>
     <UserCommand>ef1p.com</UserCommand>
     <SystemReply>[…]</SystemReply>
     <SystemReply>Registrant Name: REDACTED FOR PRIVACY</SystemReply>

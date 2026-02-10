@@ -40,9 +40,9 @@ injectTool('tool-lookup-mta-sts-policy', toolLookupMtaStsPolicy);
 injectTool('tool-lookup-tls-reporting', toolLookupTlsReporting);
 injectTool('tool-lookup-smimea-records', toolLookupSmimeaRecords);
 injectTool('tool-lookup-openpgpkey-records', toolLookupOpenpgpkeyRecords);
-injectTool('tool-lookup-email-requests', toolLookupEmailRequests);
 
 injectTool('tool-protocol-esmtp', toolProtocolEsmtp);
+injectTool('tool-lookup-email-requests', toolLookupEmailRequests);
 injectTool('tool-protocol-pop3', toolProtocolPop3);
 injectTool('tool-protocol-imap', toolProtocolImap);
 injectTool('tool-format-sieve', toolFormatSieve);
