@@ -4,6 +4,7 @@
     ],
     "rules": {
         "declaration-no-important": null,
+        "font-family-no-missing-generic-family-keyword": null,
         "font-weight-notation": "named-where-possible",
         "property-no-vendor-prefix": null,
         "scss/dollar-variable-default": null,
