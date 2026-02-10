@@ -6,9 +6,9 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 
 a {
   color: $info;
-  cursor: pointer; // Necessary for links without href.
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  text-underline-offset: .2em;
+  cursor: pointer; // Necessary for links without href.
 
   @include hover() {
     color: darken($info, 19%);
