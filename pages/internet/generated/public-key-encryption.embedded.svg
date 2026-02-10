@@ -1,0 +1,38 @@
+<svg id="figure-public-key-encryption" class="figure" data-name="public-key-encryption" width="547.86" height="128.25" viewBox="-1.25 -107.25 547.86 128.25" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+
+    <text text-anchor="middle">
+        <tspan x="381.02" y="-94.5">Private key</tspan><tspan x="381.02" y="-72.5">of recipient</tspan>
+    </text>
+    <line x1="381.02" y1="-60.5" x2="381.02" y2="-21" marker-end="url(#arrow)" stroke-dasharray="33"></line>
+    <text text-anchor="middle">
+        <tspan x="164.34" y="-94.5">Public key</tspan><tspan x="164.34" y="-72.5">of recipient</tspan>
+    </text>
+    <line x1="164.34" y1="-60.5" x2="164.34" y2="-21" marker-end="url(#arrow)" stroke-dasharray="33"></line>
+    <line class="green" x1="434.609" y1="0" x2="545.36" y2="0" marker-end="url(#arrow-green)" stroke-dasharray="104"></line>
+    <text class="green" text-anchor="middle">
+        <tspan x="489.985" y="-12">Plaintext</tspan>
+    </text>
+    <line class="red" x1="216.992" y1="0" x2="327.43" y2="0" marker-end="url(#arrow-red)" stroke-dasharray="103"></line>
+    <text class="red" text-anchor="middle">
+        <tspan x="272.68" y="-12">Ciphertext</tspan>
+    </text>
+    <line class="green" x1="0" y1="0" x2="110.751" y2="0" marker-end="url(#arrow-green)" stroke-dasharray="104"></line>
+    <text class="green" text-anchor="middle">
+        <tspan x="55.375" y="-12">Plaintext</tspan>
+    </text>
+    <rect class="blue" x="112.001" y="-19.75" width="104.679" height="39.5" rx="8" ry="8"></rect>
+    <text class="blue" text-anchor="middle">
+        <tspan x="164.34" y="5.9"><tspan class="font-weight-bold">Encryption</tspan></tspan>
+    </text>
+    <rect class="blue" x="328.68" y="-19.75" width="104.679" height="39.5" rx="8" ry="8"></rect>
+    <text class="blue" text-anchor="middle">
+        <tspan x="381.02" y="5.9"><tspan class="font-weight-bold">Decryption</tspan></tspan>
+    </text>
+    <text text-anchor="middle">
+        <tspan x="112.001" y="-41.625"><tspan class="font-weight-bold">Sender</tspan></tspan>
+    </text>
+    <text text-anchor="middle">
+        <tspan x="433.359" y="-41.625"><tspan class="font-weight-bold">Recipient</tspan></tspan>
+    </text>
+
+</svg>

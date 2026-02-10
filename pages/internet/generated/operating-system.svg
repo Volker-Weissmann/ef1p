@@ -70,11 +70,11 @@
     </text>
     <line class="green" x1="175" y1="20" x2="175" y2="60" marker-end="url(#arrow-green)" stroke-dasharray="33"></line>
     <text class="green" text-anchor="start">
-        <tspan x="187" y="34.9">Please forward to me</tspan><tspan x="187" y="56.9">all traffic on port 25</tspan>
+        <tspan x="187" y="34.9">Please forward to me</tspan><tspan x="187" y="56.9">all traffic on port 80</tspan>
     </text>
     <line class="green" x1="357" y1="100" x2="357" y2="60" marker-end="url(#arrow-green)" stroke-dasharray="33"></line>
     <text class="green" text-anchor="start">
-        <tspan x="369" y="74.9">I received a new</tspan><tspan x="369" y="96.9">packet on port 25</tspan>
+        <tspan x="369" y="74.9">I received a new</tspan><tspan x="369" y="96.9">packet on port 80</tspan>
     </text>
     <line class="green" x1="510" y1="60" x2="510" y2="20" marker-end="url(#arrow-green)" stroke-dasharray="33"></line>
     <text class="green" text-anchor="start">

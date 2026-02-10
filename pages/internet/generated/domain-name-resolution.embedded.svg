@@ -1,0 +1,38 @@
+<svg id="figure-domain-name-resolution" class="figure" data-name="domain-name-resolution" width="870.09" height="219" viewBox="-1.25 -78.75 870.09 219" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+
+    <line class="green" x1="666.609" y1="30.75" x2="697.046" y2="108.25" marker-end="url(#arrow-green)" stroke-dasharray="76"></line>
+    <line class="green" x1="666.609" y1="30.75" x2="697.046" y2="30.75" marker-end="url(#arrow-green)" stroke-dasharray="23"></line>
+    <line class="green" x1="666.609" y1="30.75" x2="697.046" y2="-46.75" marker-end="url(#arrow-green)" stroke-dasharray="76"></line>
+    <line class="blue" x1="466.063" y1="30.75" x2="496.501" y2="30.75" marker-end="url(#arrow-blue)" stroke-dasharray="23"></line>
+    <line class="blue" x1="265.258" y1="30.75" x2="295.696" y2="30.75" marker-end="url(#arrow-blue)" stroke-dasharray="23"></line>
+    <line class="blue" x1="107.385" y1="30.75" x2="137.823" y2="30.75" marker-end="url(#arrow-blue)" stroke-dasharray="23"></line>
+    <rect x="0" y="0" width="107.073" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="12" y="25.65"><tspan class="font-weight-bold">Application</tspan></tspan><tspan x="12" y="47.65">(own cache)</tspan>
+    </text>
+    <rect x="139.073" y="0" width="125.873" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="151.073" y="25.65"><tspan class="font-weight-bold">Stub resolver</tspan></tspan><tspan x="151.073" y="47.65">on your device</tspan>
+    </text>
+    <rect x="296.946" y="0" width="168.805" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="308.946" y="25.65"><tspan class="font-weight-bold">Forwarding resolver</tspan></tspan><tspan x="308.946" y="47.65">on your Wi-Fi router</tspan>
+    </text>
+    <rect x="497.751" y="0" width="168.545" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="509.751" y="25.65"><tspan class="font-weight-bold">Recursive resolver</tspan></tspan><tspan x="509.751" y="47.65">of your ISP; <tspan class="green">DNSSEC</tspan></tspan>
+    </text>
+    <rect x="698.296" y="-77.5" width="169.294" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="710.296" y="-51.85"><tspan class="font-weight-bold">Authoritative server</tspan></tspan><tspan x="710.296" y="-29.85">of the root zone</tspan>
+    </text>
+    <rect x="698.296" y="0" width="169.294" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="710.296" y="25.65"><tspan class="font-weight-bold">Authoritative server</tspan></tspan><tspan x="710.296" y="47.65">of the .com zone</tspan>
+    </text>
+    <rect x="698.296" y="77.5" width="169.294" height="61.5" rx="8" ry="8"></rect>
+    <text text-anchor="start">
+        <tspan x="710.296" y="103.15"><tspan class="font-weight-bold">Authoritative server</tspan></tspan><tspan x="710.296" y="125.15">of the ef1p.com zone</tspan>
+    </text>
+
+</svg>

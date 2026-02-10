@@ -1,0 +1,38 @@
+<svg id="figure-digital-signature" class="figure" data-name="digital-signature" width="632.206" height="128.25" viewBox="-1.25 -107.25 632.206 128.25" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+
+    <text text-anchor="middle">
+        <tspan x="444.755" y="-94.5">Public key</tspan><tspan x="444.755" y="-72.5">of signer</tspan>
+    </text>
+    <line x1="444.755" y1="-60.5" x2="444.755" y2="-21" marker-end="url(#arrow)" stroke-dasharray="33"></line>
+    <text text-anchor="middle">
+        <tspan x="184.951" y="-94.5">Private key</tspan><tspan x="184.951" y="-72.5">of signer</tspan>
+    </text>
+    <line x1="184.951" y1="-60.5" x2="184.951" y2="-21" marker-end="url(#arrow)" stroke-dasharray="33"></line>
+    <line x1="490.875" y1="0" x2="629.706" y2="0" marker-end="url(#arrow)" stroke-dasharray="132"></line>
+    <text text-anchor="middle">
+        <tspan x="560.29" y="-12"><tspan class="green">Valid</tspan> or <tspan class="red">invalid</tspan></tspan>
+    </text>
+    <line x1="230.133" y1="0" x2="398.636" y2="0" marker-end="url(#arrow)" stroke-dasharray="162"></line>
+    <text text-anchor="middle">
+        <tspan x="314.853" y="-12">Message, signature</tspan>
+    </text>
+    <line x1="0" y1="0" x2="138.831" y2="0" marker-end="url(#arrow)" stroke-dasharray="132"></line>
+    <text text-anchor="middle">
+        <tspan x="69.416" y="-12">Message</tspan>
+    </text>
+    <rect class="blue" x="140.081" y="-19.75" width="89.739" height="39.5" rx="8" ry="8"></rect>
+    <text class="blue" text-anchor="middle">
+        <tspan x="184.951" y="5.9"><tspan class="font-weight-bold">Signing</tspan></tspan>
+    </text>
+    <rect class="blue" x="399.886" y="-19.75" width="89.739" height="39.5" rx="8" ry="8"></rect>
+    <text class="blue" text-anchor="middle">
+        <tspan x="444.755" y="5.9"><tspan class="font-weight-bold">Verifying</tspan></tspan>
+    </text>
+    <text text-anchor="middle">
+        <tspan x="140.081" y="-41.625"><tspan class="font-weight-bold">Signer</tspan></tspan>
+    </text>
+    <text text-anchor="middle">
+        <tspan x="489.625" y="-41.625"><tspan class="font-weight-bold">Verifier</tspan></tspan>
+    </text>
+
+</svg>
