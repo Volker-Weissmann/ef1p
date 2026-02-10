@@ -97,7 +97,7 @@ const ipAddress: DynamicTextEntry = {
     defaultValue: '',
     inputType: 'text',
     inputWidth: 220, // 145 without placeholder.
-    placeholder: 'defaults to your address',
+    placeholder: 'defaults to your IP address',
     validateIndependently: input => input !== '' && !/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(input) && !/^([0-9a-f]{0,4}:){1,7}[0-9a-f]{0,4}$/i.test(input) && 'Please enter an IPv4 or IPv6 address or leave the field empty.',
 };
 

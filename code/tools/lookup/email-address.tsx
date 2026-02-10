@@ -174,7 +174,7 @@ const addressRegex = /^[^@ ]+@([a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?\.)*[a-z][-a-z0
 const emailAddress: DynamicTextEntry = {
     label: 'Email address',
     tooltip: 'The email address you want to query.',
-    defaultValue: 'security@ef1p.com',
+    defaultValue: 'fedora-44-primary@fedoraproject.org',
     inputType: 'text',
     inputWidth: 270,
     validateIndependently: input =>
