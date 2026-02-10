@@ -1,0 +1,44 @@
+/*
+Author: Kaspar Etter (https://kasparetter.com/)
+Work: Explained from First Principles (https://ef1p.com/)
+License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+*/
+
+:root {
+  --text-fragment: .99; // This allows us to hide the highlight with JavaScript.
+}
+
+::target-text {
+  background-color: rgba($select-color, var(--text-fragment));
+}
+
+$copy-link-to-selection-button-size: 30px;
+
+#copy-link-to-selection-button {
+  position: absolute;
+  z-index: 1000;
+  display: none;
+  width: $copy-link-to-selection-button-size;
+  height: $copy-link-to-selection-button-size;
+  color: $success;
+  text-align: center;
+  cursor: pointer;
+  background-color: $dropdown-bg;
+  border: 1px solid $dropdown-border-color;
+  border-radius: $copy-link-to-selection-button-size / 2;
+
+  &::before {
+    position: relative;
+    left: -1px;
+    display: inline-block;
+    font-family: anchorjs-icons;
+    font-size: $copy-link-to-selection-button-size - 6px;
+    line-height: $copy-link-to-selection-button-size - 5px;
+    content: "\e9cb";
+  }
+
+  @include hover() {
+    color: darken($success, 10%);
+    background-color: $jumbotron-bg;
+  }
+}
