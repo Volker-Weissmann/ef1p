@@ -4,7 +4,7 @@ category: Technologies
 author: Kaspar Etter
 license: CC BY 4.0
 published: 2020-08-05
-modified: 2021-10-21
+modified: 2026-02-10
 teaser: Learn more about this critical infrastructure, which you likely use for hours every day.
 reddit: https://www.reddit.com/r/ef1p/comments/n161nn/the_internet_explained_from_first_principles/
 icon: network-wired
@@ -41,6 +41,28 @@ you have to touch the acronym instead.
 
 Let's get right into it:
 What is a protocol?
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="update">
+Update
+</summary>
+
+In February 2026, I made the [IP geolocation tool](#ip-geolocation) more robust,
+supported [IPv6 addresses](#internet-protocol-version-6),
+and added or significantly modified the following [information boxes](/#information-boxes):
+[Internet Protocol version 6 (IPv6)](#internet-protocol-version-6),
+[QUIC](#quic),
+[public-key encryption](#public-key-encryption),
+[Wi-Fi Protected Access (WPA)](#wi-fi-protected-access),
+[capturing network traffic](#capturing-network-traffic),
+[Domain Name System Security Extensions (DNSSEC)](#domain-name-system-security-extensions)
+(including an improved [zone walking tool](#zone-walking)
+and how to [compute digests](#digest-computation)),
+[DNS stub resolvers](#dns-stub-resolvers),
+[secure DNS connections](#secure-dns-connections),
+and [DNS configuration recommendations](#dns-configuration-recommendations).
 
 </details>
 
@@ -296,7 +318,7 @@ In graph theory, such a layout is known as a [complete graph](https://en.wikiped
 Fully connected networks scale badly
 as the number of links grows quadratically with the number of nodes.
 You might have encountered the formula for the number of links before:
-n × (n – 1) / 2, with n being the number of nodes in the network.
+n · (n − 1) / 2, with n being the number of nodes in the network.
 As a consequence, this topology is impractical for larger networks.
 
 
@@ -325,16 +347,16 @@ A star network with five nodes, five links, and one router (in blue).
 </figure>
 
 While a star network scales optimally,
-it is by definition totally centralized.
+it is by definition completely centralized.
 If the nodes belong to more than one organization,
 this topology is not desirable
-as the central party exerts complete control over the network.
+as the central party exerts total control over the network.
 Depending on its market power,
 such a party can increase the price for its service
 and censor any communication it doesn't like.
 Additionally, the central node becomes a [single point of failure](https://en.wikipedia.org/wiki/Single_point_of_failure):
 If it fails for whatever reason,
-then the whole network stops working.
+the whole network stops working.
 Since this lowers the [availability](https://en.wikipedia.org/wiki/Availability) of the network,
 the star topology should not just be avoided for political but also for technical reasons.
 
@@ -363,7 +385,7 @@ It is therefore usually the preferred network topology.
 Furthermore, the node marked with an asterisk is connected to two routers
 in order to increase its availability.
 Because of higher costs,
-this is usually only done for [critical systems](https://en.wikipedia.org/wiki/Critical_system),
+this is usually done only for [critical systems](https://en.wikipedia.org/wiki/Critical_system),
 which provide crucial services.
 
 
@@ -382,7 +404,7 @@ whether they were the intended recipient of a message.
 This problem can be solved by assigning a unique identifier to each node in the network
 and by extending each transmitted message with the identifier of the intended recipient.
 Such an identifier is called a [network address](https://en.wikipedia.org/wiki/Network_address).
-Routers can learn on which link to forward the communication for which node.
+Routers [can learn](#routing-protocols) on which link to forward the communication for which node.
 This works best when the addresses aren't assigned randomly
 but rather reflect the
 – due to its physical nature often geographical –
@@ -425,15 +447,16 @@ so they know on which link to forward the communication for each node:
 |-
 | A1 | 1 | 4
 | A2 | 2 | 2
-| B? | 3 | 5
-| B? | 4 | 8
-| C? | 3 | 9
-| C? | 4 | 6
+| B\_ | 3 | 5
+| B\_ | 4 | 8
+| C\_ | 3 | 9
+| C\_ | 4 | 6
 
 <figcaption markdown="span">
 The routing table for router A.<br>
 It contains all the destinations to be reached.<br>
-The links are numbered according to the above graphic.
+The links are numbered according to the above graphic.<br>
+The [underscore](https://en.wikipedia.org/wiki/Underscore) serves as a placeholder for any value in this position.
 </figcaption>
 </figure>
 
@@ -457,7 +480,7 @@ the routing table contains all routes,
 even the ones which aren't optimal regarding the associated costs.
 Based on this information,
 a router constructs the actual [forwarding table](https://en.wikipedia.org/wiki/Forwarding_information_base),
-which only contains the optimal route for each destination without its cost.
+which contains only the optimal route for each destination without its cost.
 This makes the table smaller and the lookup during routing faster,
 which is important for [low latency](#network-performance).
 
@@ -467,12 +490,12 @@ which is important for [low latency](#network-performance).
 |-
 | A1 | 1
 | A2 | 2
-| B? | 3
-| C? | 4
+| B\_ | 3
+| C\_ | 4
 
 <figcaption markdown="span" style="max-width: 250px;">
 The forwarding table for router A,
-according to the above routing table.
+according to the [routing table](#routing-tables) above.
 </figcaption>
 </figure>
 
@@ -483,8 +506,8 @@ according to the above routing table.
 
 Routers and the physical links between them can fail at any time,
 for example because a network cable is demolished by nearby construction work.
-On the other hand, new nodes and connections are added to communication networks all the time.
-Therefore, the routing tables of routers need to be updated continuously.
+On the other hand, new [nodes and links](#nodes-and-links) are added to [communication networks](#communication-network) all the time.
+Therefore, the [routing tables](#routing-tables) of routers need to be updated continuously.
 Instead of updating them manually,
 routers communicate changes with each other using a [routing protocol](https://en.wikipedia.org/wiki/Routing_protocol).
 For example, as soon as router A detects
@@ -504,11 +527,11 @@ The link between the routers A and C failed.
 |-
 | A1 | 1 | 4
 | A2 | 2 | 2
-| B? | 3 | 5
-| C? | 3 | 9
+| B\_ | 3 | 5
+| C\_ | 3 | 9
 
 <figcaption markdown="span" style="max-width: 490px;">
-The updated routing table of router A with the routes over link 4 removed.
+The updated routing table of router A with the routes over the link 4 removed.
 With only one route left, router A forwards all communications for C on link 3.
 </figcaption>
 </figure>
@@ -538,9 +561,9 @@ A circuit-switched network with a communication channel (in orange).
 The best-known example of a circuit-switched network is the early [telephone network](https://en.wikipedia.org/wiki/Telephone_network).
 In order to make a call,
 a [switchboard operator](https://en.wikipedia.org/wiki/Switchboard_operator)
-needed to connect the wires of the two telephones in order to create a closed circuit.
-This has the advantage that the delay of the signal remains constant throughout the call
-and that the communication is guaranteed to arrive in the same order as it was sent.
+had to connect the wires of the two telephones in order to create a closed circuit.
+This has the advantage that the [delay of the signal](#network-latency) remains constant throughout the call
+and that the communication is guaranteed to arrive [in the same order](#out-of-order-delivery) as it was sent.
 On the other hand, establishing a dedicated circuit for each communication session
 can be inefficient as others cannot utilize the claimed capacity
 even when it's temporarily unused, for example when no one is speaking.
@@ -560,7 +583,7 @@ and then forwards each packet according to its [routing table](#routing-tables)
 or, more precisely, its [forwarding table](#forwarding-tables).
 Apart from these tables,
 packet-switching routers do not keep any state.
-In particular, no channels are opened or closed on the routing level.
+In particular, no [channels](#circuit-switching) are opened or closed on the routing level.
 
 <figure markdown="block">
 {% include_relative generated/signal-relaying-packet-request.embedded.svg %}
@@ -571,7 +594,7 @@ A packet (in orange) travels through the network from the sender to the recipien
 
 Since each packet is routed individually,
 they can take different routes from the sender to the recipient
-and arrive out of order due to varying delays.
+and arrive [out of order](#out-of-order-delivery) due to varying delays.
 
 <figure markdown="block">
 {% include_relative generated/signal-relaying-packet-response.embedded.svg %}
@@ -581,7 +604,7 @@ The response from the recipient takes a different route through the network.
 </figure>
 
 Since no router has a complete view of the whole network,
-it could happen that packets get stuck in an infinite loop:
+it may happen that packets get stuck in an [infinite loop](https://en.wikipedia.org/wiki/Infinite_loop):
 
 <figure markdown="block">
 {% include_relative generated/signal-relaying-packet-loop.embedded.svg %}
@@ -594,17 +617,17 @@ In order to avoid wasting network resources,
 the header of a packet also contains a counter,
 which is decreased by one every time it passes a router.
 If this counter reaches zero before the packet arrives at its destination,
-then the router discards the packet rather than forwarding it.
+the router discards the packet rather than forwarding it.
 Such a counter limits the lifespan of a packet by limiting the number of hops it can take
 and is thus known as its [time-to-live (TTL)](https://en.wikipedia.org/wiki/Time_to_live) value.
 There are also other reasons why a packet can get lost in the network.
-The queue of a router might simply be full,
+For example, the [queue](https://en.wikipedia.org/wiki/Queue_(abstract_data_type)) of a router might simply be full,
 which means that additional packets can no longer be stored
-and must therefore be dropped.
+and must be dropped.
 Because packets are similar to cars on the road network,
-some terms are borrowed from the transportation industry.
-While the capacity of a packet-switched network can be utilized better
-than the capacity of a circuit-switched network,
+some terms are borrowed from the transportation industry:
+While the capacity of a [packet-switched network](#packet-switching) can be utilized better
+than the capacity of a [circuit-switched network](#circuit-switching),
 too much [traffic](https://en.wikipedia.org/wiki/Network_traffic) on the network
 leads to [congestion](https://en.wikipedia.org/wiki/Network_congestion).
 
@@ -630,7 +653,7 @@ Its name simply means "[between](https://en.wiktionary.org/wiki/inter-) networks
 It is a [packet-switched](#packet-switching) [mesh network](#mesh-network)
 with only [best-effort delivery](https://en.wikipedia.org/wiki/Best-effort_delivery).
 This means that the Internet provides no guarantees about whether and in what time a packet is delivered.
-[Internet service providers (ISP)](https://en.wikipedia.org/wiki/Internet_service_provider)
+[Internet service providers (ISPs)](https://en.wikipedia.org/wiki/Internet_service_provider)
 provide access to the Internet for businesses and private individuals.
 They maintain proprietary computer networks for their customers
 and are themselves interconnected through [international backbones](https://en.wikipedia.org/wiki/Internet_backbone).
@@ -644,38 +667,44 @@ Such a modularization makes it possible
 to replace the protocol on one layer
 without affecting the protocols on the other layers.
 Because the layers above build on the layers below,
-they are always listed in the following order
+they are usually listed in the following order
 but then discussed in the opposite order:
 
 <figure markdown="block">
 
 | Name | Purpose | Endpoints | Identifier | Example
 |-
-| [Application layer](#application-layer) | Application logic | Application-specific resource | Application-specific | HTTP
-| [Security layer](#security-layer) | Encryption and authentication | One or both of the parties | X.509 subject name | TLS
-| [Transport layer](#transport-layer) | Typically reliable data transfer | Operating system processes | Port number | TCP
-| [Network layer](#network-layer) | Packet routing across the Internet | Internet-connected machines | IP address | IP
-| [Link layer](#link-layer) | Handling of the physical medium | Network interface controllers | MAC address | Wi-Fi
+| [Application layer](#application-layer) | Application logic | Application-specific resource | Application-specific | [HTTP](#hypertext-transfer-protocol)
+| [Security layer](#security-layer) | Encryption and authentication | One or both of the parties | [X.509 subject name](#public-key-infrastructure) | [TLS](#transport-layer-security)
+| [Transport layer](#transport-layer) | Typically reliable data transfer | Operating-system processes | [Port number](#port-numbers) | [TCP](#transmission-control-protocol)
+| [Network layer](#network-layer) | Packet routing across the Internet | Internet-connected devices | [IP address](#internet-protocol-version-4) | [IP](#network-layer)
+| [Link layer](#link-layer) | Handling of the physical medium | Network interface controllers | [MAC address](#media-access-control-address) | [Wi-Fi](#link-layer)
 
 <figcaption markdown="span">
 The layers of the Internet.
 They differ in their purpose,
 the endpoints that communicate with each other,
-and how those endpoints are identified.
+and how those endpoints are identified.<br>
+(Please note that I made up the [security layer](#security-layer);
+it doesn't exist in the [literature](https://en.wikipedia.org/wiki/Internet_protocol_suite).
+Additionally, the [network layer](https://en.wikipedia.org/wiki/Network_layer)
+is also called the [Internet layer](https://en.wikipedia.org/wiki/Internet_layer).)
 </figcaption>
 </figure>
 
-We will discuss each layer separately in the following subsections.
-For now, you can treat the above table as an overview and summary.
+We'll discuss each layer separately in the following subsections.
+For now, you can treat this table as an overview and summary.
+
 Before we dive into the lowest layer,
 we first need to understand what "building on the layer below" means.
 [Digital data](https://en.wikipedia.org/wiki/Digital_data)
 can be copied perfectly from one memory location to another.
-The implementation of a specific protocol receives a chunk of data, known as the payload, from the layer above
-and wraps it with the information required to fulfill its purpose in the so-called header.
+The implementation of a specific protocol receives a chunk of data,
+known as the [payload](https://en.wikipedia.org/wiki/Payload_(computing)), from the layer above
+and wraps it with the information required to fulfill its purpose in the so-called [header](https://en.wikipedia.org/wiki/Header_(computing)).
 The payload and the header then become the payload for the layer below,
 where another protocol specifies a new header to be added.
-Each of these wrappings is undone by the respective protocol on the recipient side.
+Each of these wrappings is undone by the recipient's implementation of the respective protocol.
 This can be visualized as follows:
 
 <figure markdown="block">
@@ -695,12 +724,13 @@ Secondly, a protocol can split a payload into smaller chunks and transfer them s
 It can even ask the sender to retransmit a certain chunk.
 As long as all the chunks are recombined on the recipient side,
 the protocol above can be ignorant about such a process.
-As we've seen in the sections above,
+
+As we've seen [earlier](#handling-of-anomalies),
 a lot of things can go wrong in computer networks.
 In the following subsections,
 we'll have a closer look on how protocols
-compensate for the deficiencies of the underlying network.
-Before we do so, we should talk about standardization first.
+compensate for the deficiencies of the [underlying network](#packet-switching).
+Before we do so, we should talk about [standardization](#request-for-comments).
 
 <details markdown="block">
 <summary markdown="span" id="request-for-comments">
@@ -713,7 +743,7 @@ Standards need to be proposed, discussed, published,
 and updated to changing circumstances.
 I'm not aware of any laws that impose specific networking standards
 outside of governmental agencies.
-The Internet is an open architecture,
+The Internet has an open architecture,
 and technology-wise, you're free to do pretty much anything you want.
 This doesn't mean, though, that others will play along.
 If different companies shall adopt the same standards to improve interoperability,
@@ -732,7 +762,7 @@ The IETF publishes its official documents as
 This name was originally chosen to avoid a commanding appearance and to encourage discussions.
 In the meantime, early versions of potential RFCs are published as
 [Internet Drafts](https://en.wikipedia.org/wiki/Internet_Draft),
-and RFCs are only approved after several rounds of peer review.
+and RFCs are approved only after several rounds of peer review.
 RFCs are numbered sequentially, and once published,
 they are no longer modified.
 If a document needs to be revised,
@@ -744,7 +774,7 @@ Even though the most important Internet protocols are specified in RFCs,
 their conception and style is much more pragmatic than similar documents of other
 [standards organizations](https://en.wikipedia.org/wiki/Standards_organization).
 The [first RFC](https://datatracker.ietf.org/doc/html/rfc1) was published in 1969.
-Since then, [almost 9'000 RFCs](https://tools.ietf.org/rfc/index) have been published.
+Since then, [almost 10'000 RFCs](https://www.rfc-editor.org/rfc-index.html) have been published.
 Not all RFCs define [new standards](https://en.wikipedia.org/wiki/Request_for_Comments#Standards_Track),
 some are just [informational](https://en.wikipedia.org/wiki/Request_for_Comments#Informational),
 some describe an [experimental proposal](https://en.wikipedia.org/wiki/Request_for_Comments#Experimental),
@@ -755,17 +785,17 @@ and others simply document the [best current practice](https://en.wikipedia.org/
 
 ### Link layer
 
-Protocols on the [link layer](https://en.wikipedia.org/wiki/Link_layer)
-take care of delivering a packet over a direct link between two nodes.
+[Protocols](#communication-protocol) on the [link layer](https://en.wikipedia.org/wiki/Link_layer)
+take care of delivering a packet over a direct link between [two nodes](#nodes-and-links).
 Examples of such protocols are [Ethernet](https://en.wikipedia.org/wiki/Ethernet) and [Wi-Fi](https://en.wikipedia.org/wiki/Wi-Fi).
-Link layer protocols are designed to handle the intricacies of the underlying physical medium and signal.
+Link-layer protocols are designed to handle the intricacies of the underlying physical medium and signal.
 This can be an electric signal over a copper wire,
 light over an optical fiber or an electromagnetic wave through space.
 The node on the other end of the link, typically a router,
 removes the header of the link layer,
-determines on the network layer on which link to forward the packet,
+determines on the [network layer](#network-layer) on which link to forward the [packet](#packet-switching),
 and then wraps the packet according to the protocol spoken on that link.
-Link layer protocols typically detect [bit errors](https://en.wikipedia.org/wiki/Bit_error)
+Link-layer protocols typically detect [bit errors](https://en.wikipedia.org/wiki/Bit_error)
 caused by noise, interference, distortion, and faulty synchronization.
 If several devices want to send a packet over the same medium at the same time,
 the signals collide, and the packets must be retransmitted
@@ -813,7 +843,7 @@ The symbol in the third position counts how many times you went through the 100 
 It is thus multiplied by 10<sup>2</sup> before being added up.
 The symbol in the fourth position is multiplied by 10<sup>3</sup>, and so on.
 All of this should be obvious to you.
-However, you might not be used to using less than or more than ten symbols.
+However, you might not be familiar with using less than or more than ten symbols.
 
 The [binary numeral system](https://en.wikipedia.org/wiki/Binary_numeral_system) uses,
 as [the name suggests](https://en.wikipedia.org/wiki/Arity),
@@ -824,14 +854,16 @@ which in turn are followed by 100, 101, 110, and 111.
 Each position is called a [bit](https://en.wikipedia.org/wiki/Bit),
 which is short for "binary digit".
 Just as with decimal numbers,
-the [most significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Most_significant_bit) is to the left,
-the [least significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Least_significant_bit) to the right.
+the [most significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Most_significant_bit) is on the left,
+the [least significant bit](https://en.wikipedia.org/wiki/Bit_numbering#Least_significant_bit) on the right.
 Since there are only two elements in the list of symbols,
 the [base](https://en.wikipedia.org/wiki/Radix)
-for exponentiation is 2 instead of 10.
+for [exponentiation](https://en.wikipedia.org/wiki/Exponentiation) is 2 instead of 10.
 If we count the positions from the right to the left [starting at zero](https://en.wikipedia.org/wiki/Zero-based_numbering),
 each bit is multiplied by two raised to the power of its position.
-4 bits allow you to represent 2<sup>4</sup> = 16 numbers, and
+For example, 1101 in binary (usually written as 1101<sub>2</sub>)
+is 1 · 2<sup>3</sup> + 1 · 2<sup>2</sup> + 0 · 2<sup>1</sup> + 1 · 2<sup>0</sup> = 8 + 4 + 0 + 1 = 13 in decimal.
+4&nbsp;bits allow you to represent 2<sup>4</sup> = 16 numbers, and
 8 bits allow you to represent 2<sup>8</sup> = 256 numbers.
 
 Virtually all modern computers use the binary numeral system
@@ -857,7 +889,7 @@ the 10 digits are supplemented by 6 letters,
 resulting in the symbols 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, A, B, C, D, E, and F.
 The F in hexadecimal notation stands for 15 in decimal notation and 1111 in binary notation.
 
-What I just wrote only applies to [natural numbers](https://en.wikipedia.org/wiki/Natural_number),
+What I just wrote applies only to [natural numbers](https://en.wikipedia.org/wiki/Natural_number),
 also called [unsigned integers](https://en.wikipedia.org/wiki/Integer_(computer_science)#Value_and_representation).
 [Negative integers](https://en.wikipedia.org/wiki/Integer) are included
 by using the leftmost bit for the [sign](https://en.wikipedia.org/wiki/Sign_(mathematics)):
@@ -877,8 +909,8 @@ Media access control (MAC) address
 </summary>
 
 The [media access control (MAC) address](https://en.wikipedia.org/wiki/MAC_address)
-is commonly used as the [network address](#network-addresses) on the link layer.
-It is a 48-bit number, which is typically displayed as six pairs of
+is commonly used as the [network address](#network-addresses) on the [link layer](#link-layer).
+It's a 48-bit number, which is typically displayed as six pairs of
 [hexadecimal digits](#number-encoding).
 (One hexadecimal digit represents 4 bits, so twelve hexadecimal digits represent 48 bits.)
 MAC addresses are used in Ethernet, Wi-Fi, and Bluetooth to address other devices in the same network.
@@ -926,15 +958,13 @@ but there are actually [three types of them](https://askleo.com/whats_the_differ
 Maximum transmission unit (MTU)
 </summary>
 
-Link layer protocols usually limit the size of the packets they can forward over the link.
+[Link-layer protocols](#link-layer) usually limit the size of the [packets](#packet-switching) they can forward over the [link](#nodes-and-links).
 This limit is known as the [maximum transmission unit (MTU)](https://en.wikipedia.org/wiki/Maximum_transmission_unit) of the link.
-For example, the MTU of Ethernet is 1500 bytes.
+For example, the MTU of Ethernet is 1500 [bytes](#number-encoding).
 If a packet is larger than the MTU,
-it is split into smaller fragments by the network layer.
+it is split into smaller fragments by the [network layer](#network-layer).
 If the network drops any of the fragments,
 then the entire packet is lost.
-
-{% include image.md source="mac-address.png" caption="This is how the MAC address and the MTU appear in the Wi-Fi preferences of macOS." themed="true" image-max-width="750" %}
 
 </details>
 
@@ -943,12 +973,12 @@ then the entire packet is lost.
 IP over Avian Carriers (IPoAC)
 </summary>
 
-Written as an April Fools' joke,
+Written as an [April Fools' joke](https://en.wikipedia.org/wiki/April_Fools%27_Day),
 [RFC](#request-for-comments) [1149](https://datatracker.ietf.org/doc/html/rfc1149)
-describes a method for delivering packets on the link layer
+describes a method for delivering packets on the [link layer](#link-layer)
 using [homing pigeons](https://en.wikipedia.org/wiki/Homing_pigeon).
 While this method is of no practical importance,
-it shows the flexibility of the Internet layers
+it shows the flexibility of the [Internet layers](#internet-layers)
 and is well [worth a read](https://en.wikipedia.org/wiki/IP_over_Avian_Carriers).
 
 </details>
@@ -958,67 +988,110 @@ and is well [worth a read](https://en.wikipedia.org/wiki/IP_over_Avian_Carriers)
 
 The purpose of the [network layer](https://en.wikipedia.org/wiki/Internet_layer)
 is to [route](#signal-routing) packets between endpoints.
-It is the layer that ensures interoperability between separate networks on the Internet.
-As a consequence, there is only one protocol which matters on this layer:
+It is the [layer](#internet-layers) that ensures interoperability between separate networks on the Internet.
+As a consequence, there's only one protocol which matters on this layer:
 the [Internet Protocol (IP)](https://en.wikipedia.org/wiki/Internet_Protocol).
-If you want to use the Internet, you have to use this protocol.
+If you want to use the Internet, you have to use this protocol
+in [one](#internet-protocol-version-4) of its [versions](#internet-protocol-version-6).
 As we've seen earlier, [packet switching](#packet-switching) provides only unreliable communication.
 It is left to the [transport layer](#transport-layer) to compensate for this.
 
+<details markdown="block" open>
+<summary markdown="span" id="internet-protocol-version-4">
+Internet Protocol version 4 (IPv4)
+</summary>
+
 The first major version of the Internet Protocol is [version 4 (IPv4)](https://en.wikipedia.org/wiki/IPv4),
-which has been in use since 1982 and is still the dominant protocol on the Internet.
-It uses 32-bit numbers to address endpoints and routers,
+which has been in use [since 1982](https://en.wikipedia.org/wiki/IPv4#History)
+and still accounts for [a bit more than half](https://www.google.com/intl/en/ipv6/statistics.html) of all Internet traffic in 2025.
+It uses [32-bit numbers](#number-encoding) to address [endpoints](#star-network) and [routers](#mesh-network),
 which are written as four numbers between 0 and 255 separated by a dot.
 These [IP addresses](https://en.wikipedia.org/wiki/IP_address)
 reflect the hierarchical structure of the Internet,
-which is important for efficient routing.
+which is important for efficient [routing](#signal-routing).
 They are assigned by the [Internet Assigned Numbers Authority (IANA)](https://en.wikipedia.org/wiki/Internet_Assigned_Numbers_Authority),
 which belongs to the American [Internet Corporation for Assigned Names and Numbers (ICANN)](https://en.wikipedia.org/wiki/ICANN),
 and by five [Regional Internet Registries (RIR)](https://en.wikipedia.org/wiki/Regional_Internet_registry).
 If you're interested, you can check out the [current IPv4 address allocation](https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xhtml).
-There are just under 4.3 billion IPv4 addresses,
-which are quite unevenly [distributed among countries](https://en.wikipedia.org/wiki/List_of_countries_by_IPv4_address_allocation).
+There are just under 4.3 billion IPv4 addresses (2<sup>32</sup> = 4'294'967'296),
+which are quite [unevenly distributed among countries](https://en.wikipedia.org/wiki/List_of_countries_by_IPv4_address_allocation).
 Given the limited address space, we're running out of IPv4 addresses.
 In order to deal with the [IPv4 address exhaustion](https://en.wikipedia.org/wiki/IPv4_address_exhaustion),
-the [Internet Protocol version 6 (IPv6)](https://en.wikipedia.org/wiki/IPv6) has been developed.
-IPv6 uses 128-bit addresses,
-which are represented as eight groups of four hexadecimal digits
-with the groups separated by colons.
+the [Internet Protocol version 6 (IPv6)](#internet-protocol-version-6) has been developed.
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="internet-protocol-version-6">
+Internet Protocol version 6 (IPv6)
+</summary>
+
+The [Internet Protocol version 6 (IPv6)](https://en.wikipedia.org/wiki/IPv6) was first specified
+in [RFC](#request-for-comments) [1883](https://datatracker.ietf.org/doc/html/rfc1883) in 1995
+and has been in use [since 2003](https://en.wikipedia.org/wiki/IPv6#Deployment).
+It uses 128-bit addresses,
+which are represented as eight groups of four [hexadecimal digits](#number-encoding),
+with the groups separated by [colons](https://en.wikipedia.org/wiki/Colon_(punctuation)).
+An example IPv6 address is `2001:0DB8:0000:0000:1A2B:0000:0000:0003`.
+([RFC 3849](https://datatracker.ietf.org/doc/html/rfc3849)
+reserves the IPv6 address [prefix](https://en.wikipedia.org/wiki/Substring#Prefix)
+`2001:0DB8` for use in documentation.)
+In order to make searching and comparing IPv6 addresses in text easier,
+[RFC 5952](https://datatracker.ietf.org/doc/html/rfc5952) defines a
+[canonical form](https://en.wikipedia.org/wiki/Canonical_form):
+- **No leading zeros**: Omit leading zeros in each group but retain at least one digit.
+  We thus have `2001:DB8:0:0:1A2B:0:0:3`.
+- **Lowercase**: Use lowercase letters for the hexadecimal digits.
+  The example address becomes `2001:db8:0:0:1a2b:0:0:3`.
+- **Zero compression**: Replace the longest sequence of consecutive `0` groups with `::`.
+  Shorten as many groups as possible and don't compress a single `0` group.
+  If several sequences of consecutive `0` groups have the same length, compress the first one.
+  The `::` may appear only once in an IPv6 address,
+  but it can appear [at the beginning](#client-server-model) or the end of an address.
+  Putting these rules together, `2001:0DB8:0000:0000:1A2B:0000:0000:0003`
+  should be rendered in text as `2001:db8::1a2b:0:0:3`.
+
 As IPv6 isn't interoperable with IPv4,
-the transition has been [slow but steady](https://en.wikipedia.org/wiki/IPv6_deployment).
+the transition has been [slow but steady](https://en.wikipedia.org/wiki/IPv6_deployment),
+reaching [almost 50% of traffic](https://www.google.com/intl/en/ipv6/statistics.html) in 2025.
+
+</details>
 
 <details markdown="block">
 <summary markdown="span" id="ip-geolocation">
 IP geolocation
 </summary>
 
-Since the Internet is not just a protocol but also a [physical network](https://en.wikipedia.org/wiki/Internet_backbone),
-which requires big investments in infrastructure like fiber optic cables,
-Internet service providers operate regionally.
-In order to facilitate the routing of packets,
+Because the [Internet](#internet-layers) isn't just a [protocol](#communication-protocol)
+but also a [physical network](https://en.wikipedia.org/wiki/Internet_backbone),
+which requires big investments in infrastructure like [fiber-optic cables](https://en.wikipedia.org/wiki/Fiber-optic_cable),
+[Internet service providers (ISPs)](https://en.wikipedia.org/wiki/Internet_service_provider) used to operate regionally.
+([SpaceX](https://en.wikipedia.org/wiki/SpaceX)'s [Starlink](https://en.wikipedia.org/wiki/Starlink)
+is starting to change that).
+To facilitate the [routing](#signal-routing) of [packets](#packet-switching),
 they get assigned an [IP address range](https://en.wikipedia.org/wiki/Subnetwork) for their regional network.
-This allows companies to build databases that map IP addresses to their geographical location.
-Unless you use a [Virtual Private Network (VPN)](https://en.wikipedia.org/wiki/Virtual_private_network)
+This allows companies to build databases that map IP addresses to their approximate geographic location.
+Unless you use a [virtual private network (VPN)](https://en.wikipedia.org/wiki/Virtual_private_network)
 or an [overlay network](https://en.wikipedia.org/wiki/Overlay_network) for anonymous communication,
 such as [Tor](https://www.torproject.org/),
 you reveal your approximate location to every server you communicate with.
 Websites such as [streaming platforms](https://en.wikipedia.org/wiki/Streaming_service_provider)
 use this information to restrict the content available to you
-depending on the country you are visiting the site from
-due to their copyright licensing agreements with film producers.
+based on the country you're visiting the site from
+due to their copyright licensing agreements with content producers.
 
-One company with such a [geolocation](https://en.wikipedia.org/wiki/Geolocation) database is [ipinfo.io](https://ipinfo.io/).
+One company with such a [geolocation](https://en.wikipedia.org/wiki/Geolocation) database is [IPinfo.io](https://ipinfo.io/).
 Using their free [API](https://en.wikipedia.org/wiki/Application_programming_interface),
-I can tell you where you likely are.
-If you are visiting this website via a mobile phone network,
-then the result will be less accurate.
-If I were to use [their paid API](https://ipinfo.io/developers/privacy),
-I could also tell you whether you are likely using a VPN or Tor.
-If you don't mind revealing to [ipinfo.io](https://ipinfo.io/) that you are reading this blog,
-then go ahead and enter an IPv4 address of interest in the following field.
-If you leave the field empty, the IP address from which you are visiting this website is used.
+I can tell roughly where you are.
+Just leave the field in the following tool empty and click on "Locate" for this.
+(If you're visiting this website via a [cellular network](https://en.wikipedia.org/wiki/Cellular_network)
+or a [satellite](https://en.wikipedia.org/wiki/Satellite_internet_constellation),
+the result will be less accurate.)
+Alternatively, enter an [IPv4](#internet-protocol-version-4) or [IPv6](#internet-protocol-version-6)
+address of interest to see its approximate location.
 
 <div id="tool-lookup-ip-address"></div>
+
 </details>
 
 <details markdown="block">
@@ -1044,10 +1117,11 @@ is assessed based on the following measures:
   to that particular destination,
   which includes the [one-way delay (OWD)](https://en.wikipedia.org/wiki/End-to-end_delay)
   in both directions and the time it took the recipient to process the request.
-  Have a look at the next two boxes for more information on this.
+  Have a look at the [next](#propagation-delay) [two](#internet-control-message-protocol) boxes
+  for more information on this.
 - **[Jitter](https://en.wikipedia.org/wiki/Jitter)**
   is the undesired variation in the latency of a signal.
-  On the link layer, such a deviation from the periodic
+  On the [link layer](#link-layer), such a deviation from the periodic
   [clock signal](https://en.wikipedia.org/wiki/Clock_signal)
   is caused by the properties of the physical medium.
   The term is sometimes also used to refer to
@@ -1059,19 +1133,20 @@ is assessed based on the following measures:
 
 The term **[throughput](https://en.wikipedia.org/wiki/Throughput)**
 is sometimes used interchangeably with bandwidth.
-Other times, it is used to refer to the actual rate
+Other times, it's used to refer to the actual rate
 at which useful data is being transferred.
 The effective throughput is lower than the maximum bandwidth
-due to the overhead of protocol headers,
+due to the overhead of [headers](https://en.wikipedia.org/wiki/Header_(computing)),
 packet loss and retransmission,
 congestion in the network,
-as well as the delay for acknowledgements by the recipient.
+and the delay for [acknowledgements by the recipient](#transmission-control-protocol).
+
 More bandwidth doesn't reduce the latency of Internet communication,
 which is the crucial factor for applications such as
 [algorithmic trading](https://en.wikipedia.org/wiki/Algorithmic_trading)
 and [online gaming](https://en.wikipedia.org/wiki/Online_game),
-where latency is called [lag](https://en.wikipedia.org/wiki/Lag).
-The design of a protocol impacts its performance:
+where latency is called [lag](https://en.wikipedia.org/wiki/Lag_(video_games)).
+The design of a [protocol](#communication-protocol) impacts its performance:
 The more messages that need to be exchanged in a session,
 the less throughput you get over long distances
 due to the many round trips.
@@ -1086,7 +1161,7 @@ As a rule of thumb,
 you can divide the number of megabits per second by ten
 to get a rough estimate for actual megabytes per second
 due to the aforementioned overhead.
-Please keep in mind that Internet communication is routed over many links
+Please keep in mind that Internet communication is routed over many [links](#nodes-and-links)
 and that any of the links, including the Wi-Fi link to your own router,
 can limit the overall performance.
 For example, if a server you interact with has a slow connection or is very busy,
@@ -1101,32 +1176,31 @@ Propagation delay
 
 The physical limit for how fast a signal can travel
 is the [speed of light](https://en.wikipedia.org/wiki/Speed_of_light) in vacuum,
-which is roughly 300'000 km/s or 3 × 10<sup>8</sup> m/s.
+which is roughly 300'000 km/s or 3 · 10<sup>8</sup> m/s.
 It takes light 67 ms to travel halfway around the Earth
 and 119 ms to travel from [geostationary orbit](https://en.wikipedia.org/wiki/Geostationary_orbit) to Earth.
 While this doesn't sound like a lot,
 [propagation delay](https://en.wikipedia.org/wiki/Propagation_delay)
-is a real problem for applications where latency matters,
+is a real problem for applications where [latency](#network-performance) matters,
 especially because a signal often has to travel back and forth to be useful.
 One party typically reacts to information received from another party,
 hence it takes a full round trip for the reaction to reach the first party again.
 The speed at which electromagnetic waves travel through a medium
 is slower than the speed of light in vacuum.
 The speed of a light pulse through an [optical fiber](https://en.wikipedia.org/wiki/Optical_fiber)
-is ⅔ of the speed of light in vacuum, i.e. 2.0 × 10<sup>8</sup> m/s.
+is ⅔ of the speed of light in vacuum, i.e. 2.0 · 10<sup>8</sup> m/s.
 A change of electrical voltage travels slightly faster through
 a [copper wire](https://en.wikipedia.org/wiki/Copper_wire)
-at 2.3 × 10<sup>8</sup> m/s.
+at 2.3 · 10<sup>8</sup> m/s.
 When costs allow it,
 optical fibers are [often preferred](https://networkengineering.stackexchange.com/a/16440)
 over copper wire because they provide higher bandwidth
 over longer distances with less interference
 before the signal needs to be amplified.
-It is to be seen whether [satellite constellations](https://en.wikipedia.org/wiki/Satellite_constellation)
-in [low Earth orbit](https://en.wikipedia.org/wiki/Low_Earth_orbit),
-such as [Starlink](https://en.wikipedia.org/wiki/Starlink),
-which is currently being built by [SpaceX](https://en.wikipedia.org/wiki/SpaceX),
-will be able to provide lower latency transcontinental connections
+It remains to be seen whether [satellite constellations](https://en.wikipedia.org/wiki/Satellite_internet_constellation)
+in [low-Earth-orbit (LEO)](https://en.wikipedia.org/wiki/Low_Earth_orbit),
+such as [SpaceX](https://en.wikipedia.org/wiki/SpaceX)'s [Starlink](https://en.wikipedia.org/wiki/Starlink),
+will be able to provide lower-latency transcontinental connections
 by using [laser communication in space](https://en.wikipedia.org/wiki/Laser_communication_in_space).
 If they succeed, the financial industry will happily pay whatever it costs to use it.
 
@@ -1138,13 +1212,13 @@ Internet Control Message Protocol (ICMP)
 </summary>
 
 The [Internet Control Message Protocol (ICMP)](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol)
-is used by routers to send error messages to the sender of a packet,
-for example when a host could not be reached
+is used by routers to send error messages to the sender of a [packet](#packet-switching),
+for example, when a host cannot be reached
 or when a packet exceeds its [time to live (TTL)](https://en.wikipedia.org/wiki/Time_to_live).
 ICMP messages are attached to an [IP header](https://en.wikipedia.org/wiki/IPv4#Header),
 in which the [IP protocol number](https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers)
 is set to 1 according to [RFC 792](https://datatracker.ietf.org/doc/html/rfc792).
-ICMP complements the Internet Protocol on the network layer.
+ICMP complements the Internet Protocol on the [network layer](#network-layer).
 It has various [message types](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages),
 with two of them being commonly used to determine the round-trip time to a network destination.
 The network utility to do so is called [ping](https://en.wikipedia.org/wiki/Ping_(networking_utility)).
@@ -1155,11 +1229,11 @@ before reporting statistics on packet loss and round-trip times:
 <div id="code-ping-example"></div>
 <figcaption markdown="span">
 
-Pinging the example.com server five times from my
+Pinging the [example.com](https://example.com/) server five times from my
 [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface).
 The average round-trip time is around 88 ms.<br>
 The first line consists of the command and options that I entered,
-all the subsequent lines are output by the ping utility.<br>
+all the subsequent lines are output by the [ping utility](https://en.wikipedia.org/wiki/Ping_(networking_utility)).<br>
 Round-trip times within the same geographical area are typically below 10 ms,
 whereas it takes around 80 to 100 ms<br>
 to the US East Coast and around 150 to 170 ms to the US West Coast and back from my place in central Europe.
@@ -1176,14 +1250,15 @@ Dynamic Host Configuration Protocol (DHCP)
 
 Unlike the [MAC address](#media-access-control-address),
 which at least historically always stayed the same,
-the IP address of your device is different for every network it joins
-as IP addresses are allocated top-down to allow for efficient routing between networks.
+the [IP address](#internet-protocol-version-4) of your device is different for every network it joins
+as IP addresses are allocated top-down to allow for efficient [routing between networks](#signal-routing).
 Instead of configuring the IP address manually every time you join another network,
-your device can request an IP address from the router of the network using the
-[Dynamic Host Configuration Protocol (DHCP)](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol).
+your device can request an IP address from the network's router using the
+[Dynamic Host Configuration Protocol (DHCP)](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol)
+as specified in [RFC 2131](https://datatracker.ietf.org/doc/html/rfc2131).
 DHCP is an [application layer](#application-layer) protocol.
 
-{% include image.md source="dhcp-configuration.png" caption="The DHCP configuration in the Wi-Fi preferences of macOS. Have a look at [NAT](#network-address-translation) for more information about the IP address." themed="true" image-max-width="750" %}
+{% include image.md source="dhcp-configuration.png" caption="The DHCP configuration in the Wi-Fi preferences of [macOS](https://en.wikipedia.org/wiki/MacOS). Have a look at [NAT](#network-address-translation) for more information about the IP address." themed="true" image-max-width="750" %}
 
 </details>
 
@@ -1193,10 +1268,10 @@ Address Resolution Protocol (ARP)
 </summary>
 
 When devices want to communicate with each other in the same network,
-they need to know the MAC address of the other devices
+they need to know the [MAC address](#media-access-control-address) of the other devices
 in order to address them on the [link layer](#link-layer).
 The [Address Resolution Protocol (ARP)](https://en.wikipedia.org/wiki/Address_Resolution_Protocol)
-resolves IP addresses to MAC addresses in the local network.
+resolves [IP addresses](#internet-protocol-version-4) to MAC addresses in the local network.
 By using a special MAC address which is accepted by all devices on the local network,
 any network participant can ask, for example, "Who has the IP address 192.168.1.2?".
 The device which has this IP address responds, thereby sharing its MAC address.
@@ -1210,30 +1285,32 @@ The device which has this IP address responds, thereby sharing its MAC address.
 #### Operating systems
 
 Before we can discuss the [transport layer](https://en.wikipedia.org/wiki/Transport_layer),
-we first need to talk about [operating systems (OS)](https://en.wikipedia.org/wiki/Operating_system).
-The job of an operating system is to manage the
+we first need to talk about operating systems.
+The job of an [operating system (OS)](https://en.wikipedia.org/wiki/Operating_system) is to manage the
 [hardware](https://en.wikipedia.org/wiki/Computer_hardware) of a computer.
-Its hardware includes [processors](https://en.wikipedia.org/wiki/Processor_(computing)),
-such as the [central processing unit (CPU)](https://en.wikipedia.org/wiki/Central_processing_unit)
-and the [graphics processing unit (GPU)](https://en.wikipedia.org/wiki/Graphics_processing_unit),
-[memory](https://en.wikipedia.org/wiki/Computer_memory),
-such as [volatile memory](https://en.wikipedia.org/wiki/Volatile_memory)
-and [non-volatile memory](https://en.wikipedia.org/wiki/Non-volatile_memory)
-like your [solid-state drive (SSD)](https://en.wikipedia.org/wiki/Solid-state_drive),
-[input/output (I/O) devices](https://en.wikipedia.org/wiki/Input/output),
-such as a [keyboard](https://en.wikipedia.org/wiki/Computer_keyboard)
-and a [mouse](https://en.wikipedia.org/wiki/Computer_mouse) for input,
-a [monitor](https://en.wikipedia.org/wiki/Computer_monitor)
-and [speakers](https://en.wikipedia.org/wiki/Computer_speakers) for output,
-as well as a [network interface controller (NIC)](https://en.wikipedia.org/wiki/Network_interface_controller)
-to communicate with other devices on the same network.
+The hardware of a computer includes:
+- [processors](https://en.wikipedia.org/wiki/Processor_(computing)),
+  such as the [central processing unit (CPU)](https://en.wikipedia.org/wiki/Central_processing_unit)
+  and the [graphics processing unit (GPU)](https://en.wikipedia.org/wiki/Graphics_processing_unit),
+- [memory](https://en.wikipedia.org/wiki/Computer_memory),
+  such as [volatile memory](https://en.wikipedia.org/wiki/Volatile_memory)
+  and [non-volatile memory](https://en.wikipedia.org/wiki/Non-volatile_memory)
+  like your [solid-state drive (SSD)](https://en.wikipedia.org/wiki/Solid-state_drive),
+- [input/output (I/O) devices](https://en.wikipedia.org/wiki/Input/output),
+  such as a [keyboard](https://en.wikipedia.org/wiki/Computer_keyboard)
+  and a [mouse](https://en.wikipedia.org/wiki/Computer_mouse) for input,
+  a [monitor](https://en.wikipedia.org/wiki/Computer_monitor)
+  and [speakers](https://en.wikipedia.org/wiki/Computer_speakers) for output,
+- as well as a [network interface controller (NIC)](https://en.wikipedia.org/wiki/Network_interface_controller)
+  to communicate with other devices on the same network.
+{:.compact}
 
-An operating system fulfills three different purposes:
-- **Abstraction**: It simplifies and standardizes the access to the hardware,
-  making it easier for engineers to develop software for several
-  [computing platforms](https://en.wikipedia.org/wiki/Computing_platform).
-- **Duplication**: It provides the same resources to several programs running on the same computer,
-  thereby giving each program the illusion that it has the hardware just for itself.
+An operating system serves the following three purposes:
+- **Abstraction**: It simplifies and standardizes access to the hardware,
+  making it easier for engineers to develop [software](https://en.wikipedia.org/wiki/Software)
+  for several [computing platforms](https://en.wikipedia.org/wiki/Computing_platform).
+- **Duplication**: It provides the same hardware to all [programs](https://en.wikipedia.org/wiki/Computer_program)
+  running on the same computer, while giving each program the illusion that it has the hardware just for itself.
 - **Protection**: It enforces restrictions on the behavior of programs.
   For example, it can deny access to the webcam or certain parts of
   the [file system](https://en.wikipedia.org/wiki/File_system)
@@ -1247,12 +1324,13 @@ it is called a [process](https://en.wikipedia.org/wiki/Process_(computing)).
 This distinction is important
 because the same program can be executed several times in parallel,
 which results in several processes until they terminate.
-Since more than one process might want to use the network connection at the same time,
-the operating system needs a way to keep the traffic of different processes apart.
-The label used for this purpose is a 16-bit integer known as [port number](https://en.wikipedia.org/wiki/Port_(computer_networking)).
+Since more than one process may want to use the network connection at the same time,
+the [operating system](#operating-systems) needs a way to keep the traffic of different processes apart.
+The label used for this purpose is a [16-bit integer](#number-encoding)
+known as [port number](https://en.wikipedia.org/wiki/Port_(computer_networking)).
 When a process sends a request to another device,
 the operating system chooses an arbitrary but still unused port number
-and encodes it as the source port in the transport layer wrapping of the outgoing packet.
+and encodes it as the source port in the transport-layer wrapping of the outgoing packet.
 The recipient then has to include the same port number as the destination port in its response.
 When the operating system of the requester receives this response,
 it knows which process to forward the incoming packet to
@@ -1270,7 +1348,7 @@ If it is already taken,
 then the operating system returns an error.
 Ports are distributed on a first-come, first-served basis.
 To claim port numbers below 1024,
-processes need a special privilege, though.
+processes need a [special privilege](https://en.wikipedia.org/wiki/Superuser), though.
 Which port to claim as a receiving process is handled by convention.
 Each [application layer](#application-layer) protocol
 defines one or several default ports to receive traffic on.
@@ -1279,44 +1357,40 @@ Wikipedia has an extensive [list of established port numbers](https://en.wikiped
 <figure markdown="block">
 {% include_relative generated/operating-system.embedded.svg %}
 <figcaption markdown="span">
-An application process registers the port 25 at the operating system and then receives a packet on this port.
+An application process registers the [port 80](#hypertext-transfer-protocol) at the operating system and then receives a [packet](#packet-switching) on this port.
 </figcaption>
 </figure>
 
 
 #### Client-server model
 
-A [server](https://en.wikipedia.org/wiki/Server_(computing)) is just a process
-registered with the operating system to handle incoming traffic on a certain port.
-It does this to provide a certain service,
+A [server](https://en.wikipedia.org/wiki/Server_(computing))
+is just a [process](#port-numbers)
+registered with the [operating system](#operating-systems)
+to handle incoming traffic on a certain [port](#port-numbers).
+It does this to provide a certain [service](https://en.wikipedia.org/wiki/Service_(systems_architecture)),
 which is then requested by so-called [clients](https://en.wikipedia.org/wiki/Client_(computing)).
 This is called the [client-server model](https://en.wikipedia.org/wiki/Client%E2%80%93server_model),
 which contrasts with a [peer-to-peer architecture](https://en.wikipedia.org/wiki/Peer-to-peer),
-where each node equally provides and consumes the service.
+where each [node](#nodes-and-links) equally provides and consumes the service.
 The communication is always initiated by the client.
 If the server makes a request itself,
 it becomes the client in that interaction.
-A server is typically accessed via a network like the Internet
+A server is typically accessed via a network, such as the Internet,
 but it can also run on the same machine as its client.
 In such a case, the client accesses the server via a so-called [loopback](https://en.wikipedia.org/wiki/Loopback),
-which is a virtual network interface where the destination is the same as the source.
+which is a [virtual network interface](https://en.wikipedia.org/wiki/Virtual_network_interface)
+where the destination is the same as the source.
 The current computer is often referred to as [localhost](https://en.wikipedia.org/wiki/Localhost).
 There is also a dedicated IP address for this purpose:
-`127.0.0.1` in the case of IPv4 and `::1` in the case of IPv6.
+`127.0.0.1` in the case of [IPv4](#internet-protocol-version-4)
+and `::1` in the case of [IPv6](#internet-protocol-version-6).
 
 <figure markdown="block">
 {% include_relative generated/client-server.embedded.svg %}
 <figcaption markdown="span" style="max-width: 345px;">
 The client requests a service provided by the server.
-The client's port number is dynamic, the server's static.
-</figcaption>
-</figure>
-
-<figure markdown="block">
-{% include_relative generated/client-server-simplified.embedded.svg %}
-<figcaption markdown="span" style="max-width: 420px;">
-Instead of drawing two arrows, I will only draw one from now on,
-namely from the client initiating the communication to the server.
+The client's [port number](#port-numbers) is dynamic, the server's static.
 </figcaption>
 </figure>
 
@@ -1325,37 +1399,39 @@ namely from the client initiating the communication to the server.
 Transmission Control Protocol (TCP)
 </summary>
 
-The problem with packet-switched networks, such as the Internet, is
-that packets can get lost or arrive out of order with an arbitrary delay.
+The problem with [packet-switched networks](#packet-switching), such as the [Internet](#internet-layers), is
+that packets can get lost or [arrive out of order](#out-of-order-delivery) with an [arbitrary delay](#network-latency).
 However, it is desirable for many applications
 that what the receiver receives is exactly what the sender sent.
 So how can we get reliable, in-order transfer of data over an unreliable network?
 This is achieved by the [Transmission Control Protocol (TCP)](https://en.wikipedia.org/wiki/Transmission_Control_Protocol),
 which brings the [concept of a connection](https://en.wikipedia.org/wiki/Connection-oriented_communication)
-from circuit-switched networks to packet-switched networks.
+from [circuit-switched networks](#circuit-switching) to packet-switched networks.
 But unlike connections in circuit-switched networks,
 TCP connections are handled by the communication endpoints
 without the involvement of the routers in between.
+
 In order to provide reliable data transfer,
-both the sending and the receiving process temporarily store
-outgoing and incoming packets in [buffers](https://en.wikipedia.org/wiki/Data_buffer).
+both the sending and the receiving [process](#port-numbers) temporarily store
+outgoing and incoming packets in a [buffer](https://en.wikipedia.org/wiki/Data_buffer).
 In each direction of communication,
-the packets are enumerated with the so-called sequence number.
+the packets are enumerated with a so-called [sequence number](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure).
 For each packet that is being transferred,
-its sequence number is encoded in the [TCP header](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure).
+its [32-bit](#number-encoding) sequence number is encoded in the [TCP header](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure).
 This allows the recipient to reorder incoming packets which arrived out of order.
 By including the sequence number
-until which they have successfully received all packets from the other party
+up to which they have successfully received all packets from the other party
 in the TCP header as well,
 each party lets the other party know
-that it can remove those packets from its buffer.
-Packets whose receipts are not acknowledged in this way are retransmitted by the sending party.
-TCP headers also include a [checksum](https://en.wikipedia.org/wiki/Checksum) to detect transmission errors.
+that it can remove earlier packets from its buffer.
+Packets whose receipt is not acknowledged in this way are retransmitted by the sender.
+
+TCP headers also include a [checksum](https://en.wikipedia.org/wiki/Checksum) to detect [transmission errors](#data-corruption).
 On top of that,
 TCP allows each party to specify
 how many packets beyond the last acknowledged sequence number they are willing to receive.
-This is known as [flow control](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#Flow_control),
-and it ensures that the sender does not overwhelm the receiver.
+This mechanism, known as [flow control](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#Flow_control),
+ensures that the sender does not overwhelm the receiver.
 Last but not least,
 the sender slows down its sending rate
 when too many packets are lost
@@ -1372,18 +1448,21 @@ IP address spoofing
 In all the protocols we have discussed so far,
 nothing ensures the authenticity of the transmitted information.
 For example, an attacker can fake their identity
-by encoding a different source address into the header of a packet.
+by encoding a different [source address](#source-and-destination-addresses)
+into the [header of a packet](#packet-switching).
 By posing as someone else,
 the attacker might gain access to a system
 that they didn't have before.
 This is known as a [spoofing attack](https://en.wikipedia.org/wiki/Spoofing_attack).
-On the link layer, it's called [MAC address spoofing](https://en.wikipedia.org/wiki/MAC_spoofing),
-and on the network layer, it's called [IP address spoofing](https://en.wikipedia.org/wiki/IP_address_spoofing).
+On the [link layer](#link-layer),
+it's called [MAC address spoofing](https://en.wikipedia.org/wiki/MAC_spoofing),
+and on the [network layer](#network-layer),
+it's called [IP address spoofing](https://en.wikipedia.org/wiki/IP_address_spoofing).
 
-Since a router connects different networks,
+Since a [router](#hubs-switches-and-routers) connects different networks,
 it can block packets that come from one network
 but have a source address from a different network.
-For packets coming from the outside but claim to be from the local network,
+For packets coming from the outside but claim to be from the [local network](https://en.wikipedia.org/wiki/Local_area_network),
 this is referred to as [ingress filtering](https://en.wikipedia.org/wiki/Ingress_filtering).
 Ingress filtering protects internal machines from external attackers.
 For outgoing packets that do not have a source address from the local network,
@@ -1391,27 +1470,27 @@ the term is [egress filtering](https://en.wikipedia.org/wiki/Egress_filtering).
 Egress filtering protects external machines from internal attackers.
 As such, the administrator of the local network has fewer incentives to implement this.
 
-The reason why we're discussing this under the transport layer and not earlier is
-that TCP makes the spoofing of IP addresses much more difficult.
+The reason why we're discussing this under the [transport layer](#transport-layer) and not earlier is
+that [TCP](#transmission-control-protocol) makes the spoofing of [IP addresses](#internet-protocol-version-4) much more difficult.
 The problem with encoding a wrong source address is
-that the recipient will send its response to that wrong address.
+that the recipient sends its responses to that wrong address.
 This means that unless an attacker also compromised a router close to the recipient,
 they won't receive any of the response packets.
 Therefore, the interaction needs to be completely predictable for the attack to succeed.
 Before any actual data can be sent,
 TCP first [establishes a connection](https://en.wikipedia.org/wiki/Transmission_Control_Protocol#Connection_establishment)
 by exchanging a few TCP packets without a payload.
-As we encountered [earlier](#communication-channel),
+As mentioned [earlier](#communication-channel),
 such preliminary communication in preparation for the actual communication is called a [handshake](https://en.wikipedia.org/wiki/Handshaking).
 In a TCP handshake,
-both parties choose the initial sequence number for their outgoing packets at random.
-Since the sequence number is a 32-bit integer,
+both parties choose the initial [sequence number](#transmission-control-protocol) for their outgoing packets at random.
+As the sequence number consists of [32 bits](#number-encoding),
 which results in more than four billion possibilities,
 an attacker who doesn't see the responses from the victim
 is very unlikely to guess the correct sequence number.
 Thus, none of the victim's response packets will be properly acknowledged,
 which leads to a failed connection on the transport layer
-before the program on the application layer
+before the program on the [application layer](#application-layer)
 gets a chance to perform what the attacker wanted.
 
 </details>
@@ -1421,19 +1500,22 @@ gets a chance to perform what the attacker wanted.
 User Datagram Protocol (UDP)
 </summary>
 
-There is a second important protocol on the transport layer,
-which I quickly want to mention for the sake of completeness:
+There is a second important protocol on the [transport layer](#transport-layer),
+which I want to mention for the sake of completeness:
 the [User Datagram Protocol (UDP)](https://en.wikipedia.org/wiki/User_Datagram_Protocol).
-UDP provides connectionless and thus unreliable communication between processes,
-encoding only the source and destination port numbers together with a length field and a checksum
+UDP provides connectionless and thus unreliable communication between [processes](#port-numbers),
+encoding only the source and destination [port numbers](#port-numbers) together with a length field and a checksum
 in [its header](https://en.wikipedia.org/wiki/User_Datagram_Protocol#UDP_datagram_structure).
-It provides none of the other features of TCP,
+It provides none of the other features of [TCP](#transmission-control-protocol),
 thereby prioritizing fast delivery over reliability.
 This is useful for streaming real-time data, such as a phone or video call, over the Internet.
-While the quality of the call deteriorates if too many packets are lost or delayed,
+While the quality of the call deteriorates when too many packets are [lost](#data-corruption) or [delayed](#network-latency),
 there's no point in insisting on having them delivered as they cannot be played back later.
-As there is no connection setup and thus no need for a handshake,
-UDP can also be used to broadcast information to all devices in the same local network.
+As there is no connection setup and consequently no need for a handshake,
+UDP can also be used to [broadcast](#broadcasting-and-information-security) information to all devices in the same local network.
+Protocols based on UDP, such as [DNS](#domain-name-system),
+are often vulnerable to [IP address spoofing](#ip-address-spoofing),
+which makes [amplification attacks](#amplification-attacks) possible.
 
 </details>
 
@@ -1442,14 +1524,14 @@ UDP can also be used to broadcast information to all devices in the same local n
 Network address translation (NAT)
 </summary>
 
-In an effort to conserve IPv4 addresses
-in order to alleviate the above-mentioned address space exhaustion,
-all devices in a local network commonly share the same source address
+In an effort to conserve [IPv4 addresses](#internet-protocol-version-4)
+in order to alleviate the above-mentioned [address space exhaustion](#internet-protocol-version-4),
+all devices in a local network commonly share the same [source address](#source-and-destination-addresses)
 when communicating with other devices over the Internet.
 This is accomplished by requiring that all communication is initiated by devices in the local network
-and by having the router engage in a technique known as
+and by having the [router](#hubs-switches-and-routers) engage in a technique known as
 [network address translation (NAT)](https://en.wikipedia.org/wiki/Network_address_translation).
-The basic idea is that the router maintains a mapping from the internally used IP address and port number
+The basic idea is that the router maintains a mapping from the internally used IP address and [port number](#port-numbers)
 to a port number it uses externally.
 
 <figure markdown="block">
@@ -1458,7 +1540,7 @@ to a port number it uses externally.
 |:-:|:-:|:-:
 | 192.168.1.2 | 58'237 | 49'391
 | 192.168.1.2 | 51'925 | 62'479
-| 192.168.1.4 | 54'296 | 53'154
+| 192.168.1.4 | 64'296 | 53'154
 | … | … | …
 {:.table-with-vertical-border-after-column-2}
 
@@ -1469,17 +1551,17 @@ A translation table with some sample data.
 
 For each outgoing packet,
 the router checks whether it already has a mapping for the given IP address and source port.
-If not, it creates a new mapping to a port number it has not yet used in its external communication.
+If not, it creates a new mapping to a port number it has not recently used in its external communication.
 The router then rewrites the headers of the outgoing packet
-by replacing the internal IP address with its own on the network layer
-and the internal port with the mapped external port on the transport layer.
+by replacing the internal IP address with its own on the [network layer](#network-layer)
+and the internal port with the mapped external port on the [transport layer](#transport-layer).
 For each incoming packet,
-the router looks up the internal address and port in its translation table.
-If found, it replaces the destination address and port of the packet
-and forwards it to the corresponding device in the local network.
+the router looks up the packet's destination port number in its translation table.
+If found, it replaces the destination address and port of the packet with the found internal values
+and forwards the packet to the corresponding device in the local network.
 If no such entry exists, it simply drops the incoming packet.
-What makes the technique a bit complicated in practice,
-is that the router also has to replace the checksums on the transport layer
+What makes the technique a bit complicated in practice
+is that the router also has to recompute all the checksums on the transport layer
 and handle potential [fragmentation](#maximum-transmission-unit) on the network layer.
 
 From a security perspective, network address translation has the desirable side effect
@@ -1493,7 +1575,7 @@ this principle no longer holds nowadays, unfortunately.
 If you still want to host a server on such a network,
 you need to configure your router to forward all incoming traffic on a certain port to that machine.
 This is known as [port forwarding](https://en.wikipedia.org/wiki/Port_forwarding).
-The loss of end-to-end connectivity is also a problem for peer-to-peer applications,
+The loss of end-to-end connectivity is also a problem for [peer-to-peer applications](https://en.wikipedia.org/wiki/Peer-to-peer),
 which need to [circumvent NAT](https://en.wikipedia.org/wiki/NAT_traversal)
 by [punching a hole](https://en.wikipedia.org/wiki/Hole_punching_(networking))
 through its firewall or rely on an intermediary server to relay all communication.
@@ -1504,7 +1586,10 @@ Two remarks on the values used in the example translation table above:
   As a consequence, your network settings might look quite similar to [mine](#dynamic-host-configuration-protocol).
 - [Clients](#client-server-model) can use any port number they like as their source port.
   If this wasn't the case, network address translation wouldn't work.
-  I've chosen the values above from the range that IANA suggests for such [ephemeral ports](https://en.wikipedia.org/wiki/Ephemeral_port).
+  I've chosen the values above from the range
+  that [IANA](https://en.wikipedia.org/wiki/Internet_Assigned_Numbers_Authority) suggests
+  for such [ephemeral ports](https://en.wikipedia.org/wiki/Ephemeral_port),
+  namely 49'152 to 65'535.
 
 </details>
 
@@ -1514,8 +1599,8 @@ Server on your personal computer
 </summary>
 
 I said [above](#client-server-model) that
-a server is just a process registered with the operating system
-to handle incoming traffic on a certain port.
+a server is just a process registered with the [operating system](#operating-systems)
+to handle incoming traffic on a certain [port](#port-numbers).
 In particular, no special hardware is required;
 you can easily run a server on your personal computer.
 In practice, servers run on hardware optimized for their respective task, of course.
@@ -1540,24 +1625,24 @@ why running a server on your personal computer is not ideal:
   have experience in [balancing increased load](https://en.wikipedia.org/wiki/Load_balancing_(computing))
   across several machines.
 - **Administration**: Keeping a service secure and available requires a lot of time and expertise.
-  While this can be a fun and at times frustrating side project,
+  While this can be an enjoyable and at times frustrating side project,
   better leave the monitoring and maintenance of your services to experts.
 - **Dynamic addresses**: Once you set up port forwarding on your router
   in order to circumvent [network address translation](#network-address-translation),
-  you still face the problem that your computer gets a dynamic IP address from the router
+  you still face the problems that your computer gets a dynamic [IP address](#internet-protocol-version-4) from the router
   and that the router typically gets a dynamic IP address from your Internet service provider
   (see [DHCP](#dynamic-host-configuration-protocol)).
   In the local network, you can configure your router
-  to always assign the same IP address to your computer based on its MAC address.
+  to assign always the same IP address to your computer based on its [MAC address](#media-access-control-address).
   As far as your public IP address is concerned,
-  your ISP might offer a static address at a premium.
+  your [ISP](https://en.wikipedia.org/wiki/Internet_service_provider) might offer a static address at a premium.
   Otherwise, you'd have to use [Dynamic DNS](https://en.wikipedia.org/wiki/Dynamic_DNS).
 
 In conclusion, running a production server on your ordinary computer is possible but not recommended.
 However, software engineers often run a development server locally on their machine,
 which they then access via the above-mentioned [loopback address](#client-server-model) from the same machine.
 This allows them to [test changes locally](https://en.wikipedia.org/wiki/Deployment_environment)
-before they deploy a new version of their software in the [cloud](https://en.wikipedia.org/wiki/Cloud_computing).
+before they deploy a new version of their software.
 
 </details>
 
@@ -1575,13 +1660,12 @@ and a vulnerability in a particular application.
 Having multiple layers of security controls is known as
 [defense in depth](https://en.wikipedia.org/wiki/Defense_in_depth_(computing)).
 Depending on the firewall and the configured rules,
-packets are inspected and filtered on the network, transport, or application layer.
+[packets](#packet-switching) are inspected and filtered on the [network](#network-layer), [transport](#transport-layer), or [application layer](#application-layer).
 If the firewall rules are imposed by someone else,
 such as a network administrator or the government,
 users might resort to [tunneling](https://en.wikipedia.org/wiki/Tunneling_protocol#Circumventing_firewall_policy)
 their traffic via an approved protocol.
-
-{% include image.md source="firewall-settings.png" caption="The firewall tab in the security and privacy preferences of macOS. Make sure that you have this setting enabled!" themed="true" image-max-width="750" %}
+Make sure you have the firewall enabled in the network settings of your operating system.
 
 </details>
 
@@ -1590,18 +1674,18 @@ their traffic via an approved protocol.
 
 All the communication we have seen so far is neither authenticated nor encrypted.
 This means that any router can read and alter the messages that pass through it.
-Since the network determines the route of the packets rather than you as a sender,
+Since the network determines the [route](#signal-routing) of the [packets](#packet-switching) rather than you as a sender,
 you have no control over which companies and nations are involved in delivering them.
 The lack of confidentiality is especially problematic
-when using the Wi-Fi in a public space,
+when using the [Wi-Fi](https://en.wikipedia.org/wiki/Wi-Fi) in a public space,
 such as a restaurant or an airport,
 because your device simply connects to the [wireless access point](https://en.wikipedia.org/wiki/Wireless_access_point)
 of a [given network](https://en.wikipedia.org/wiki/Service_set_(802.11_network)#SSID) with the best signal.
 Since your device has no way to authenticate the network,
-anyone can impersonate the network
+anyone [who knows the Wi-Fi password](#wi-fi-protected-access) can impersonate the network
 and then inspect and modify your traffic
 by setting up a fake access point.
-This is known as an [evil twin attack](https://en.wikipedia.org/wiki/Evil_twin_%28wireless_networks%29),
+This is known as an [evil twin attack](https://en.wikipedia.org/wiki/Evil_twin_(wireless_networks)),
 which also affects [mobile phone networks](https://www.youtube.com/watch?v=fQSu9cBaojc).
 As a general principle, you should never trust the [network layer](#network-layer).
 
@@ -1623,22 +1707,26 @@ SSL 2.0 and 3.0 as well as TLS 1.0 and 1.1 have been
 over time due to security weaknesses
 and should no longer be used.
 While it is beyond the scope of this article
-to explain how the cryptography used in TLS works,
+to explain how the [cryptography](https://en.wikipedia.org/wiki/Cryptography) used in TLS works,
 this is what it provides:
+
+{:#party-authentication}
 - **Party authentication**: The identity of the communicating parties can be authenticated
   using [public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography).
   While TLS supports the authentication of both the client and the server,
   usually only the identity of the server is verified.
-  To this end, the server sends a signed [public-key certificate](https://en.wikipedia.org/wiki/Public_key_certificate)
+  To this end, the server sends a [signed](#digital-signatures) [public-key certificate](https://en.wikipedia.org/wiki/Public_key_certificate)
   to the client during the [TLS handshake](https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_handshake).
-  The client then verifies whether the signature was issued by an organization it trusts
-  (see the following two boxes for more information on this).
+  The client then verifies whether the signature was issued by [an organization it trusts](#public-key-infrastructure).
+  (You find more information on this in [these](#digital-signatures) [boxes](#public-key-infrastructure).)
   This allows the client to be fairly confident that it connected to the right server
   without the communication being intercepted by a
   [man in the middle (MITM)](https://en.wikipedia.org/wiki/Man-in-the-middle_attack).
   While the client could also present a public-key certificate,
   the client is more commonly authenticated on the [application layer](#application-layer),
-  for example with a username and a password.
+  for example with [a username and a password](/email/#password-based-authentication-mechanisms).
+
+{:#content-confidentiality}
 - **Content confidentiality**: The content of the conversation is
   [encrypted](https://en.wikipedia.org/wiki/Encryption) in transit with
   [symmetric-key cryptography](https://en.wikipedia.org/wiki/Symmetric-key_algorithm).
@@ -1649,35 +1737,116 @@ this is what it provides:
   a lot of [metadata](https://en.wikipedia.org/wiki/Metadata) is revealed
   to anyone who observes the communication between the two parties.
   An eavesdropper [learns that](https://security.stackexchange.com/a/4418/228462)
-  - a TLS connection was established between the two IP addresses,
+  - a TLS connection was established between the two [IP addresses](#internet-protocol-version-4),
   - the time and duration of the connection, which leaks a lot,
     given that a response often triggers follow-up connections,
   - the rough amount of data that was transferred in each direction,
-  - and the [name of the server](https://security.stackexchange.com/a/7706/228462)
-    because the server sends its certificate in plaintext to the client.
-    Additionally, the client likely did an unencrypted [DNS query](#domain-name-system) beforehand;
-    the attacker can perform a [reverse DNS lookup](https://en.wikipedia.org/wiki/Reverse_DNS_lookup)
-    of the server's IP address;
-    and the client might [indicate the desired host name](https://en.wikipedia.org/wiki/Server_Name_Indication)
+  - and likely the [name of the server](https://security.stackexchange.com/a/7706/228462).
+    Before TLS 1.3, the server sends its certificate to the client in plaintext.
+    Even when TLS 1.3 is being used, the client [probably sent](#dns-stub-resolvers) an unencrypted [DNS query](#domain-name-system) beforehand.
+    Moreover, the eavesdropper can make a [reverse DNS lookup](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) of the server's IP address.
+    And last but not least, the client typically [indicates the desired host name](#wireshark-sni)
     to the server so that the server knows which certificate to send back.
+    As of 2025, [Encrypted Client Hello (ECH)](https://datatracker.ietf.org/doc/draft-ietf-tls-esni/) is being finalized
+    to [encrypt the sensitive parts](https://blog.cloudflare.com/encrypted-client-hello/) of the client's first message, including the server name,
+    if the server publishes an [encryption public key](#public-key-encryption) in the `ech` parameter
+    of an [`SVCB` or `HTTPS` DNS record](#svcb-and-https-resource-records).
+    Have a look at [this example](#tool-lookup-dns-records&domainName=cloudflare-ech.com&recordType=HTTPS).
   {:.compact}
+
+{:#message-authentication}
 - **Message authentication**: Each transmitted message is [authenticated](https://en.wikipedia.org/wiki/Message_authentication)
   with a so-called [message authentication code](https://en.wikipedia.org/wiki/Message_authentication_code).
   This allows each party to verify that all messages were sent by the other party
   and that the messages were not modified in transit.
-  Encryption alone usually does not guarantee
+  (Encryption alone usually does not guarantee
   the [integrity](https://en.wikipedia.org/wiki/Data_integrity)
   of the encrypted data because encryption generally does not protect against
-  [malleability](https://en.wikipedia.org/wiki/Malleability_(cryptography)).
+  [malleability](https://en.wikipedia.org/wiki/Malleability_(cryptography)).)
   What TLS [does not provide](https://security.stackexchange.com/questions/103645/does-ssl-tls-provide-non-repudiation-service),
   however, is [non-repudiation](https://en.wikipedia.org/wiki/Non-repudiation).
   Or put another way: A party can plausibly dispute
-  that it communicated the statements inside a TLS connection.
+  that it made the statements inside a TLS connection.
   This is because message authentication codes are [symmetric](https://en.wikipedia.org/wiki/Message_authentication_code#Security),
   which means that whoever can verify them can also generate them.
 
 Since TLS requires reliable communication,
-it uses [TCP](#transmission-control-protocol) on the [transport layer](#transport-layer).
+it uses [TCP](#transmission-control-protocol) on the [transport layer](#transport-layer)
+– or is handled by [QUIC](#quic) over [UDP](#user-datagram-protocol).
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="quic">
+QUIC
+</summary>
+
+[QUIC](https://en.wikipedia.org/wiki/QUIC), which is pronounced as "quick",
+is a modern alternative to using [TLS](#transport-layer-security) over [TCP](#transmission-control-protocol)
+with the [following features among others](https://en.wikipedia.org/wiki/QUIC#Characteristics):
+- **Combined [handshake](https://en.wikipedia.org/wiki/Handshake_(computing))**:
+  When running TLS over TCP,
+  it takes one [round trip](#network-performance) to establish the TCP connection
+  and another round trip to establish the TLS 1.3 connection inside the TCP connection.
+  (A full TLS 1.2 handshake takes two round trips.)
+  QUIC combines the two [handshakes](#communication-channel)
+  by carrying the bytes of the TLS 1.3 handshake in its first two packets.
+  [TLS 1.3](https://en.wikipedia.org/wiki/Transport_Layer_Security#TLS_1.3)
+  was specified before QUIC in [RFC 8446](https://datatracker.ietf.org/doc/html/rfc8446)
+  and could be used by the standardized version of QUIC as is.
+  TLS libraries, on the other hand, had to be adapted to expose the information required by QUIC.
+  TLS 1.3 is an integral part of QUIC, i.e. QUIC cannot be used without it.
+- **Proper [multiplexing](https://en.wikipedia.org/wiki/Multiplexing)**:
+  While some protocols which run over TCP, such as [HTTP/2](https://en.wikipedia.org/wiki/HTTP/2)
+  (the second major version of [HTTP](#hypertext-transfer-protocol)),
+  allow several documents to be sent in parallel by interleaving them,
+  a missing TCP packet in one document blocks the loading of all the documents.
+  This is known as [head-of-line blocking](https://en.wikipedia.org/wiki/Head-of-line_blocking).
+  QUIC solves this problem by using [UDP](#user-datagram-protocol) on the [transport layer](#transport-layer)
+  and handling retransmission of lost packets for each stream within the same QUIC connection independently.
+  The advantage over opening several connections to the same server is that the connection setup overhead
+  (the round trip, [counterparty authentication](#transport-layer-security),
+  and [key agreement](https://en.wikipedia.org/wiki/Key-agreement_protocol))
+  can be shared by several streams,
+  while also allowing some streams to be prioritized over others.
+  To make this possible, QUIC encrypts each packet individually.
+- **Connection migration**:
+  Unlike TCP, which identifies a connection by the local and remote
+  [IP addresses](#internet-protocol-version-4) and [port numbers](#port-numbers),
+  QUIC identifies a connection typically by a connection ID in the packet header.
+  This allows QUIC connections to survive [network](https://en.wikipedia.org/wiki/Local_area_network) changes,
+  such as switching from a [Wi-Fi](https://en.wikipedia.org/wiki/Wireless_LAN) to a [mobile hotspot](https://en.wikipedia.org/wiki/Tethering),
+  whereas TCP connections [time out](#connection-loss) and must be re-established by each client,
+  causing interruptions and overhead.
+
+QUIC was originally developed at [Google](https://en.wikipedia.org/wiki/Google) in 2012
+and then standardized by the [IETF](#request-for-comments) in May 2021
+in [RFC 8999](https://datatracker.ietf.org/doc/html/rfc8999),
+[RFC 9000](https://datatracker.ietf.org/doc/html/rfc9000),
+[RFC 9001](https://datatracker.ietf.org/doc/html/rfc9001),
+and [RFC 9002](https://datatracker.ietf.org/doc/html/rfc9002).
+Originally, QUIC was an acronym for Quick UDP Internet Connections.
+In the IETF standards, QUIC has become the proper name of the protocol.
+QUIC is the basis of [HTTP/3](https://en.wikipedia.org/wiki/HTTP/3)
+(the third major version of [HTTP](#hypertext-transfer-protocol))
+as specified in [RFC 9114](https://datatracker.ietf.org/doc/html/rfc9114)
+and [DNS over QUIC (DoQ)](#secure-dns-connections)
+as specified in [RFC 9250](https://datatracker.ietf.org/doc/html/rfc9250).
+HTTP/3 is supported by all major browsers and
+by [around 36% of all websites](https://w3techs.com/technologies/details/ce-http3).
+[Cloudflare](https://en.wikipedia.org/wiki/Cloudflare)
+(a large [content delivery network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network))
+serves [around 31% of its requests](https://radar.cloudflare.com/adoption-and-usage) over HTTP/3.
+
+While TLS is not mandatory for HTTP/2, browsers support HTTP/2 [only over TLS](https://caniuse.com/http2).
+Both HTTP/2 and HTTP/3 are served on [port](#port-numbers) 443.
+So how does a browser know whether a webserver supports HTTP/3 with all its advantages?
+A server can advertise the protocols it supports with a [special DNS record](#svcb-and-https-resource-records).
+When connecting to a webserver for the first time,
+a browser can check this record or start both an HTTP/2 and an HTTP/3 connection in parallel
+and abort the former when the latter succeeds.
+Alternatively, a webserver can indicate its support for HTTP/3 with the HTTP response header field
+[`Alt-Svc: h3=":443"`](https://datatracker.ietf.org/doc/html/rfc9114#section-3.1.1).
 
 </details>
 
@@ -1693,7 +1862,7 @@ Since digital information can be duplicated and appended without degradation,
 a [digital signature](https://en.wikipedia.org/wiki/Digital_signature)
 has to depend on the signed content.
 Handwritten signatures, on the other hand,
-are bound to the content simply by being on the same piece of paper.
+are bound to the content simply by being on the same piece of paper/material.
 
 Digital signature schemes consist of three
 [algorithms](https://en.wikipedia.org/wiki/Algorithm):
@@ -1706,7 +1875,7 @@ Digital signature schemes consist of three
   it has to be infeasible to derive the private key from the public key.
   This requires that [one-way functions](https://en.wikipedia.org/wiki/One-way_function),
   which are easy to compute but hard to invert, exist.
-  It is widely believed that this is the case
+  It is widely believed that this is the case,
   but we have [no proof](https://en.wikipedia.org/wiki/P_versus_NP_problem) for this yet.
   An example of such an asymmetric relationship is integer multiplication versus
   [integer factorization](https://en.wikipedia.org/wiki/Integer_factorization).
@@ -1722,11 +1891,18 @@ The public key can be derived from the private key, but not vice versa.
 
 - **Signing**: The signer then computes the signature for a given message
   using the private key generated in the previous step.
-  The signature is also just a number or a tuple of several numbers.
+  The signature is also just a number or a [tuple](https://en.wikipedia.org/wiki/Tuple) of several numbers.
   Since the computation of the signature depends on the private key,
   only the person who knows the private key can produce the signature.
-- **Verification**: Anyone who has the message, the signature, and the signer's public key
+- **Verifying**: Anyone who has the message, the signature, and the signer's public key
   can verify that the signature was generated by the person knowing the corresponding private key.
+
+<figure markdown="block">
+{% include_relative generated/digital-signature.embedded.svg %}
+<figcaption markdown="span">
+A visualization of what flows into and out from the signing and the verifying algorithms (in blue).
+</figcaption>
+</figure>
 
 As you can see from these algorithms,
 digital signatures rely on a different
@@ -1741,7 +1917,7 @@ Since the private key is not inherent to the signer
 but rather chosen by the signer,
 digital signatures require that
 the signer assumes responsibility for the signed statements.
-This brings us to the next topic: public-key infrastructure.
+This brings us to the next topic: [public-key infrastructure](#public-key-infrastructure).
 
 </details>
 
@@ -1773,8 +1949,7 @@ you can authenticate Bob over an untrusted network
 if Alice met Bob and confirms to you (and everyone else)
 that a specific public key indeed belongs to Bob.
 Whether Alice sends the signed statement with this content directly to you
-or whether Bob presents this signed statement during the conversation with him,
-does not matter.
+or whether Bob presents this signed statement during the conversation with him doesn't matter.
 Since you know the public key of Alice,
 you can verify that only she could produce the signature.
 In order to make the system scale better,
@@ -1791,7 +1966,7 @@ A widely adopted format for public-key certificates is
 which is also used in TLS.
 X.509 certificates are often displayed as follows:
 
-{% include image.md source="digital-certificate.png" caption="The public-key certificate of [Wikipedia](https://en.wikipedia.org/wiki/Main_Page) as displayed by Chrome on macOS." themed="true" image-max-width="750" %}
+{% include image.md source="digital-certificate.png" caption="The public-key certificate of [Wikipedia](https://en.wikipedia.org/wiki/Main_Page) as displayed by an older version of [Google Chrome](https://en.wikipedia.org/wiki/Google_Chrome) on [macOS](https://en.wikipedia.org/wiki/MacOS)." themed="true" image-max-width="750" %}
 
 There are two different paradigms for issuing public-key certificates:
 - **[Web of trust](https://en.wikipedia.org/wiki/Web_of_trust)**:
@@ -1815,14 +1990,14 @@ There are two different paradigms for issuing public-key certificates:
   An employer might replace or extend this list on corporate devices.
   These trusted third parties are called certification authorities (CAs).
   While users can add and remove CAs on their own devices,
-  they rarely do this – and I don't recommend to mess with this list either,
+  they rarely do this – and I also recommend against messing with this list,
   as badly informed changes can compromise the security of your system.
   Organizations and individuals pay one of these CAs to assert their identity.
   A preinstalled CA, also known as a [root CA](https://en.wikipedia.org/wiki/Root_certificate),
   can also delegate the authority to certify to other entities,
   which are called intermediate CAs.
   If you have a look at the top of the above screenshot,
-  then you see that this is exactly what happened:
+  you see that this is exactly what happened:
   The root CA *DigiCert High Assurance EV Root CA*
   delegated its authority with a signed certificate
   to the intermediate CA *DigiCert SHA2 High Assurance Server CA*,
@@ -1832,18 +2007,294 @@ There are two different paradigms for issuing public-key certificates:
   If we check the list of root CAs,
   we see that *DigiCert High Assurance EV Root CA* is indeed among them:
 
-{% include image.md source="root-certificates.png" caption="The list of root CAs as displayed by the preinstalled application [Keychain Access](https://support.apple.com/guide/keychain-access/welcome/mac) on macOS. In case you are wondering, this list contains 165 root CAs on my Mac." themed="true" image-max-width="750" caption-max-width="580" %}
+{% include image.md source="root-certificates.png" caption="The list of root CAs as displayed by the preinstalled application [Keychain Access](https://support.apple.com/guide/keychain-access/welcome/mac) on [macOS](https://en.wikipedia.org/wiki/MacOS). On my Mac, this list contains 143 trusted root CAs, including the one [shown above](#digital-certificate)." themed="true" image-max-width="750" caption-max-width="580" %}
 
-As [described above](#transport-layer-security),
+As described [above](#transport-layer-security),
 the server sends its certificate to the client during the TLS handshake.
 By also including the certificate of a potential intermediate CA,
 the client has all the information needed to authenticate the server.
-This means that CAs don't have to be reachable over the Internet,
+Therefore, CAs don't have to be reachable over the Internet,
 which is good for the security of their signing keys
-but also good for the reliability of the Internet.
+and for the reliability of the Internet.
 There is a lot more to public-key certificates,
 such as expiration and [revocation](https://en.wikipedia.org/wiki/Certificate_revocation_list),
 but these aspects are beyond the scope of this article.
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="public-key-encryption">
+Public-key encryption
+</summary>
+
+Another use case of [public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography)
+besides [digital signatures](#digital-signatures) is [encryption](https://en.wikipedia.org/wiki/Encryption).
+The private key and the public key are generated similarly [as before](#digital-signatures),
+but a different pair of algorithms (called encryption and decryption)
+allows anyone to transmit a message, which is called [plaintext](https://en.wikipedia.org/wiki/Plaintext) when it's not encrypted
+and [ciphertext](https://en.wikipedia.org/wiki/Ciphertext) when it is encrypted, to a recipient so that no one else can read it.
+I added this box just so that you're not confused when I use the term public key in the context of encryption.
+
+<figure markdown="block">
+{% include_relative generated/public-key-encryption.embedded.svg %}
+<figcaption markdown="span">
+How encryption transforms a plaintext into a ciphertext,
+which can be deciphered by the recipient, who has the corresponding private key.
+</figcaption>
+</figure>
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="wi-fi-protected-access">
+Wi-Fi Protected Access (WPA)
+</summary>
+
+[Wi-Fi Protected Access (WPA)](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access)
+is the name of three security certification programs by the [Wi-Fi Alliance](https://en.wikipedia.org/wiki/Wi-Fi_Alliance).
+Since each WPA generation maps to concrete standards, you can also think of them as three protocols.
+When you see a lock symbol next to a network's name in the Wi-Fi dropdown of your [operating system](#operating-systems),
+it means that the Wi-Fi network uses WPA.
+As of 2025, the vast majority of Wi-Fi networks use [WPA2](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#WPA2),
+which replaced [WPA](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#WPA) in 2004.
+In a wireless network, every device within reach of the sending device [receives the signal](#broadcasting-and-information-security)
+and simply ignores packets which aren't addressed to it.
+However, you can use a tool such as [Wireshark](https://en.wikipedia.org/wiki/Wireshark) to [capture all packets](#capturing-network-traffic)
+that your [network interface controller](https://en.wikipedia.org/wiki/Network_interface_controller) sees,
+even the ones which aren't addressed to you.
+While WPA2 encrypts your communication with the Wi-Fi router
+using a device- and session-specific [cryptographic key](https://en.wikipedia.org/wiki/Key_(cryptography)),
+anyone who knows the network's password and captured your WPA2 [handshake](#communication-channel) with the router can derive this key.
+Unless [Protected Management Frames (PMF)](https://en.wikipedia.org/wiki/IEEE_802.11w-2009) is being used,
+which is usually not the case in WPA2 networks,
+an attacker can often trigger another handshake by sending [deauthentication frames](https://en.wikipedia.org/wiki/Wi-Fi_deauthentication_attack).
+You must therefore always assume in your [threat model](https://en.wikipedia.org/wiki/Threat_model)
+that other devices on your Wi-Fi network can read your communication.
+
+[WPA3](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#WPA3), which was introduced in 2018,
+uses a [password-authenticated key exchange (PAKE)](https://en.wikipedia.org/wiki/Password-authenticated_key_agreement),
+whose key cannot be derived from a captured handshake
+even if the attacker knows or later learns the network's password.
+Additionally, PMF is required for WPA3.
+It also replaces the [Wi‑Fi Protected Setup (WPS)](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Setup)
+with the more secure [Device Provisioning Protocol (DPP)](https://www.netmaker.io/resources/device-provisioning-protocol-dpp)
+and supports [Opportunistic Wireless Encryption (OWE)](https://en.wikipedia.org/wiki/Opportunistic_Wireless_Encryption)
+for networks that aren't password-protected.
+Outside of enterprise networks, WPA3 isn't widely adopted yet.
+
+(When you click on "Advanced…" in the Wi-Fi settings of [macOS](https://en.wikipedia.org/wiki/MacOS), you see a list of known networks.
+On my computer, many of them are listed with the security type "WPA3 Personal", even the network I'm currently using.
+However, when I [alt-click on the Wi-Fi symbol](#guide-to-capturing-packets-on-macos) in the [menu bar](https://en.wikipedia.org/wiki/Menu_bar),
+it says "Security: WPA2 Personal", which is what's actually being used.
+I don't know why macOS says something else in the list of known networks.
+It might be that these networks advertise support for WPA3 but still allow WPA2 for compatibility.
+This just shifts the question, though, to why macOS isn't using the newer protocol
+when the router supports both in [transitional mode](https://en.wikipedia.org/wiki/Wi-Fi_Protected_Access#Dragonblood).)
+
+Neither WPA2 nor WPA3 for personal networks protects against an [evil twin attack](#security-layer)
+if the attacker knows the network's password.
+There are enterprise versions of these protocols, though,
+where [wireless access points](https://en.wikipedia.org/wiki/Wireless_access_point) can be authenticated with [certificates](#public-key-infrastructure).
+Moreover, an enhanced version of WPA3-Personal was introduced in 2020 under the name
+[SAE-PK](https://www.wi-fi.org/beacon/thomas-derham-nehru-bhandaru/wi-fi-certified-wpa3-december-2020-update-brings-new-0),
+which adds the [fingerprint](https://en.wikipedia.org/wiki/Public_key_fingerprint)
+of a persistent [public key](#digital-signatures) to a network's configuration
+and uses it to authenticate the wireless access point.
+
+Please note that WPA protects only the wireless link to and from your [router](#hubs-switches-and-routers) on the [link layer](#link-layer).
+The router decrypts WPA packets and can then inspect and alter their contents.
+WPA has nothing to do with the [security layer](#security-layer).
+This [information box](/#information-boxes) is here just to stress the importance of the security layer.
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="capturing-network-traffic">
+Capturing network traffic
+</summary>
+
+After learning about [how insecure most Wi-Fi networks still are](#wi-fi-protected-access),
+it's time to put theory into practice.
+As you will see in this box,
+it's fairly easy to record and analyze all the [packets](#packet-switching) that your computer sees on your Wi-Fi network.
+Before I show you step by step how to do it,
+you must be aware that unauthorized interception of third-party communications is prohibited in most jurisdictions
+as most states protect the [secrecy of correspondence](https://en.wikipedia.org/wiki/Secrecy_of_correspondence).
+I explain to you how do it only because seeing is believing.
+Capture traffic only from your own devices in networks that you operate or for which you have explicit permission to do so.
+In short: <span class="color-orange">Don't wiretap other people without their consent!</span>
+
+
+##### Guide to capturing packets:
+
+1. Download the [free and open-source](https://en.wikipedia.org/wiki/Free_and_open-source_software)
+   [packet analyzer](https://en.wikipedia.org/wiki/Packet_analyzer) [Wireshark](https://en.wikipedia.org/wiki/Wireshark)
+   from [this page](https://www.wireshark.org/download.html)
+   and follow [its installation instructions](https://www.wireshark.org/docs/wsug_html/#ChapterBuildInstall).
+2. Connect to the Wi-Fi network on which you want to capture the packets.
+3. Start Wireshark, open "Options" under the [menu "Capture"](https://www.wireshark.org/docs/wsug_html/#ChUseCaptureMenuSection),
+   and enable the ["Monitor Mode"](https://www.wireshark.org/docs/wsug_html/#ChCapCaptureOptions) in the column with this name
+   in the row of your Wi-Fi interface.
+   If it's in use, it's the only interface besides the [loopback interface](https://en.wikipedia.org/wiki/Loopback#Virtual_loopback_interface) with traffic.
+   (On [macOS](https://en.wikipedia.org/wiki/MacOS), this interface is typically called `en0`.)
+   Whether this allows you to capture packets on the network which aren't sent from your computer or to your computer
+   depends on the [network interface controller (NIC)](https://en.wikipedia.org/wiki/Network_interface_controller),
+   the [driver](https://en.wikipedia.org/wiki/Device_driver), and the [operating system](#operating-systems).
+   While the monitor mode is active, you might get disconnected from your Wi-Fi network.
+4. In the [“Capture Options” window](https://www.wireshark.org/docs/wsug_html/#ChCapCaptureOptions),
+   select the Wi-Fi interface and click on "Start" on the bottom right.
+5. If everything goes well, you should immediately see dozens of recorded packets in the upper half of the Wireshark window.
+   If nothing happens and you read "no packets" in the [status bar](https://www.wireshark.org/docs/wsug_html/#ChUseStatusbarSection) at the bottom,
+   follow the [next guide below](#guide-to-capturing-packets-on-macos) if you're using a [Mac](https://en.wikipedia.org/wiki/Mac_(computer))
+   or troubleshoot your issue with a [large language model (LLM)](https://en.wikipedia.org/wiki/Large_language_model) otherwise.
+   You can [stop capturing packets](https://www.wireshark.org/docs/wsug_html/#ChCapStopSection)
+   by clicking on the red square in the toolbar or on the corresponding item in the "Capture" menu.
+   If packets were captured, [continue here](#guide-to-analyzing-the-captured-packets).
+
+
+##### Guide to capturing packets on [macOS](https://en.wikipedia.org/wiki/MacOS) if the above didn't work: {#guide-to-capturing-packets-on-macos}
+
+1. On my [MacBook Pro](https://en.wikipedia.org/wiki/MacBook_Pro), Wireshark captures packets only when I disable the monitor mode.
+   You can test whether the monitor mode works at all by running `sudo tcpdump -I -i en0`{:.enable-click-to-copy}
+   in the [Terminal](https://en.wikipedia.org/wiki/Terminal_(macOS)).
+   ([`sudo`](https://en.wikipedia.org/wiki/Sudo) runs the [`tcpdump` command](https://www.tcpdump.org/manpages/tcpdump.1.html) with maximum permissions.
+   `-I` activates the monitor mode and `-i` determines the interface, namely `en0`.)
+   You stop capturing packets with [Control-C](https://en.wikipedia.org/wiki/Control-C).
+   If this doesn't capture any packets either, then the problem isn't with Wireshark's permissions or settings.
+2. Click on the Wi-Fi symbol in the [menu bar](https://en.wikipedia.org/wiki/Menu_bar) of macOS
+   while holding down the [option key (⌥)](https://en.wikipedia.org/wiki/Option_key).
+   In the second line of the [drop-down menu](https://en.wikipedia.org/wiki/Drop-down_list),
+   you see whether the name of your Wi-Fi interface is indeed `en0`.
+   Under the network you're currently connected to,
+   it should say "Security: [WPA2 Personal](#wi-fi-protected-access)" (or alternatively "Security: None").
+   If this is not the case, you cannot inspect the packets sent to and from other devices in your network.
+   Two lines below, you see [on which channel](https://en.wikipedia.org/wiki/List_of_WLAN_channels) your Wi-Fi operates.
+   In my case, it says "Channel: 6 (2.4 GHz, 20 MHz)".
+   Write down the channel number before the parentheses and the number before [MHz](https://en.wikipedia.org/wiki/Hertz) (in my case 6 and 20).
+3. Open the [Wireless Diagnostics](https://support.apple.com/guide/mac-help/use-wireless-diagnostics-mchlf4de377f/mac) app of macOS.
+   It's located at `/System/Library/CoreServices/Applications/`{:.enable-click-to-copy},
+   but it's easier to open through the extended Wi-Fi menu as explained in the previous point
+   or by using [Spotlight](https://en.wikipedia.org/wiki/Spotlight_(Apple)).
+   Ignore the [wizard/assistant](https://en.wikipedia.org/wiki/Wizard_(software)) of Wireless Diagnostics;
+   open the "Sniffer" under the "Window" menu of Wireless Diagnostics instead.
+4. Make sure that the channel number and the channel width match the numbers that you wrote down earlier.
+   (These numbers should actually match the channel of the device whose traffic you want to record.
+   As long as both devices are connected to the same [access point](https://en.wikipedia.org/wiki/Wireless_access_point), the channel is the same.
+   If you have a [mesh setup](https://en.wikipedia.org/wiki/Wireless_mesh_network)
+   with [Wi-Fi repeaters](https://en.wikipedia.org/wiki/Wireless_repeater),
+   make sure that both devices are connected to the same repeater.)
+5. Click "Start" in the "Sniffer" window of Wireless Diagnostics.
+   Once you're done capturing, click "Stop".
+   Please note that you lose Internet connectivity while your Wi-Fi controller is in monitoring mode.
+   (While the monitor mode is on, the Wi-Fi symbol in the menu bar changes to an eye.)
+   The captured packets are stored in a [packet capture (.pcap)](https://en.wikipedia.org/wiki/Pcap) file in `var/tmp`{:.enable-click-to-copy}.
+6. In the [Finder](https://en.wikipedia.org/wiki/Finder_(software)),
+   open "Go to Folder…" (⇧⌘G) under the "Go" menu and enter `var/tmp`{:.enable-click-to-copy}.
+   Open the `.pcap` file in Wireshark.
+   (Wireshark should be the default application if you simply double-click the file.)
+
+
+##### A few remarks on packet capturing with macOS: {#remarks-on-packet-capturing-with-macos}
+
+- If you're stuck in monitor mode even though you've finished capturing,
+  you might have to reboot your computer.
+  Monitor mode is not a persistent firmware flag that survives a reboot.
+  Before rebooting, [ChatGPT](https://en.wikipedia.org/wiki/ChatGPT) suggested the following,
+  but none of these suggestions worked for me:
+  - Turn your Wi-Fi off in the menu bar. Wait for a couple of seconds and then turn it on again.
+  - Make sure that your Wi-Fi interface is indeed called `en0` by running `networksetup -listallhardwareports`{:.enable-click-to-copy}
+    on your [command-line interface (CLI)](https://en.wikipedia.org/wiki/Command-line_interface).
+  - Toggle the power on your Wi-Fi interface with `networksetup -setairportpower en0 off`{:.enable-click-to-copy}
+    and then `networksetup -setairportpower en0 on`{:.enable-click-to-copy}.
+  - Drop the interface with [ifconfig](https://en.wikipedia.org/wiki/Ifconfig):
+    `sudo ifconfig en0 down`{:.enable-click-to-copy} and then `sudo ifconfig en0 up`{:.enable-click-to-copy}.
+  {:.compact}
+- Once you have activated the monitor mode with the Sniffer tool of Wireless Diagnostics,
+  you can capture the packets with Wireshark as well.
+  This allows you to see the packets as they are being received,
+  which is much better for demonstrations.
+- The `.pcap` files of the Sniffer tool in `/var/tmp`{:.enable-click-to-copy} persist across reboots.
+  Since they may contain sensitive traffic,
+  delete them manually as soon as you're done analyzing them.
+- I haven't found a way to activate the monitor mode from the command line.
+  [Apple](https://en.wikipedia.org/wiki/Apple_Inc.) used to ship an `airport` utility, which made this possible,
+  but since around [macOS Sonoma 14.4](https://en.wikipedia.org/wiki/MacOS_Sonoma) this is no longer supported.
+
+
+##### Guide to analyzing the captured packets:
+
+1. If your Wi-Fi network is password-protected (using [WPA2 Personal](#wi-fi-protected-access)),
+   open the [preferences of Wireshark](https://www.wireshark.org/docs/wsug_html/#ChCustPreferencesSection).
+   Expand the "Protocols" on the left side and click on "IEEE 802.11" in the long list of supported protocols.
+   Make sure that decryption is enabled.
+   Then click on "Edit…" next to "Decryption keys".
+   Create a new entry with the plus at the bottom, select `wpa-pwd` as the key type, and set the key to `password:name`,
+   using the password and the [name](https://en.wikipedia.org/wiki/Service_set_(802.11_network)#Service_set_identifier) of your Wi-Fi network.
+   Then click "OK".
+2. In the [text field between the toolbar and the captured packets](https://www.wireshark.org/docs/wsug_html/#ChUseFilterToolbarSection),
+   enter `eapol`{:.enable-click-to-copy} to filter for the
+   [Extensible Authentication Protocol (EAP)](https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol)
+   [over LAN (EAPOL)](https://en.wikipedia.org/wiki/IEEE_802.1X).
+   Make sure that you see four packets (numbered "Message 1" to 4) from the device whose packets you want to analyze
+   if your Wi-Fi network is password-protected.
+   As mentioned [earlier](#wi-fi-protected-access), the device- and session-specific encryption key can be derived only
+   if the four [handshake](#communication-channel) packets were captured when the device joined the network
+   (and if you know the network's password, which we told Wireshark in the previous step).
+   If you don't see four EAPOL packets, [start another capture](#guide-to-capturing-packets)
+   and ensure that the device of interest joins the network during the capture.
+   (Just disabling Wi-Fi for a couple of seconds on the device might not be enough.
+   Ideally, you join another network before re-connecting to the network on which you capture the packets.)
+3. You can filter for all the packets sent from and to your other device
+   by entering `wlan.addr == aa:bb:cc:dd:ee:ff`{:.enable-click-to-copy}
+   using the (potentially network-specific) [MAC address](#media-access-control-address) of the device.
+   If you cannot determine its MAC address from the packets that you see in Wireshark,
+   look up its MAC address in the Wi-Fi settings of the device.
+   (You can also filter for an [IPv4 address](#internet-protocol-version-4) with `ip.addr == …`{:.enable-click-to-copy}
+   and for an [IPv6 address](#internet-protocol-version-6) with `ipv6.addr == …`{:.enable-click-to-copy}.
+   The problem with this is that the device might use both IPv4 and IPv6,
+   and by filtering for one, you lose the other (unless you combine them with `||`, i.e. `ip.addr == … || ipv6.addr == …`{:.enable-click-to-copy}).
+   To make things worse, a device typically has several IPv6 addresses.)
+4. The amount of packets that you see is likely still overwhelming.
+   You can combine several filters with `&&` to narrow the packets down to what you're interested in (even during live capture).
+   Here are some examples [for filtering](https://www.wireshark.org/docs/wsug_html/#ChWorkDisplayFilterSection):
+   - **Filter for a protocol**:
+     [DHCP](#dynamic-host-configuration-protocol) with `dhcp`{:.enable-click-to-copy},
+     [HTTP](#hypertext-transfer-protocol) with `http`{:.enable-click-to-copy},
+     [DNS](#domain-name-system) with `dns`{:.enable-click-to-copy},
+     [TLS](#transport-layer-security) with `tls`{:.enable-click-to-copy},
+     [QUIC](#quic) with `quic`{:.enable-click-to-copy},
+     [ARP](#address-resolution-protocol) with `arp`{:.enable-click-to-copy}, etc.
+   - **Hide certain protocols**:
+     Hide all [802.11 management and control frames](https://en.wikipedia.org/wiki/802.11_frame_types) with `wlan.fc.type >= 2`{:.enable-click-to-copy},
+     filter for traffic on the [network layer](#network-layer) with `(ip || ipv6)`{:.enable-click-to-copy},
+     exclude [Multicast DNS (mDNS)](https://en.wikipedia.org/wiki/Multicast_DNS) for `.local` domain names with `!mdns`{:.enable-click-to-copy}, and so on.
+   - **Filter for the presence of a field**:
+     `tls.handshake.extensions_server_name`{:.enable-click-to-copy} for all initial [TLS packets](#transport-layer-security)
+     where the "Client Hello" uses [server name indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication).
+     (This includes initial [QUIC packets](#quic); but unlike ordinary TLS, you don't see the server name in the "Info" column.
+     You have to select the packet and then expand "QUIC IETF" > "CRYPTO" > "TLSv1.3 Record Layer: […]" >
+     "Handshake Protocol: Client Hello" > "Extension: server_name" in the lower left quadrant.)
+   - **Filter for the value in a field**:
+     `dns.flags.response == 0`{:.enable-click-to-copy} for DNS queries and `dns.flags.response == 1`{:.enable-click-to-copy} for replies.
+5. When you select a packet, you can inspect its content in the lower left quadrant of the Wireshark window.
+   You can expand the various [Internet layers](#internet-layers) to see the corresponding header fields
+   and the actual payload on the [application layer](#application-layer).
+   When you right-click on a specific field,
+   you can add the field as a column in the packet table above by clicking on "Apply as Column".
+   You can also filter the packets for this value in this field
+   by choosing an option under "Apply as Filter" in the [context menu](https://en.wikipedia.org/wiki/Context_menu).
+
+
+##### Screenshots of examples
+
+The following screenshots depict network traffic from my [iPad](https://en.wikipedia.org/wiki/IPad) on my private Wi-Fi
+that I captured using my [MacBook Pro](https://en.wikipedia.org/wiki/MacBook_Pro).
+
+{% include image.md source="wireshark-dns.png" caption="When filtering the packets for the [DNS protocol](#domain-name-system), we see queries for various [record types](#resource-record-types) of [ef1p.com](https://ef1p.com/). The queries are [sent to the router](#dns-stub-resolvers) with the [IPv4 address](#internet-protocol-version-4) [`192.168.178.1`](#network-address-translation). As you can see on the line where it says [User Datagram Protocol](#user-datagram-protocol) in the lower left quadrant, the selected query was sent to the [port](#port-numbers) [53](#transport-protocol). In the lower right quadrant, you can see where the query name, which I selected on the left, appears in the sequence of sent bytes. I added the \"Name\" column in the table with the filtered packets by right-clicking on the (selected) \"Name: ef1p.com\" field in the lower left quadrant and then choosing \"Apply as Column\". The router sent the responses to the three queries in a single [802.11n frame](https://en.wikipedia.org/wiki/IEEE_802.11n-2009#Frame_aggregation) using [MAC service data unit (MSDU) aggregation](https://en.wikipedia.org/wiki/Frame_aggregation#MSDU_aggregation), which is why the length of the packet on the last line is three times bigger." themed="true" image-max-width="878" caption-max-width="878" %}
+
+{% include image.md source="wireshark-sni.png" caption="When the browser on my iPad loaded this website over [HTTPS](#hypertext-transfer-protocol) on port [443](#hypertext-transfer-protocol), it sent the domain name of the server in the clear in its first message to the server, using the [Server Name Indication (SNI) extension](https://en.wikipedia.org/wiki/Server_Name_Indication) of [TLS](#transport-layer-security). This allows the server to send back the right certificate even if it hosts several websites. Until [WPA3](#wi-fi-protected-access) or [Encrypted Client Hello (ECH)](https://datatracker.ietf.org/doc/draft-ietf-tls-esni/) is widely deployed, you have to assume that every device in the same network knows which websites you visit." themed="true" image-max-width="708" caption-max-width="735" %}
+
+{% include image.md source="wireshark-dhcp.png" caption="When a device joins a network and doesn't have an [IP address](#internet-protocol-version-4) yet, it uses [`0.0.0.0`](https://en.wikipedia.org/wiki/0.0.0.0) as the source for [DHCP](#dynamic-host-configuration-protocol) queries and sends them to the [broadcast address](https://en.wikipedia.org/wiki/Broadcast_address) `255.255.255.255`, which is limited to the local network. The [router](#hubs-switches-and-routers) with the IP address [`192.168.178.1`](#network-address-translation) assigned the IP address `192.168.178.104` to my iPad in the selected packet. (On the [link layer](#link-layer), each device is addressed with its [MAC address](#media-access-control-address).) As you can see in the screenshot, the router also told my iPad in the [option 6](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol#Options) of DHCP to [send all DNS queries to the router](#dns-stub-resolvers)." themed="true" image-max-width="636" caption-max-width="680" %}
 
 </details>
 
@@ -1853,12 +2304,12 @@ but these aspects are beyond the scope of this article.
 Everything we've covered so far serves a single purpose:
 to accomplish things we humans are interested in.
 This is done with protocols on the [application layer](https://en.wikipedia.org/wiki/Application_layer).
-Examples of application layer protocols are
-the [HyperText Transfer Protocol (HTTP)](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+Examples of application-layer protocols are
+the [HyperText Transfer Protocol (HTTP)](#hypertext-transfer-protocol)
 as the foundation of the [World Wide Web (WWW)](https://en.wikipedia.org/wiki/World_Wide_Web),
-the [Simple Mail Transfer Protocol (SMTP)](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol)
-for delivering [email](https://en.wikipedia.org/wiki/Email),
-the [Internet Message Access Protocol (IMAP)](https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol)
+the [Simple Mail Transfer Protocol (SMTP)](/email/#simple-mail-transfer-protocol)
+for delivering [email](/email/),
+the [Internet Message Access Protocol (IMAP)](/email/#internet-message-access-protocol)
 for retrieving email,
 and the [File Transfer Protocol (FTP)](https://en.wikipedia.org/wiki/File_Transfer_Protocol)
 for, as you can probably guess, transferring files.
@@ -1871,7 +2322,7 @@ namely [HTTPS](https://en.wikipedia.org/wiki/HTTPS),
 [IMAPS](https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol#Security),
 and [FTPS](https://en.wikipedia.org/wiki/FTPS).
 This is the beauty of modularization:
-Application layer protocols can reuse the same protocols below,
+Application-layer protocols can reuse the same protocols below,
 while the protocols below don't need to know anything about the protocols above.
 
 <details markdown="block">
@@ -1903,7 +2354,8 @@ Other examples of control characters are
 the [end-of-transmission character](https://en.wikipedia.org/wiki/End-of-Transmission_character),
 and the [null character](https://en.wikipedia.org/wiki/Null_character)
 to indicate the [end of a string](https://en.wikipedia.org/wiki/Null-terminated_string).
-(A [string](https://en.wikipedia.org/wiki/String_(computer_science)) is just a sequence of characters in memory.)
+(A [string](https://en.wikipedia.org/wiki/String_(computer_science))
+is just a sequence of characters in [memory](https://en.wikipedia.org/wiki/Computer_memory).)
 
 In order to uniquely identify them,
 a so-called [code point](https://en.wikipedia.org/wiki/Code_point)
@@ -1938,7 +2390,7 @@ and others.
 The character encodings defined by ISO 8859 have the problem
 that they are not compatible with each other.
 Since character encodings are typically used for whole documents
-including websites and not just parts of them,
+including websites and not just for parts of them,
 you cannot use characters from different sets in the same document.
 Additionally, each document has to be accompanied with the used character set
 as part of its [metadata](https://en.wikipedia.org/wiki/Metadata)
@@ -1968,12 +2420,12 @@ A communication protocol has to specify
 how text and numbers in messages are encoded
 or at least how the recipient is informed about the used encoding.
 As mentioned above,
-many application layer protocols are
+many [application-layer protocols](#application-layer) are
 [text-based](https://en.wikipedia.org/wiki/Text-based_protocol),
 which means that the transmitted messages can be meaningfully displayed in a text editor.
 This is in contrast to [binary protocols](https://en.wikipedia.org/wiki/Binary_protocol),
 whose messages are difficult to read for humans without specialized analysis software.
-As we just learned, text is also encoded with binary numbers,
+As we just learned, text is also encoded with [binary numbers](#number-encoding),
 and text editors can be considered as specialized software.
 The real difference between the two categories of protocols is
 that text-based protocols delimit different pieces of information
@@ -1996,19 +2448,19 @@ Alternatively, the whole data could be re-encoded with a certain set of characte
 This is required when arbitrary data needs to be encoded
 where only text is permitted or reliably supported.
 This is the case for [email attachments](https://en.wikipedia.org/wiki/Email_attachment)
-because email originally only supported 7-bit ASCII.
+because email originally supported only [7-bit ASCII](#text-encoding).
 If you attach a picture to an email, for example,
-then the picture is split into chunks of 6 bits,
+the picture is split into chunks of 6 bits,
 and each chunk is encoded with one of 64 characters.
 This encoding is called [Base64](https://en.wikipedia.org/wiki/Base64),
 and it needs to be reverted by the recipient
 in order to display the picture.
 Base64 uses the characters `A` – `Z`, `a` – `z`, `0` – `9`, `+`, and `/`
 (26 + 26 + 10 + 2 = 64).
-Since binary protocols require no such transformation
-and often skip the labels for fields
-or abbreviate them to a single number,
-they are more concise and efficient than text-based protocols.
+Because binary protocols require no such transformation
+and often omit field labels
+or replace them with numeric tags,
+they are more compact and efficient than text-based protocols.
 
 </details>
 
@@ -2019,10 +2471,10 @@ HyperText Transfer Protocol (HTTP)
 
 In order for you to read this article,
 your [browser](https://en.wikipedia.org/wiki/Web_browser) fetched this page from a
-[web server](https://en.wikipedia.org/wiki/Web_server) via HTTP over TLS,
-which is known as HTTPS.
-Given the popularity of the Web,
-HTTP is one of the most widely used application layer protocols.
+[web server](https://en.wikipedia.org/wiki/Web_server) via [HTTP](https://en.wikipedia.org/wiki/HTTP) over [TLS](#transport-layer-security),
+which is known as [HTTPS](https://en.wikipedia.org/wiki/HTTPS).
+Given the popularity of [the Web](https://en.wikipedia.org/wiki/World_Wide_Web),
+HTTP is one of the most widely used [application-layer protocols](#application-layer).
 If we ignore newer versions of the protocol and rarely used features,
 HTTP is a fairly simple protocol and thus an excellent first example.
 HTTP works according to the [client-server model](#client-server-model):
@@ -2056,7 +2508,7 @@ for example, when your browser is being redirected to a different page.
 We have encountered the concept of [header and payload](#packet-switching) several times already,
 and HTTP follows the same logic.
 Let's look at a slightly modified example from
-[Wikipedia](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Example_session):
+[Wikipedia](https://en.wikipedia.org/wiki/HTTP#HTTP/1.1_example_of_request_/_response_transaction):
 
 <figure markdown="block">
 
@@ -2081,7 +2533,8 @@ As you [learned above](#port-numbers),
 only one process can bind to a specific port on the same machine,
 thus this header field is the only way for a server
 to tell the requests to different websites apart.
-(Strictly speaking, it's one process per port number and IP address.
+(Strictly speaking, it's one process
+per [port number](#port-numbers) and [IP address](#internet-protocol-version-4).
 So if the server has several network interfaces,
 the requests on each interface could be handled by a different process.)
 The default port is 80 for HTTP and 443 for HTTPS.
@@ -2089,7 +2542,8 @@ If you want to request a website on a different port,
 you would specify this after the host name in the
 [URL](https://en.wikipedia.org/wiki/Uniform_Resource_Locator).
 For example, if you run a web server [locally](#server-on-your-personal-computer) on port 4000,
-you would access it at `http://localhost:4000/` in your browser.
+you would access it at `http://localhost:4000/`{:.enable-click-to-copy} in your browser.
+Let's look at the response:
 
 <figure markdown="block" class="allow-break-inside">
 
@@ -2132,10 +2586,10 @@ such as [styles](https://en.wikipedia.org/wiki/Cascading_Style_Sheets),
 and [images](https://en.wikipedia.org/wiki/HTML_element#Images_and_objects).
 These files can be hosted on the same or a different server.
 The browser fetches them via separate HTTP requests.
-The body of the response is not limited to text-based formats,
+The body of the response is not limited to [text-based formats](#text-based-protocols),
 any files can be transferred via HTTP.
 Thanks to the `Content-Length` header field,
-binary files don't need to be [escaped](#text-based-protocols).
+binary files don't need to be escaped.
 Every modern browser includes powerful
 [developer tools](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_are_browser_developer_tools),
 with which you can inspect the requests it made:
@@ -2145,22 +2599,23 @@ with which you can inspect the requests it made:
 If you are familiar with the [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface)
 of your operating system,
 you can write such HTTP requests yourself.
-On macOS, the default program providing such a command-line interface
+On [macOS](https://en.wikipedia.org/wiki/MacOS),
+the default program providing such a command-line interface
 is [Terminal](https://support.apple.com/guide/terminal/welcome/mac),
-located in the `/Applications/Utilities` folder.
-With the command [Telnet](https://en.wikipedia.org/wiki/Telnet),
-you can establish a TCP connection to the designated server.
+located in the `/Applications/Utilities`{:.enable-click-to-copy} folder.
+With the networking utility [nc](https://en.wikipedia.org/wiki/Netcat),
+you can establish a [TCP](#transmission-control-protocol) connection to the designated server.
 If the website is provided via HTTPS,
 you can use [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL)
-to establish a TLS connection to the designated server.
+to establish a [TLS](#transport-layer-security) connection to the designated server.
 The following tool generates what you have to enter in your command-line interface
-based on the provided web address:
+based on the provided [Web address](https://en.wikipedia.org/wiki/URL):
 
 <figure markdown="block">
 <div id="tool-protocol-http"></div>
 <figcaption markdown="span">
 How to make an HTTP(S) request from your command-line interface.
-You can copy the text to your clipboard by clicking on it.
+You can copy the text to your [clipboard](https://en.wikipedia.org/wiki/Clipboard_(computing)) by clicking on it.
 </figcaption>
 </figure>
 
@@ -2171,18 +2626,22 @@ You can copy the text to your clipboard by clicking on it.
 Domain Name System (DNS)
 </summary>
 
+
+##### Name registration
+
 The hierarchical numbers used in [network addresses](#network-addresses)
-are great for machines to route packets
+are great for machines to [route](#signal-routing) [packets](#packet-switching)
 but difficult for humans to remember.
 The [Domain Name System (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System)
+as specified in [RFC 1034](https://datatracker.ietf.org/doc/html/rfc1034) and [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035)
 solves this problem by providing a hierarchical
 [namespace](https://en.wikipedia.org/wiki/Namespace)
 of easily memorizable [domain names](https://en.wikipedia.org/wiki/Domain_name)
 and a protocol to access public information associated with such names.
 A domain name consists of a sequence of labels separated by a dot.
-Similar to how the [Internet Protocol](#network-layer)
-is more than just a protocol as it also governs the allocation of IP addresses,
-the Domain Name System is more than just an application layer protocol
+Similar to how the [Internet](#network-layer)
+is more than just a protocol as it also governs the allocation of [IP addresses](#internet-protocol-version-4),
+the Domain Name System is more than just an [application-layer protocol](#application-layer)
 as it also governs the allocation of domain names,
 thereby ensuring that each domain name is unique.
 At the root of this system is again the
@@ -2195,18 +2654,21 @@ you register your domains at a so-called
 [domain name registrar](https://en.wikipedia.org/wiki/Domain_name_registrar),
 which has to be [accredited by the registry operators](https://www.icann.org/registrar-reports/accreditation-qualified-list.html)
 of all the top-level domains under which it allows its customer to register a domain name.
-This has the advantage that you as a registrant only have to interact with a single company
+This has the advantage that you as a registrant have to interact with only a single company
 even if you register various domain names under different top-level domains.
 Let's look at an example: I'm the registrant of [ef1p.com](https://ef1p.com).
 The top-level domain of this domain name is [com](https://en.wikipedia.org/wiki/.com).
 The registry operator for `.com` is [Verisign](https://en.wikipedia.org/wiki/Verisign).
-The domain name registrar I have chosen to register my domains is [Gandi](https://en.wikipedia.org/wiki/Gandi).
-I pay them 13 Euros every year just so that I can keep this domain name.
+The domain name registrar I have chosen to register my domains is [Infomaniak](https://en.wikipedia.org/wiki/Infomaniak).
+I pay them around 18 USD every year just so that I can keep this domain.
 In order to avoid ambiguity,
 a [fully qualified domain name (FQDN)](https://en.wikipedia.org/wiki/Fully_qualified_domain_name)
 is sometimes written with a trailing dot, such as `ef1p.com.`.
 Otherwise, the label might just refer to a [subdomain](https://en.wikipedia.org/wiki/Subdomain).
-Don't let this confuse you in the DNS playground below.
+Don't let this confuse you in the [DNS lookup tool](#dns-lookup-tool) below.
+
+
+##### Distributed database
 
 From a technical point of view,
 DNS acts as a [distributed database](https://en.wikipedia.org/wiki/Distributed_database),
@@ -2221,7 +2683,7 @@ Such temporary storage is known as [caching](https://en.wikipedia.org/wiki/Cache
 and it allows other devices in the same network to look up the information faster.
 Caching is also important to distribute the load more evenly among name servers,
 which improves the scalability of the Domain Name System.
-Each record specifies how long it can be [cached](https://en.wikipedia.org/wiki/Domain_Name_System#Record_caching),
+Each record specifies how long [it can be cached](https://en.wikipedia.org/wiki/Domain_Name_System#Record_caching),
 which limits how outdated the answer to a query can be.
 This expiration period is called [time to live (TTL)](https://en.wikipedia.org/wiki/Time_to_live),
 and a common value for this is one hour.
@@ -2229,13 +2691,16 @@ This means that if you change a DNS record with such a TTL value,
 you have to wait for up to one hour
 until the stale entries have been discarded everywhere.
 
-The most common use case of DNS is to resolve a domain name to an IP address.
-Every time a client connects to a server identified by a domain name,
+
+##### IP address lookups
+
+The most common use case of DNS is to resolve a domain name to an [IP address](#internet-protocol-version-4).
+Every time a [client](#client-server-model) connects to a server identified by a domain name,
 it first has to query a name server to obtain the IP address of the server
 because the [network layer](#network-layer) has no notion of domain names.
 This is similar to how you have to look up the phone number of a person
 before you can call that person.
-In this sense, DNS can be compared to a telephone book;
+In this sense, DNS can be compared to a [telephone book](https://en.wikipedia.org/wiki/Telephone_directory);
 but, rather than looking up the phone number of persons,
 you look up the IP address of computers on the Internet.
 Another difference is that each domain name is unique,
@@ -2249,33 +2714,43 @@ the IP address of the server you want to connect to
 also has the advantage that a server can be replaced
 without having to notify its users about the new address.
 
+
+##### Transport protocol
+
 DNS specifies a binary encoding for requests and responses.
-If the response is small enough to fit into a single packet
-(see the [maximum transmission unit](#maximum-transmission-unit)),
+[By default](#dns-stub-resolvers),
 DNS uses the [User Datagram Protocol (UDP)](#user-datagram-protocol)
 in order to avoid the additional [round trips](#network-performance)
 required by the [Transmission Control Protocol (TCP)](#transmission-control-protocol)
-for the channel setup.
-If the request or response packet is lost,
-the client simply queries again after the configured timeout.
-DNS requests are served on [port](#port-numbers) 53.
+for the connection setup.
+If the request or the response packet is lost,
+the client simply queries again after the configured [timeout](#connection-loss).
+If not all queried resource records fit into a single UDP packet
+(see the [maximum transmission unit](#maximum-transmission-unit)),
+the DNS server [indicates this in its response](https://blog.apnic.net/2024/07/15/revisiting-dns-and-udp-truncation/).
+In such a case, the client should discard the UDP response
+and send the same query over TCP again.
+DNS is served on [port](#port-numbers) 53 for UDP and TCP.
 
-There are other types of resource records
-besides the one which resolves a domain name to an IPv4 address:
+
+##### Resource record types
+
+There are [other types of resource records](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-4)
+besides the one which resolves a domain name to an [IPv4 address](#internet-protocol-version-4):
 
 <figure markdown="block" class="allow-break-inside">
 
 | Acronym | Name | Value | Example
 |-
-| [`A`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.4.1) | IPv4 address record | A single IPv4 address. | <a href="#tool-lookup-dns-records&domainName=ef1p.com&recordType=A&dnssecOk=false" title="Look up the A record of ef1p.com.">↗</a>
-| [`AAAA`](https://datatracker.ietf.org/doc/html/rfc3596#section-2.1) | IPv6 address record | A single IPv6 address. | <a href="#tool-lookup-dns-records&domainName=google.com&recordType=AAAA&dnssecOk=false" title="Look up the AAAA record of google.com.">↗</a>
-| [`ANY`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.2.5) | Any record type query | Return all record types of the queried domain. | <a href="#tool-lookup-dns-records&domainName=ietf.org&recordType=ANY&dnssecOk=false" title="Look up ANY records of ietf.org.">↗</a>
+| [`A`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.4.1) | IPv4 address record | A single IPv4 address. | <a href="#tool-lookup-dns-records&domainName=ef1p.com&recordType=A&dnssecOk=false" title="Look up the A records of ef1p.com.">↗</a>
+| [`AAAA`](https://datatracker.ietf.org/doc/html/rfc3596#section-2.1) | IPv6 address record | A single IPv6 address. | <a href="#tool-lookup-dns-records&domainName=google.com&recordType=AAAA&dnssecOk=false" title="Look up the AAAA records of google.com.">↗</a>
+| [`ANY`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.2.5) | Any record type query | Return all record types of the queried domain. | <a href="#tool-lookup-dns-records&domainName=ef1p.com&recordType=ANY&dnssecOk=false" title="Look up ANY records of ef1p.com.">↗</a>
 | [`CAA`](https://datatracker.ietf.org/doc/html/rfc8659#section-4) | CA authorization record | The CA authorized to issue certificates for this domain.<br>Only checked by CAs before issuing a certificate. | <a href="#tool-lookup-dns-records&domainName=wikipedia.org&recordType=CAA&dnssecOk=false" title="Look up the CAA records of wikipedia.org.">↗</a>
-| [`CNAME`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.1) | Canonical name record | Another domain name to continue the lookup with. | <a href="#tool-lookup-dns-records&domainName=www.facebook.com&recordType=CNAME&dnssecOk=false" title="Look up the CNAME record of www.facebook.com.">↗</a>
+| [`CNAME`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.1) | Canonical name record | Another domain name to continue the lookup with. | <a href="#tool-lookup-dns-records&domainName=www.facebook.com&recordType=CNAME&dnssecOk=false" title="Look up the CNAME records of www.facebook.com.">↗</a>
 | [`MX`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.9) | Mail exchange record | The server to deliver the mail for the queried domain to. | <a href="#tool-lookup-dns-records&domainName=gmail.com&recordType=MX&dnssecOk=false" title="Look up the MX records of gmail.com.">↗</a>
 | [`NS`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.11) | Name server record | The authoritative name server of the queried domain. | <a href="#tool-lookup-dns-records&domainName=youtube.com&recordType=NS&dnssecOk=false" title="Look up the NS records of youtube.com.">↗</a>
-| [`OPENPGPKEY`](https://datatracker.ietf.org/doc/html/rfc7929#section-2) | OpenPGP key | The local part of the user's email address is hashed. | <a href="#tool-lookup-dns-records&domainName=5d2d3ceb7abe552344276d47d36a8175b7aeb250a9bf0bf00e850cd2._openpgpkey.ef1p.com&recordType=OPENPGPKEY&dnssecOk=false" title="Look up the OPENPGPKEY records of security@ef1p.com.">↗</a>
-| [`PTR`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.12) | Pointer record | Another domain name without continuing the lookup.<br>Primarily used for implementing [reverse DNS lookups](https://en.wikipedia.org/wiki/Reverse_DNS_lookup). | <a href="#tool-lookup-dns-records&domainName=47.224.172.17.in-addr.arpa&recordType=PTR&dnssecOk=false" title="Do a reverse lookup on one of apple.com's IP addresses. Yeah, the result is rather weird and I have no idea either why these records exist.">↗</a>
+| [`OPENPGPKEY`](https://datatracker.ietf.org/doc/html/rfc7929#section-2) | OpenPGP key | The local part of the user's email address is hashed. | <a href="#tool-lookup-dns-records&domainName=7b2489a62716f4bfdabb289442549772ea1920b90535fb206948d927._openpgpkey.fedoraproject.org&recordType=OPENPGPKEY&dnssecOk=false" title="Look up the OPENPGPKEY records of fedora-44-primary@fedoraproject.org.">↗</a>
+| [`PTR`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.12) | Pointer record | Another domain name without continuing the lookup.<br>Primarily used for implementing [reverse DNS lookups](https://en.wikipedia.org/wiki/Reverse_DNS_lookup). | <a href="#tool-lookup-dns-records&domainName=10.144.253.17.in-addr.arpa&recordType=PTR&dnssecOk=false" title="Do a reverse lookup on one of apple.com's IPv4 addresses.">↗</a><br><a href="#tool-lookup-dns-records&domainName=e.0.0.2.0.0.0.0.0.0.0.0.0.0.0.0.2.0.8.0.a.0.0.4.0.5.4.1.0.0.a.2.ip6.arpa&recordType=PTR&dnssecOk=false" title="Do a reverse lookup on one of google.com's IPv6 addresses. (1e100 = 10^100, which is called a googol.)">↗</a>
 | [`SMIMEA`](https://datatracker.ietf.org/doc/html/rfc8162#section-2) | S/MIME certificate | The local part of the user's email address is hashed. | <a href="#tool-lookup-dns-records&domainName=b1a51af355b2082ce05911aa0cc98a2d816fb6bc6b2901d2c0ded2de._smimecert.spodhuis.org&recordType=SMIMEA&dnssecOk=false" title="Look up the SMIMEA records of ietf-dane-phil@spodhuis.org.">↗</a>
 | [`SOA`](https://datatracker.ietf.org/doc/html/rfc1035#section-3.3.13) | Start of authority record | Administrative information for [secondary name servers](https://en.wikipedia.org/wiki/Name_server#Authoritative_answer). | <a href="#tool-lookup-dns-records&domainName=amazon.com&recordType=SOA&dnssecOk=false" title="Look up the SOA record of amazon.com.">↗</a>
 | [`SRV`](https://datatracker.ietf.org/doc/html/rfc2782) | Service record | The port number and domain name of the queried service. | <a href="#tool-lookup-dns-records&domainName=_submission._tcp.gmail.com&recordType=SRV&dnssecOk=false" title="Look up the SRV record of _submission._tcp.gmail.com. As an email client, you can use the subdomain _submission._tcp to figure out which server to submit outgoing emails to. Unfortunately, this standard is not widely used.">↗</a>
@@ -2289,6 +2764,9 @@ Don't worry if you don't yet understand what they are used for.
 </figcaption>
 </figure>
 
+
+##### DNS lookup tool
+
 We will encounter some of these record types in future articles on this blog.
 For now, I want to give you the opportunity to play around with the actual DNS.
 I use an [API by Google](https://developers.google.com/speed/public-dns/docs/doh/json)
@@ -2296,11 +2774,10 @@ to query what you enter.
 Try it with any domain name you are interested in.
 If you hover with your mouse over the data,
 you get additional explanations and options,
-such as doing a reverse lookup of an IPv4 address.
-The DNSSEC option and the record types
-which are not in the above table
-will be introduced in [the next box](#domain-name-system-security-extensions).
-If you just want to play around with the tools in this article without scrolling,
+such as doing a [reverse lookup](https://en.wikipedia.org/wiki/Reverse_DNS_lookup) of an IPv4 or IPv6 address.
+The [DNSSEC](#domain-name-system-security-extensions) option and the record types which are not in the above table
+will be introduced [here](#dnssec-resource-records) and [here](#svcb-and-https-resource-records).
+If you want to play around with the tools in this article without scrolling,
 I also published them separately on [this page](/internet/tools/).
 
 <div id="tool-lookup-dns-records"></div>
@@ -2312,7 +2789,10 @@ I also published them separately on [this page](/internet/tools/).
 Domain Name System Security Extensions (DNSSEC)
 </summary>
 
-The problem with plain old DNS is that the answer to a query cannot be trusted.
+
+##### DNS security issues
+
+The problem with plain old [DNS](#domain-name-system) is that the answer to a query cannot be trusted.
 While non-authoritative name servers
 that cache and relay answers for others
 are great for scalability,
@@ -2322,7 +2802,7 @@ thereby [poisoning the cache](https://en.wikipedia.org/wiki/DNS_spoofing)
 of [DNS resolvers](https://en.wikipedia.org/wiki/Domain_Name_System#DNS_resolvers).
 Additionally, an attacker who can modify your network traffic
 can also replace the actual response from a name server with a malicious one
-because neither UDP nor IP authenticates the transmitted data.
+because neither [UDP](#user-datagram-protocol) nor [IP](#internet-protocol-version-4) authenticates the transmitted data.
 To make things even worse,
 an attacker might not even have to modify your network traffic.
 As long as the attacker [sees your DNS query](#broadcasting-and-information-security)
@@ -2343,36 +2823,39 @@ a successful attack on the DNS resolution of your computer
 allows the attacker to redirect all your Internet traffic through servers that they control.
 The only thing that can limit the damage they can do is [TLS](#transport-layer-security)
 with valid [public-key certificates](#public-key-infrastructure)
-or another protocol with similar security properties on the application layer.
-This also requires that the user does not simply dismiss invalid certificate warnings.
+or another protocol with similar security properties on the [application layer](#application-layer).
+This also requires that the user does not simply dismiss warnings about invalid certificates.
 Luckily, such warnings are quite intimidating in most browsers by now
 and can no longer be dismissed with a single click.
-[Google Chrome](https://www.google.com/chrome/) plays it safe
-and won't connect to a web server with an invalid certificate at all.
 If you don't know what I'm talking about,
 visit [this page](https://untrusted-root.badssl.com/)
 in order to get such a warning.
 There is no risk in visiting this page
 as long as you abort and don't modify your security settings.
 
+
+##### Authenticity without confidentiality
+
 The [Domain Name System Security Extensions (DNSSEC)](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions)
-solves the aforementioned problem
+solve these [DNS security issues](#dns-security-issues)
 by [authenticating](https://en.wikipedia.org/wiki/Message_authentication) resource records.
 DNSSEC doesn't provide [confidentiality](https://en.wikipedia.org/wiki/Information_security#Confidentiality), though.
-You would have to use [DNS over TLS](https://en.wikipedia.org/wiki/DNS_over_TLS) for that.
+You would have to use [another protocol](#secure-dns-connections) for that.
 For most readers, it's enough to know that the integrity of DNS can be protected.
-For advanced readers, here is how DNSSEC works.
-DNSSEC introduces new types of resource records
-(as defined in [RFC 4034](https://datatracker.ietf.org/doc/html/rfc4034))
-and [backward-compatible](https://en.wikipedia.org/wiki/Backward_compatibility)
-modifications to the communication protocol
-(as defined in [RFC 4035](https://datatracker.ietf.org/doc/html/rfc4035)).
+The rest of this box dives fairly deep into how DNSSEC works according to
+[RFC 4033](https://datatracker.ietf.org/doc/html/rfc4033) (overview and considerations),
+[RFC 4034](https://datatracker.ietf.org/doc/html/rfc4034) ([new types of resource records](#dnssec-resource-records)),
+and [RFC 4035](https://datatracker.ietf.org/doc/html/rfc4035) (protocol modifications).
+
+
+##### Administrative zones
+
 Before we can discuss these extensions,
 we first need to understand
 that the Domain Name System is split into [administrative zones](https://en.wikipedia.org/wiki/DNS_zone),
 each of which is managed by a single entity.
 Each such entity runs name servers (or lets a company run them on its behalf),
-which return the authoritative answer for the domains in its zone.
+which return the authoritative answers for the domains in its zone.
 DNS has a single and thus centralized [root zone](https://en.wikipedia.org/wiki/DNS_root_zone),
 which is managed by the [Internet Assigned Numbers Authority (IANA)](https://en.wikipedia.org/wiki/Internet_Assigned_Numbers_Authority),
 a subsidiary of the [Internet Corporation for Assigned Names and Numbers (ICANN)](https://en.wikipedia.org/wiki/ICANN),
@@ -2387,10 +2870,10 @@ and provide you with the addresses of the authoritative name servers of that zon
 If you query one of those name servers for `ef1p.com.`,
 it will tell you again that other name servers are responsible for this domain.
 You can query all these name servers with the tool at the end of the previous box:
-<a href="#tool-lookup-dns-records&domainName=.&recordType=NS&dnssecOk=false">the root name servers</a>,
-<a href="#tool-lookup-dns-records&domainName=com.&recordType=NS&dnssecOk=false">the .com name servers</a>,
-and <a href="#tool-lookup-dns-records&domainName=ef1p.com.&recordType=NS&dnssecOk=false">the ef1p.com name servers</a>.
-Somewhat confusingly, the name servers are listed with a domain name rather than an IP address.
+[the root name servers](#tool-lookup-dns-records&domainName=.&recordType=NS&dnssecOk=false),
+[the .com name servers](#tool-lookup-dns-records&domainName=com.&recordType=NS&dnssecOk=false),
+and [the ef1p.com name servers](#tool-lookup-dns-records&domainName=ef1p.com.&recordType=NS&dnssecOk=false).
+Somewhat confusingly, the name servers are listed with a domain name rather than an [IP address](#internet-protocol-version-4).
 In order to avoid the [circular dependency](https://en.wikipedia.org/wiki/Circular_dependency)
 that [you already need to have used DNS in order to use DNS](https://en.wikipedia.org/wiki/DNS_root_zone#Initialization_of_DNS_service),
 DNS clients have to be delivered not only with the domain names of the root name servers but also with their IP addresses.
@@ -2400,13 +2883,13 @@ it will tell them the IP address of any name server it refers them to as well.
 This is accomplished with so-called [glue records](https://en.wikipedia.org/wiki/Domain_Name_System#Circular_dependencies_and_glue_records),
 which are address resource records for name servers in a subzone returned by the name server of the superzone.
 I cannot demonstrate this with the above tool
-because Google does all the recursive resolution for us.
+because [Google](https://developers.google.com/speed/public-dns/docs/doh/json) does all the recursive resolution for us.
 If you are familiar with a [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface),
 you can use the [dig command](https://en.wikipedia.org/wiki/Dig_(command)) to check this:
-`dig net @a.root-servers.net.` returns in the authority section of the DNS answer
+`dig net @a.root-servers.net.`{:.enable-click-to-copy} returns in the authority section of the DNS answer
 that the name server for `net.` is `a.gtld-servers.net.` (among others)
 and in the additional section of the DNS answer
-that the IPv4 address of `a.gtld-servers.net.` is `192.5.6.30`.
+that the [IPv4 address](#internet-protocol-version-4) of `a.gtld-servers.net.` is `192.5.6.30`.
 (The authority section indicates the
 [authoritative name servers](https://en.wikipedia.org/wiki/Domain_Name_System#Authoritative_name_server)
 of the queried domain or its canonical name.
@@ -2420,15 +2903,18 @@ I would declare any further subdomains, such as `www.ef1p.com.`,
 in the same zone as `ef1p.com.`.
 Since I'm the administrator of my zone,
 I can do this without involving any party
-other than [gandi.net](https://www.gandi.net/en),
+other than [infomaniak.com](https://www.infomaniak.com/),
 which operates the name servers on my behalf,
 thanks to the hierarchical and distributed nature of DNS.
+
+
+##### Single trust anchor
 
 Coming back to DNSSEC after this little detour,
 the core idea is that each zone signs its records
 and provides these signatures in newly created records.
-Each administrative zone uses its own cryptographic keys for this
-but the zone above in the hierarchy signs and lists the public keys of its subzones.
+Each administrative zone uses its own [cryptographic keys](#digital-signatures) for this,
+but the zone above in the hierarchy lists and signs the public keys of its subzones.
 This allows you to verify the public keys and resource records of all DNSSEC-enabled zones
 as long as you know the public key of the root zone.
 This is similar to the [public-key infrastructure](#public-key-infrastructure) behind TLS,
@@ -2437,17 +2923,20 @@ by signing their public key.
 There is a crucial difference, though.
 In the case of TLS, everyone needs to trust every single certification authority
 since any certification authority can issue a certificate for any domain.
-With DNSSEC, you only need to trust the administrators of the zones above you.
+With DNSSEC, you need to trust only the administrators of the zones above you.
 For this blog, that's the root zone and the `com.` zone.
 A zone like `attacker.example.org.` cannot authorize a different DNSSEC key for `ef1p.com.`.
 In computer security, requiring less trust is always better.
 While DNSSEC fails spectacularly if the root key is compromised,
 TLS fails if the key of any certification authority is compromised.
 Having a [single point of failure](https://en.wikipedia.org/wiki/Single_point_of_failure)
-is preferable to having [many independent points of failure](https://twitter.com/csoandy/status/570239492386385921).
-There have been [attempts to address this issue for TLS](https://datatracker.ietf.org/doc/html/rfc6698),
+is preferable to having [many independent points of failure](https://x.com/csoandy/status/570239492386385921).
+There have been [attempts to address this issue for TLS](/email/#dns-based-authentication-of-named-entities),
 but, unfortunately, they weren't widely adopted.
 Let's have a look at some technical aspects of DNSSEC next.
+
+
+##### DNSSEC resource records
 
 DNSSEC introduced the following DNS record types:
 
@@ -2458,11 +2947,11 @@ DNSSEC introduced the following DNS record types:
 | [`DNSKEY`](https://datatracker.ietf.org/doc/html/rfc4034#section-2) | DNS public key record | The public key used to sign the resource records of the queried domain. | <a href="#tool-lookup-dns-records&domainName=.&recordType=DNSKEY&dnssecOk=true" title="Look up the DNSKEY records of the root zone.">↗</a>
 | [`DS`](https://datatracker.ietf.org/doc/html/rfc4034#section-5) | Delegation signer record | The hash of the key-signing key (KSK) used in the delegated DNS zone. | <a href="#tool-lookup-dns-records&domainName=com.&recordType=DS&dnssecOk=true" title="Look up the DS record for the com zone signed by the root zone.">↗</a>
 | [`RRSIG`](https://datatracker.ietf.org/doc/html/rfc4034#section-3) | Resource record signature | A digital signature on the queried set of resource records. | <a href="#tool-lookup-dns-records&domainName=.&recordType=RRSIG&dnssecOk=true" title="Look up the various RRSIG records of the root domain.">↗</a>
-| [`NSEC`](https://datatracker.ietf.org/doc/html/rfc4034#section-4) | Next secure record | The next existing subdomain used for authenticated denial of existence. | <a href="#tool-lookup-dns-records&domainName=nonexistent.example.com.&recordType=A&dnssecOk=true" title="See the NSEC record returned when looking up the A record of the nonexistent domain nonexistent.example.com.">↗</a>
-| [`NSEC3`](https://datatracker.ietf.org/doc/html/rfc5155#section-3) | `NSEC` version 3 | A salted hash of the next existing subdomain to prevent "zone walking". | <a href="#tool-lookup-dns-records&domainName=com.&recordType=A&dnssecOk=true" title="See the NSEC3 record returned when looking up the nonexistent A record of the domain com.">↗</a>
-| [`NSEC3PARAM`](https://datatracker.ietf.org/doc/html/rfc5155#section-4) | `NSEC3` parameters | Used by authoritative name servers to generate the `NSEC3` records. | <a href="#tool-lookup-dns-records&domainName=ef1p.com.&recordType=NSEC3PARAM&dnssecOk=true" title="Look up the NSEC3PARAM record of ef1p.com.">↗</a>
-| [`CDS`](https://datatracker.ietf.org/doc/html/rfc7344#section-3.1) | Child copy of `DS` | Used by the child zone to update its `DS` record in the parent zone. | <a href="#tool-lookup-dns-records&domainName=switch.ch.&recordType=CDS&dnssecOk=true" title="Look up the CDS record of switch.ch.">↗</a>
-| [`CDNSKEY`](https://datatracker.ietf.org/doc/html/rfc7344#section-3.2) | Child copy of `DNSKEY` | Used by the child zone to update its `DS` record in the parent zone. | <a href="#tool-lookup-dns-records&domainName=switch.ch.&recordType=CDNSKEY&dnssecOk=true" title="Look up the CDNSKEY record of switch.ch. Unfortunately, Google's API doesn't yet return the data in the same format as for DNSKEY.">↗</a>
+| [`NSEC`](https://datatracker.ietf.org/doc/html/rfc4034#section-4) | Next secure record | The next existing subdomain used for authenticated [denial of existence](#denial-of-existence). | <a href="#tool-lookup-dns-records&domainName=nonexistent.ef1p.com.&recordType=A&dnssecOk=true" title="See the NSEC record returned when looking up the A record of the nonexistent domain nonexistent.ef1p.com.">↗</a>
+| [`NSEC3`](https://datatracker.ietf.org/doc/html/rfc5155#section-3) | `NSEC` version 3 | A salted hash of the next existing subdomain to prevent [zone walking](#zone-walking). | <a href="#tool-lookup-dns-records&domainName=com.&recordType=A&dnssecOk=true" title="See the NSEC3 record returned when looking up the nonexistent A record of the domain com.">↗</a>
+| [`NSEC3PARAM`](https://datatracker.ietf.org/doc/html/rfc5155#section-4) | `NSEC3` parameters | Used by authoritative name servers to generate the `NSEC3` records. | <a href="#tool-lookup-dns-records&domainName=example.com.&recordType=NSEC3PARAM&dnssecOk=true" title="Look up the NSEC3PARAM record of example.com.">↗</a>
+| [`CDS`](https://datatracker.ietf.org/doc/html/rfc7344#section-3.1) | Child copy of `DS` | Used by the child zone to publish the desired `DS` record in the parent zone. | <a href="#tool-lookup-dns-records&domainName=gov.&recordType=CDS&dnssecOk=true" title="Look up the CDS record of gov.">↗</a>
+| [`CDNSKEY`](https://datatracker.ietf.org/doc/html/rfc7344#section-3.2) | Child copy of `DNSKEY` | Used by the child zone so that the parent zone can compute the `DS` record. | <a href="#tool-lookup-dns-records&domainName=gov.&recordType=CDNSKEY&dnssecOk=true" title="Look up the CDNSKEY record of gov.">↗</a>
 
 <figcaption markdown="span">
 The [DNS record types introduced for DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions#Resource_records)
@@ -2471,6 +2960,9 @@ as defined in [RFC 4034](https://datatracker.ietf.org/doc/html/rfc4034),
 and [RFC 7344](https://datatracker.ietf.org/doc/html/rfc7344).
 </figcaption>
 </figure>
+
+
+##### Key-signing keys and zone-signing keys
 
 Although DNSSEC validation treats all keys equally,
 [RFC 4033](https://datatracker.ietf.org/doc/html/rfc4033)
@@ -2483,7 +2975,7 @@ of the key-signing key in a `DS` record.
 which maps inputs of arbitrary size to outputs of a fixed size and is infeasible to invert.)
 By using only the hash of a key instead of the key itself,
 the parent zone has to store less data because the hash is shorter.
-And of course, we're only talking about [public keys](#digital-signatures) here.
+And of course, we're talking only about [public keys](#digital-signatures) here.
 The key-signing key is then used to sign one or more zone-signing keys.
 The signature, which covers all `DNSKEY` records,
 is published in an `RRSIG` record with the same domain name.
@@ -2498,12 +2990,16 @@ The algorithms that can be used to sign records are listed
 and, more authoritatively, [by IANA](https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml).
 The supported hash algorithms for `DS` records are [listed here](https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml).
 
-As mentioned above, the key-signing key of the root zone acts as the trust anchor for DNSSEC.
+
+##### Key-signing ceremonies
+
+As mentioned [above](#single-trust-anchor),
+the key-signing key of the root zone acts as the [trust anchor](https://en.wikipedia.org/wiki/Trust_anchor) for DNSSEC.
 Its hash is published [on the website of IANA](https://www.iana.org/dnssec/files)
 together with a scan of handwritten signatures by [trusted community representatives](https://www.iana.org/dnssec/tcrs),
 attesting the output of the used [hardware security module (HSM)](https://en.wikipedia.org/wiki/Hardware_security_module).
-You can inspect the root public key <a href="#tool-lookup-dns-records&domainName=.&recordType=DNSKEY&dnssecOk=true">with the above tool</a>
-or by entering `dig . dnskey +dnssec` into your command-line interface.
+You can inspect the root public key [with the above tool](#tool-lookup-dns-records&domainName=.&recordType=DNSKEY&dnssecOk=true)
+or by entering `dig . dnskey +dnssec`{:.enable-click-to-copy} into your command-line interface.
 (The key-signing key is in the record which starts with 257.
 The other record, starting with 256, contains the zone-signing key.)
 All DNSSEC-aware DNS resolvers are delivered with a copy of this public key
@@ -2516,8 +3012,11 @@ All [ceremonies](https://en.wikipedia.org/wiki/Key_ceremony) involving this priv
 are [publicly documented](https://www.iana.org/dnssec/ceremonies)
 in order to increase trust in the root key of DNSSEC.
 For example, you can download the [log files](https://en.wikipedia.org/wiki/Log_file)
-as well as camera footage from different angles from [the latest ceremony](https://www.iana.org/dnssec/ceremonies/41).
+as well as camera footage from different angles from [a recent ceremony](https://www.iana.org/dnssec/ceremonies/41).
 I can also recommend you to read this [first-hand account](https://www.cloudflare.com/dns/dnssec/root-signing-ceremony/).
+
+
+##### Offline signing
 
 For performance and security reasons,
 DNSSEC has been designed so that the resource records in a zone can be signed before being served by a name server.
@@ -2532,19 +3031,24 @@ While China, for example, can ([and does](https://en.wikipedia.org/wiki/Great_Fi
 [inject forged DNS responses](http://www.sigcomm.org/sites/default/files/ccr/papers/2012/July/2317307-2317311.pdf)
 in order to censor content on its network,
 this practice is prevented or at least consistently detected when DNSSEC is used.
-In other words, you only have to trust the administrator of a zone
+In other words, you have to trust only the administrator of a zone
 and not the operator of an authoritative name server.
-As mentioned just a few paragraphs earlier,
+As mentioned just a few paragraphs [earlier](#single-trust-anchor),
 requiring less trust is always better in computer security.
 
+
+##### Resulting design complexity
+
 Allowing the signatures to be computed in advance makes DNSSEC more complicated in several regards:
+
+{:#replay-attacks}
 - **Replay attacks**: Even if an attacker cannot forge a valid response,
-  they can replace the response to a new request with the response from a previous request
+  they can replace the response to a new request with the response from an earlier request
   if they can intercept the traffic on the victim's network.
   This is known as a [replay attack](https://en.wikipedia.org/wiki/Replay_attack)
   and is usually prevented by including a [random number used only once](https://en.wikipedia.org/wiki/Cryptographic_nonce)
   in the request, which then also has to be included in the authenticated response.
-  However, due to the above design decision,
+  However, due to the above [design decision](#offline-signing),
   DNSSEC signatures cannot depend on fresh data from the client.
   Since the potentially precomputed signatures stay the same for many requests
   and DNSSEC doesn't authenticate anything else in the response,
@@ -2555,6 +3059,8 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   after which the signature may no longer be used to authenticate the signed resource records.
   Suitable validity periods for DNSSEC signatures are discussed
   in [section 4.4.2 of RFC 6781](https://datatracker.ietf.org/doc/html/rfc6781#section-4.4.2).
+
+{:#denial-of-existence}
 - **Denial of existence**: How can you be sure that a domain name doesn't exist
   or doesn't have the queried record type
   without requiring the authoritative name server to sign such a statement on the fly?
@@ -2565,31 +3071,33 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   because the DNS protocol encodes the length of a label with a [6-bit number](https://stackoverflow.com/a/19341879/12917821).)
   This makes it impossible to generate and sign negative responses for all nonexistent subdomains in advance.
   A generic negative response, which doesn't depend on the queried domain name, doesn't work
-  because an attacker could replay such a response even when the queried domain does exist.
+  because an attacker could [replay such a response](#replay-attacks) even when the queried domain does exist.
   Instead of mentioning the nonexistent domain in the response,
   DNSSEC achieves [authenticated denial of existence](https://datatracker.ietf.org/doc/html/rfc7129)
   by returning that no subdomain exists in a given range,
   which includes the queried domain.
   Since all domains in a zone are known to the administrator of that zone,
   the gaps between the subdomains can be determined and signed in advance.
-  For example, if you <a href="#tool-lookup-dns-records&domainName=nonexistent.example.com.&recordType=A&dnssecOk=true">query the nonexistent domain</a>
-  `nonexistent.example.com.`, you get an `NSEC` record in the authority section of the response,
-  which says that the next domain name in the zone after `example.com.` is `www.example.com.`,
+  <br>
+  For example, if you [query the nonexistent domain](#tool-lookup-dns-records&domainName=nonexistent.ef1p.com.&recordType=A&dnssecOk=true)
+  `nonexistent.ef1p.com.`, you get an `NSEC` record in the authority section of the response,
+  which says that the next domain name in the zone after `hello.ef1p.com.` is `www.ef1p.com.`,
   and an `RRSIG` record, which signs the `NSEC` record.
-  Since `nonexistent.example.com.` comes after `example.com.` and before `www.example.com.`
+  Since `nonexistent.ef1p.com.` comes after `hello.ef1p.com.` and before `www.ef1p.com.`
   in the alphabetically sorted list of subdomains in that zone,
   we now know for sure that this domain does not exist.
   The base domain of the zone,
-  which is `example.com.` in our example,
-  is not just at the beginning of this list but also at its end.
-  If you click on `www.example.com.` in the data column of the `NSEC` record
-  in order to <a href="#tool-lookup-dns-records&domainName=www.example.com.&recordType=NSEC&dnssecOk=true">query its `NSEC` record</a>,
-  you see that the next domain after `www.example.com.` is `example.com.`.
+  which is `ef1p.com.` in our example,
+  is not just at the beginning of this list but also at the end.
+  If you click on the magnifying glass after `www.ef1p.com.` in the data column of the `NSEC` record
+  in order to [query the `NSEC` record](#tool-lookup-dns-records&domainName=www.ef1p.com.&recordType=NSEC&dnssecOk=true) of `www.ef1p.com.`,
+  you see that the next domain after `www.ef1p.com.` is `ef1p.com.`.
   In other words, the list of subdomains wraps around
   for the purpose of determining the gaps to sign.
+  <br>
   Each `NSEC` record also specifies the types of records
-  that the domain which owns the specific `NSEC` record has.
-  If you query, for example, the <a href="#tool-lookup-dns-records&domainName=www.example.com.&recordType=MX&dnssecOk=true">`MX` record of `www.example.com.`</a>,
+  that the domain to which it belongs has.
+  If you query, for example, the [`MX` record of `hello.ef1p.com.`](#tool-lookup-dns-records&domainName=hello.ef1p.com.&recordType=MX&dnssecOk=true),
   you get the `NSEC` record of that domain instead.
   Since `MX` is not listed in this `NSEC` record,
   you can be certain that no such record exists.
@@ -2601,7 +3109,9 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   Since the resolver knows that the root zone has DNSSEC enabled,
   the attacker would have to be able to deny the existence of a `DS` record in an authenticated zone,
   which they cannot do thanks to the mechanism described in this paragraph.
-  In practice, your zone can only have DNSSEC enabled if all the zones above it have DNSSEC enabled.
+  In practice, your zone can have DNSSEC enabled only if all the zones above it have DNSSEC enabled.
+
+{:#zone-walking}
 - **Zone walking**: `NSEC` records create a new problem, though.
   By querying the `NSEC` record of the respective subsequent domain,
   you can enumerate all the domains in a zone,
@@ -2614,32 +3124,41 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   (the [closest one](https://hackertarget.com/find-dns-host-records/)
   I could find works completely differently),
   I built one for you,
-  using the same [Google API](https://developers.google.com/speed/public-dns/docs/doh/json) as before:
+  using the same [Google API](https://developers.google.com/speed/public-dns/docs/doh/json) as [before](#tool-lookup-dns-records):
   <div id="tool-lookup-zone-domains" class="mt-3"></div>
   Unfortunately, not many domains have DNSSEC records,
   and most of them which do use `NSEC3` rather than `NSEC`.
-  It's therefore not easy to find domains to feed into this tool.
-  Besides the domain of the [Internet Engineering Task Force (IETF)](https://www.ietf.org/),
-  [some top-level domains](https://www.farsightsecurity.com/blog/txt-record/zone-walking-20170901/)
-  also still use `NSEC` records for authenticated denial of existence.
-  Among those are [country code top-level domains](https://en.wikipedia.org/wiki/Country_code_top-level_domain)
-  such as <a href="#tool-lookup-zone-domains&startDomain=br.">.br (Brazil)</a>,
-  <a href="#tool-lookup-zone-domains&startDomain=bg.">.bg (Bulgaria)</a>,
-  <a href="#tool-lookup-zone-domains&startDomain=lk.">.lk (Sri Lanka)</a>,
-  and <a href="#tool-lookup-zone-domains&startDomain=tn.">.tn (Tunisia)</a>,
+  It's thus not easy to find domains to feed into this tool.
+  Besides the [root zone](https://en.wikipedia.org/wiki/DNS_root_zone),
+  which is [walkable](#tool-lookup-zone-domains&startDomain=.),
+  [some top-level domains (TLD)](https://www.farsightsecurity.com/blog/txt-record/zone-walking-20170901/)
+  also use `NSEC` records for authenticated denial of existence,
+  which means that one can list all domains registered under such a TLD.
+  Among those are [country-code top-level domains](https://en.wikipedia.org/wiki/Country_code_top-level_domain)
+  such as [.br (Brazil)](#tool-lookup-zone-domains&startDomain=br.),
+  [.kg (Kyrgyzstan)](#tool-lookup-zone-domains&startDomain=kg.),
+  [.lk (Sri Lanka)](#tool-lookup-zone-domains&startDomain=lk.),
+  [.lr (Liberia)](#tool-lookup-zone-domains&startDomain=lr.),
+  [.pr (Puerto Rico)](#tool-lookup-zone-domains&startDomain=pr.),
+  and [.tn (Tunisia)](#tool-lookup-zone-domains&startDomain=tn.),
   as well as [generic top-level domains](https://en.wikipedia.org/wiki/Generic_top-level_domain)
-  such as <a href="#tool-lookup-zone-domains&startDomain=help.">.help</a>,
-  <a href="#tool-lookup-zone-domains&startDomain=link.">.link</a>,
-  and <a href="#tool-lookup-zone-domains&startDomain=photo.">.photo</a>.
+  such as [.audio](#tool-lookup-zone-domains&startDomain=audio.),
+  [.auto](#tool-lookup-zone-domains&startDomain=auto.),
+  [.game](#tool-lookup-zone-domains&startDomain=game.),
+  [.hosting](#tool-lookup-zone-domains&startDomain=hosting.),
+  [.lol](#tool-lookup-zone-domains&startDomain=lol.),
+  and [.pics](#tool-lookup-zone-domains&startDomain=pics.).
+  <br>
   For security and privacy reasons, many organizations prefer
   not to expose the content of their zone so easily.
   This problem was first addressed by [RFC 4470](https://datatracker.ietf.org/doc/html/rfc4470),
   which suggested generating and signing minimally covering `NSEC` records for nonexistent domains on the fly,
   and later by [RFC 5155](https://datatracker.ietf.org/doc/html/rfc5155),
   which introduced the new record type `NSEC3`.
-  Since the former proposal abandons offline signing,
+  As the former proposal abandons offline signing,
   thereby sacrificing security for better privacy,
-  we will focus on the latter proposal.
+  we'll focus on the latter proposal in this bullet point.
+  <br>
   Instead of determining the gaps between domain names directly,
   all domain names in a zone are hashed in the case of `NSEC3`.
   These hashes are then sorted,
@@ -2654,7 +3173,7 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   Thus, if the queried domain name exists but the queried record type doesn't,
   a resolver can verify such a negative response
   by checking that the hash of the queried domain matches the start value of the received `NSEC3` record.
-  An `NSEC3` record also mentions which hash function is used,
+  An `NSEC3` record also indicates which hash function is used,
   how many times the hash function is applied to a domain name,
   and optionally a [random value](https://en.wikipedia.org/wiki/Salt_(cryptography)),
   which is mixed into the hash function in order to defend against
@@ -2667,6 +3186,7 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   The difference to just querying guessed subdomain names
   is that the search for the [preimage](https://en.wikipedia.org/wiki/Preimage_attack)
   of a hash can be done without interacting with the authoritative name server.
+  <br>
   Besides protecting the domain names with a one-way function,
   `NSEC3` also allows to skip the names of unsigned subzones
   when determining the gaps to sign by setting the
@@ -2675,17 +3195,34 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   the size of a zone can be reduced as fewer `NSEC3` records are required.
   While easily guessable subdomains, such as `www` or `mail`, have to be considered public anyway,
   `NSEC3` protects the resource records of subdomains with more random names reasonably well.
+  <br>
   Please note that the DNS query still has to include the actual domain name and not its hash.
   By just learning the hash of a subdomain,
   you don't yet know the domain name to query.
   However, it's still relatively easy to figure out the overall number of domain names in a zone
   by probing the name server with names that hash to a range
   for which you haven't seen an `NSEC3` record yet.
-  Hash functions only make it hard to find an input that hashes to a specific output,
+  Hash functions make only the task of finding an input that hashes to a specific output hard,
   but if the output just has to land in a certain range,
   then the bigger the range, the easier the problem.
   Even if you introduce additional dummy `NSEC3` records,
   you still leak an upper limit of domain names in the zone.
+
+{:#compact-denial-of-existence}
+- **Compact Denial of Existence**: Since publishing this article,
+  online signing (i.e. computing RRSIG signatures on demand instead of in advance) has become more popular.
+  In September 2025, [RFC 9824](https://datatracker.ietf.org/doc/html/rfc9824) has been published,
+  which suggests to respond to a query for a nonexistent domain
+  by claiming that the domain name exists but that it has no resource records of the queried type.
+  For this purpose, the RFC introduces a new record type `NXNAME`,
+  which can be listed in `NSEC` records to signal that the queried domain name does not exist.
+  In the next domain name field of the `NSEC` record,
+  the queried domain name is prefixed with a label consisting of a single null octet,
+  which is written as `\000`.
+  You can see this [when you query nonexistent.ietf.org](#tool-lookup-dns-records&domainName=nonexistent.ietf.org&recordType=NSEC&dnssecOk=true).
+  Zones which use this technique, such as [ietf.org](#tool-lookup-zone-domains&startDomain=ietf.org&resultLimit=10), cannot be walked.
+
+{:#wildcard-expansion}
 - **Wildcard expansion**: Last but not least,
   [wildcard records](https://en.wikipedia.org/wiki/Wildcard_DNS_record)
   make DNSSEC even more complicated.
@@ -2697,7 +3234,7 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   with `*` being the [wildcard character](https://en.wikipedia.org/wiki/Wildcard_character),
   a query for `mail.example.com.` will return the former record,
   and a query for `anything-else.example.com.` will return the latter.
-  The wildcard can only be used as the leftmost DNS label
+  The wildcard can be used only as the leftmost DNS label
   and cannot be combined with other characters on that level.
   Thus, neither `mail.*.example.com.` nor `mail*.example.com.` is a wildcard record.
   For a wildcard record to match,
@@ -2708,13 +3245,16 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   because `mail.example.com.` exists.
   Whether a wildcard name matches is determined
   independently from the queried record type.
-  For example, if `mail.example.com.` only has an `MX` record
+  For example, if `mail.example.com.` has only an `MX` record
   while `*.example.com` has an `A` record,
   then querying `mail.example.com.` for an `A` record returns no data.
   However, not all implementations adhere to these rules.
-  Without DNSSEC, DNS resolvers don't learn
+  Without DNSSEC (or when [Compact Denial of Existence](#compact-denial-of-existence) is being used
+  to [generate a response](https://datatracker.ietf.org/doc/html/rfc9824#section-3.3) for the queried domain name on the fly),
+  DNS resolvers don't learn
   whether an answer has been synthesized from a wildcard record
   or whether the returned record exists as such in the zone.
+  <br>
   Since signatures cannot be precomputed for all possible matches,
   `RRSIG` records indicate the number of labels
   in the domain name to which they belong,
@@ -2723,17 +3263,18 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   This allows a validator to reconstruct the original name,
   which is covered in the signature
   and thus required to verify the signature.
-  For example, when querying the IPv4 address of `anything.else.example.com.`,
+  For example, when querying the [IPv4 address](#internet-protocol-version-4) of `anything.else.example.com.`,
   the returned `A` record is accompanied
   by an `RRSIG` record with a label count of 2.
   This tells the validator to verify the signature for `*.example.com.`.
   If the label count was 3, it would have been `*.else.example.com.`.
+  <br>
   Equally importantly, we need to ensure
   that this wildcard `RRSIG` record cannot be replayed
   for domain names that do exist,
   such as `mail.example.com.` in our example.
   For this reason, DNSSEC mandates
-  that wildcard `RRSIG` records are only valid
+  that wildcard `RRSIG` records are valid only
   if an `NSEC` or an `NSEC3` record proves
   that the queried domain name doesn't exist.
   This means that the response to `anything.else.example.com.`
@@ -2760,143 +3301,889 @@ Allowing the signatures to be computed in advance makes DNSSEC more complicated 
   you find a longer explanation of wildcards in DNSSEC
   [here](https://datatracker.ietf.org/doc/html/rfc7129#section-5.5).
 
-Even though the Domain Name System is a core component of the Internet
-and should be secured accordingly,
-DNSSEC is [still not widely deployed](https://blog.apnic.net/2017/12/06/dnssec-deployment-remains-low/).
-If you play around with the [above tool](#tool-lookup-dns-records),
-you will note that none of the big tech companies protect their DNS records with DNSSEC.
-We can [only speculate](https://security.stackexchange.com/a/231507/228462)
-about why these companies are reluctant to deploy DNSSEC.
-If you work at a large company and know the reasoning,
-please [let me know](mailto:contact@ef1p.com).
-Personally, I can think of the following reasons:
-- **Dynamic answers**: Large companies with a lot of incoming traffic
-  provide different DNS answers for different DNS resolvers.
-  Varying the returned IP address helps with
-  [load balancing](https://en.wikipedia.org/wiki/Load_balancing_(computing))
-  because different clients connect to different servers.
-  A name server can also reply with an IP address
-  which is geographically close to the requester.
-  This is used by [content delivery networks (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network)
-  to make downloading a lot of content faster for the consumer and cheaper for the provider.
-  For example, if I <a href="#tool-lookup-dns-records&domainName=google.com&recordType=A&dnssecOk=false">resolve `google.com`</a>
-  and then do a reverse lookup by clicking on the returned IP address,
-  I get `zrh11s03-in-f14.1e100.net.` with `zrh` standing for Zurich in Switzerland.
-  (`1e100` is the scientific notation for one [googol](https://en.wikipedia.org/wiki/Googol).)
-  The problem with DNSSEC is that not individual resource records (RR) are signed
-  but rather all the returned resource records of the same type together.
-  (This is why you encounter the acronym RRset a lot in technical documents.)
-  If you combine resource records for answers dynamically based on the availability of servers,
-  then your name server has to sign them on the fly
-  and thus needs access to the private key of your zone.
-  If you only ever return a single IP address, though,
-  then each of your `A` records can simply have its own signature,
-  which can be generated in advance on an offline system.
-  In either case, this shouldn't hinder the deployment of DNSSEC.
-- **Bootstrapping**: In order to increase security,
-  DNSSEC not only needs to be deployed on servers but also on clients.
-  As long as not enough clients ask for and validate DNSSEC records,
-  there is little reason to invest in the deployment of DNSSEC on the server-side.
-  Given the Web's abundance of information,
-  I find it surprisingly difficult to figure out
-  which operating systems and browsers have DNSSEC validation
-  [enabled by default](https://security.stackexchange.com/questions/124226/why-do-browsers-or-operating-systems-not-have-default-dnssec-validation).
-  My tentative conclusion is that none of them do,
-  but I would be pleased to be proven wrong.
-- **Registrar support**: Smaller organizations and individuals typically
-  use the name servers provided and operated by their domain name registrar.
-  They can only adopt DNSSEC if their registrar supports it.
-  While [the vast majority](http://stats.research.icann.org/dns/tld_report/)
-  of [top-level domains](https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains)
-  deploy DNSSEC,
-  only [few registrars](https://blog.apnic.net/2017/12/06/dnssec-deployment-remains-low/)
-  provide DNSSEC to their customers.
-  Even if you decide to run your own name servers
-  due to a lack of support by your registrar,
-  your registrar still needs to provide a form
-  to submit your `DS` record to the parent zone.
-  Remember that registrants only have a business relationship with their registrar,
-  which is itself accredited by the registry operating the top-level domain.
-  The involvement of so many different parties is likely the main reason
-  why as of June 2019 still [only around 1%](https://taejoong.github.io/pubs/publications/spencer-2019-dnssec.pdf)
-  of domains under `.com`, `.net`, and `.org` have a `DNSKEY` record published.
-  While the support for DNSSEC by registrars is steadily increasing,
-  [RFC 7344](https://datatracker.ietf.org/doc/html/rfc7344) and [RFC 8078](https://datatracker.ietf.org/doc/html/rfc8078)
-  propose a new way to publish and update the `DS` record in the parent zone.
-  As you probably have learned by now,
-  all shortcomings of DNS are addressed by introducing new record types,
-  and these two RFCs are no different.
-  The former RFC introduces the record types `CDS` and `CDNSKEY` (where the `C` stands for child),
-  with which the child zone can indicate to the parent zone the desired content of the `DS` record.
-  This requires that the operator of the parent zone regularly polls for these records
-  and that DNSSEC is already deployed in the child zone
-  because otherwise these records are not authenticated.
-  Such a mechanism is useful for
-  [changing the key-signing keys](https://datatracker.ietf.org/doc/html/rfc6781#section-4.1.2).
-  The latter RFC suggests policies
-  that the parent can use to authenticate the `CDS` or `CDNSKEY` record of the child initially.
-  It also specifies how the child can use such a record to ask for the deletion of the `DS` record.
-  One reason to disable DNSSEC for a zone is when the domain name is transferred to a new owner
-  who cannot or doesn't want to deploy DNSSEC.
-- **Operational risks**: While classic DNS can be configured and then forgotten,
-  DNSSEC requires regular attention unless everything,
-  including updating the `DS` record in the parent zone,
-  is fully automated.
-  A failure to sign the resource records of your zone in time takes down your whole domain.
-  While this becomes easier over time
-  thanks to new standards such as the `CDS` record and better administration tools,
-  it's initially something more that a domain administrator has to learn and worry about,
-  which doesn't favor fast adoption.
-  The only reason why `ef1p.com` has DNSSEC enabled is
-  because [Gandi takes care of everything](https://docs.gandi.net/en/domain_names/advanced_users/dnssec.html).
-- **Technical dissatisfaction**: There is also technical criticism of DNSSEC.
-  As already mentioned, DNSSEC doesn't provide confidentiality.
-  Everyone with access to your network traffic
-  can see which domain names you look up.
-  The counterargument is that protocols should do one thing and do it well.
-  After reading this article,
-  you're hopefully convinced that flexibility through modularity is desirable.
-  [DNS over TLS](https://en.wikipedia.org/wiki/DNS_over_TLS)
-  achieves confidentiality in the local network.
-  The name server you connect to,
-  which is typically operated by your Internet service provider or another company,
-  still learns the queried domain name,
-  which also allows it to cache the retrieved records.<br>
-  Another common misconception about DNSSEC is
-  that TLS with public-key certificates already ensures
-  that you are connected to the right server.
-  If an attacker manages to direct you to a wrong IP address,
-  then the TLS connection will fail.
-  However, the trust model of DNSSEC is different
-  from the public-key infrastructure used by TLS.
-  Additionally, [defense in depth](https://en.wikipedia.org/wiki/Defense_in_depth_(computing))
-  is always a good idea.
-  But more importantly,
-  not all communication is protected by TLS,
-  and not all DNS records are used to establish TLS connections.
-  For example, `TXT` records are used extensively for
-  [email authentication](/email/#domain-authentication).
-  While email providers, such as [gmail.com](https://gmail.com),
-  [yahoo.com](https://yahoo.com), and [outlook.com](https://outlook.com),
-  all have such records,
-  none of them protect the integrity of these records with DNSSEC.<br>
-  DNSSEC is also criticized for its centralized trust model.
-  With the root key residing in the United States of America,
-  one country remains in control of critical Internet infrastructure.
-  While this criticism is more justified,
-  [IANA does a lot for transparency](https://www.iana.org/dnssec).
-  Moreover, other countries can simply deliver their software
-  with the key-signing keys of their
-  [country's top-level domain](https://en.wikipedia.org/wiki/Country_code_top-level_domain).
-  Nothing prevents anyone from introducing additional trust anchors.<br>
-  In my opinion, the most serious problem is that DNSSEC increases the size of DNS responses significantly.
-  This allows an attacker with limited bandwidth to send a multiple of their bandwidth to the victim's computer
-  simply by changing the source address of ignored DNS requests to the victim's IP address.
-  This is known as a [DNS amplification attack](https://en.wikipedia.org/wiki/Denial-of-service_attack#Amplification).
+{:#amplification-attacks}
+- **Amplification attacks**:
+  By including relatively large `RRSIG` records in its responses
+  and by requiring up to three `NSEC(3)` records for [wildcard expansion](#wildcard-expansion),
+  DNSSEC increases the size of DNS responses significantly.
+  While the [vast majority](https://labs.ripe.net/author/giovane_moura/fragmentation-truncation-and-timeouts-are-large-dns-messages-falling-to-bits/)
+  of DNSSEC responses still fit into a single [UDP](#user-datagram-protocol) packet
+  without having to [fall back](#transport-protocol) on [TCP](#transmission-control-protocol),
+  an attacker can send a multiple of their own bandwidth to a victim's computer
+  by [changing the source address](#ip-address-spoofing) of DNS requests with large responses to the victim's IP address.
+  This is known as a [DNS amplification attack](https://en.wikipedia.org/wiki/Denial-of-service_attack#Amplification),
+  which is a type of [denial-of-service attack](https://en.wikipedia.org/wiki/Denial-of-service_attack).
+  DNS providers [mitigate amplification attacks](https://www.cloudflare.com/dns/dnssec/dnssec-complexities-and-considerations/)
+  using techniques such as [response rate limiting (RRL)](https://kb.isc.org/docs/aa-01000).
 
-Are you still reading this?
-I'm happy to see that no amount of technical detail can deter you.
-Keep up your curiosity! 🤓
+
+##### Varied adoption
+
+Even though the [Domain Name System](#domain-name-system) is a core component of the Internet
+and should be secured accordingly,
+the deployment of DNSSEC [varies a lot](https://blog.apnic.net/2023/09/18/measuring-the-use-of-dnssec/).
+While [around a third](https://stats.labs.apnic.net/dnssec) of worldwide users
+[indirectly use](#dns-stub-resolvers) DNS resolvers which fully validate DNSSEC
+and [more than half](https://www.sidn.nl/en/news-and-blogs/majority-of-dutch-domains-and-internet-users-have-dnssec-security#dnssec-use-within-tlds)
+of all domains registered at several European [country-code top-level domains](https://en.wikipedia.org/wiki/Country_code_top-level_domain),
+such as the [Dutch (.nl)](https://en.wikipedia.org/wiki/.nl),
+[Czech (.cz)](https://en.wikipedia.org/wiki/.cz),
+[Norwegian (.no)](https://en.wikipedia.org/wiki/.no),
+[Swedish (.se)](https://en.wikipedia.org/wiki/.se),
+and [since 2025](https://www.nic.ch/export/shared/.content/files/Switch_Report_Registry_2024.pdf)
+also the [Swiss (.ch)](https://en.wikipedia.org/wiki/.ch) zone,
+use DNSSEC to authenticate their records,
+only [around 4%](https://www.verisign.com/resources/dnssec-tools/dnssec-scoreboard/) of [.com](https://en.wikipedia.org/wiki/.com) domains
+and [around 5%](https://www.verisign.com/resources/dnssec-tools/dnssec-scoreboard/) of [.net](https://en.wikipedia.org/wiki/.net) domains
+have DNSSEC enabled in 2025.
+When you play around with the [above tool](#tool-lookup-dns-records), you will note in particular that
+[none of the big tech companies](https://www.sidn.nl/en/news-and-blogs/none-of-the-biggest-internet-services-are-dnssec-enabled)
+protect their DNS records with DNSSEC.
+As these companies dominate Internet traffic,
+[around 96%](https://stats.labs.apnic.net/cfdnssecdata/) of all DNS queries are for unsigned domain names.
+The reason for their reluctance to deploy DNSSEC seems to be operational risks
+(see [this list of DNSSEC outages](https://ianix.com/pub/dnssec-outages.html) due to misconfigurations,
+which bring down a zone and its subzones with all their services)
+and overhead ([key management](https://en.wikipedia.org/wiki/Key_management) with rollovers, larger responses, and potentially on-the-fly signing)
+with limited security benefits as most of their traffic is via [HTTPS](#hypertext-transfer-protocol),
+whose communication is secured with [TLS](#transport-layer-security) and [public-key certificates](#public-key-infrastructure).
+However, DNS supports more than just [IP addresses](#internet-protocol-version-4) of webservers,
+such as [autoconfiguration of mail clients](/email/#autoconfiguration),
+[indirect resolution of mail servers](/email/#address-resolution),
+and [sender authentication of emails](/email/#fixes),
+among [many](/email/#smimea-resource-record) [other](/email/#openpgpkey-resource-record) [things](/email/#sshfp-resource-record),
+which DNSSEC secures as well.
+
+
+##### Digest computation
+
+[IANA](https://en.wikipedia.org/wiki/Internet_Assigned_Numbers_Authority)
+publishes the [key-signing key](#key-signing-keys-and-zone-signing-keys) of the [root zone](#administrative-zones)
+at [https://data.iana.org/root-anchors/root-anchors.xml](https://data.iana.org/root-anchors/root-anchors.xml):
+
+<figure markdown="block">
+
+```xml
+…
+<KeyDigest id="Kmyv6jo" validFrom="2024-07-18T00:00:00+00:00">
+  <KeyTag>38696</KeyTag>
+  <Algorithm>8</Algorithm>
+  <DigestType>2</DigestType>
+  <Digest>683D2D0ACB8C9B712A1948B27F741219298D0A450D612C483AF444A4C0FB2B16</Digest>
+  <PublicKey>AwEAAa96jeuknZlaeSrvyAJj6ZHv28hhOKkx3rLGXVaC6rXTsDc449/cidltpkyGwCJNnOAlFNKF2jBosZBU5eeHspaQWOmOElZsjICMQMC3aeHbGiShvZsx4wMYSjH8e7Vrhbu6irwCzVBApESjbUdpWWmEnhathWu1jo+siFUiRAAxm9qyJNg/wOZqqzL/dL/q8PkcRU5oUKEpUge71M3ej2/7CPqpdVwuMoTvoB+ZOT4YeGyxMvHmbrxlFzGOHOijtzN+u1TQNatX2XBuzZNQ1K+s2CXkPIZo7s6JgZyvaBevYtxPvYLw4z9mR7K2vaF18UYH9Z9GNUUeayffKC73PYc=</PublicKey>
+  <Flags>257</Flags>
+</KeyDigest>
+…
+```
+
+<figcaption markdown="span">
+The newest key-signing key of the root zone,
+formatted in the [Extensible Markup Language (XML)](https://en.wikipedia.org/wiki/XML).
+</figcaption>
+</figure>
+
+You find the same digest in [this PDF](https://www.iana.org/reports/2024/root-ksk-2024.pdf),
+which is covered with handwritten signatures by [trusted community representatives](https://www.iana.org/dnssec/tcrs).
+(Digest is just a synonym for [hash](https://en.wikipedia.org/wiki/Cryptographic_hash_function).)
+In this section, I explain [how the digest is computed](https://security.stackexchange.com/a/269147/228462).
+According to [RFC 4034](https://datatracker.ietf.org/doc/html/rfc4034#section-5.1.4),
+
+```js
+digest = digest_algorithm(DNSKEY owner name | DNSKEY RDATA);
+DNSKEY RDATA = Flags | Protocol | Algorithm | Public Key.
+```
+
+where `|` denotes [concatenation](https://en.wikipedia.org/wiki/Concatenation).
+We thus need to hash the following [binary data](#number-encoding), which I write in [hexadecimal notation](#number-encoding):
+- `\x00`: the encoding of the root domain `.`
+  (every domain name is [terminated by a length byte of zero](https://datatracker.ietf.org/doc/html/rfc1035#section-3.1)),
+- `\x01\x01`: [257](#key-signing-ceremonies) in the [flags field](https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.1)
+  (257 denotes a key-signing key, 256 a [zone-signing key](#key-signing-keys-and-zone-signing-keys)),
+- `\x03`: 3 in the [protocol field](https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.2)
+  (this value is always 3 [according to the RFC](https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.2)),
+- `\x08`: 8 in the [algorithm field](https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.3)
+  (which refers to [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem)/[SHA-256](https://en.wikipedia.org/wiki/SHA-2)
+  according to [this registry](https://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xhtml)),
+- the above public key [in binary](https://datatracker.ietf.org/doc/html/rfc4034#section-2.1.4) instead of [Base64 encoding](#text-based-protocols).
+
+We have to compute the `<DigestType>` 2 of this data,
+which according to [this registry](https://www.iana.org/assignments/ds-rr-types/ds-rr-types.xhtml) is [SHA-256](/email/#secure-hash-algorithms):
+
+<figure markdown="block">
+<div id="code-digest-computation"></div>
+<figcaption markdown="span" style="max-width: 725px;">
+
+How to compute the digest of the root zone's key-signing key.
+([`awk`](https://en.wikipedia.org/wiki/AWK) simply renders the output more nicely.)
+
+</figcaption>
+</figure>
+
+
+##### Further reading
+
+If you want to learn more about DNSSEC,
+the Dutch [registry operator](https://en.wikipedia.org/wiki/Domain_name_registry)
+[SIDN](https://en.wikipedia.org/wiki/.nl) has a
+[great FAQ](https://www.sidn.nl/en/modern-internet-standards/dnssec).
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="dns-stub-resolvers">
+DNS stub resolvers
+</summary>
+
+A big problem of [DNSSEC](#domain-name-system-security-extensions) is
+that most applications leave the resolution of domain names to the operating system [by default](#dns-configuration-recommendations)
+and most operating systems (except [OpenBSD](https://en.wikipedia.org/wiki/OpenBSD)) don't validate DNSSEC by default.
+Operating systems are usually shipped with [stub resolvers](https://datatracker.ietf.org/doc/html/rfc4033#section-7),
+which [cache responses](#distributed-database)
+but leave the recursive querying of [authoritative servers](https://datatracker.ietf.org/doc/html/rfc9499#section-6-4.36)
+to a [recursive resolver](https://en.wikipedia.org/wiki/Domain_Name_System#DNS_resolvers).
+Your computer learns which name server to query typically via [DHCP](#dynamic-host-configuration-protocol)
+(through [option 6](#wireshark-dhcp)) when joining a network.
+The [router](#hubs-switches-and-routers) often provides its own [IP address](#internet-protocol-version-4)
+and then [forwards](https://datatracker.ietf.org/doc/html/rfc9499#section-6-4.62) all [DNS queries](#domain-name-system)
+to the recursive resolver of your [Internet service provider (ISP)](https://en.wikipedia.org/wiki/Internet_service_provider).
+
+<figure markdown="block">
+{% include_relative generated/domain-name-resolution.embedded.svg %}
+<figcaption markdown="span" style="max-width: 725px;">
+
+What a typical domain name resolution looks like when you visit the domain `ef1p.com`.
+The recursive resolver first queries the authoritative server of the [root zone](https://en.wikipedia.org/wiki/DNS_root_zone) for authoritative servers of the `.com` zone
+before querying one of them for an authoritative server of the `ef1p.com` zone,
+which returns the `A` records associated with `ef1p.com`.
+(Not sending the original query to all authoritative servers is known as
+[QNAME minimization](https://blog.verisign.com/security/maximizing-qname-minimization-a-new-chapter-in-dns-protocol-evolution/)
+as described in [RFC 9156](https://datatracker.ietf.org/doc/html/rfc9156).)
+
+</figcaption>
+</figure>
+
+Many recursive resolvers validate DNSSEC, but all the resolvers before it typically don't,
+which means that they have to trust the recursive resolver and the [insecure network](#problems-with-plaintext-dns).
+Validating DNSSEC only on the recursive resolver rather than on your device leads to two problems:
+- **Insecure last mile**:
+  Ordinary DNS leaves the ["last mile"](https://www.sidn.nl/en/modern-internet-standards/dnssec#faq-What%20is%20the%20%27last%20mile'%3F)
+  from the recursive resolver of your ISP to your device vulnerable to tampering and censorship,
+  especially when using public Wi-Fis.
+  There are [several protocols to secure DNS connections](#secure-dns-connections),
+  but unfortunately, they aren't widely used because they require [manual configuration](#dns-configuration-recommendations),
+  which is [about to change](#discovery-of-designated-resolvers).
+- **Opaque upstream failure**:
+  When a recursive resolver fails to validate DNSSEC,
+  it returns the error code [`SERVFAIL`](https://en.wikipedia.org/wiki/Domain_Name_System#DNS_message_format) (server failure).
+  When receiving this generic error, which is used for many DNS problems,
+  browsers display a message such as "this site can't be reached",
+  "we're having trouble finding that site", or "server not found".
+  Such messages don't inform the user about what's causing the issue and who's fault it is,
+  making the user experience of DNSSEC failures opaque and frustrating.
+  And unlike invalid [TLS](#transport-layer-security) [certificates](#public-key-infrastructure),
+  the user cannot override the failure to connect anyway.
+  While this behavior is desirable from a security standpoint, it increases frustration in benign cases.
+  [RFC 8914](https://datatracker.ietf.org/doc/html/rfc8914), published in 2020,
+  introduced [Extended DNS Errors (EDE)](https://developers.cloudflare.com/1.1.1.1/infrastructure/extended-dns-error-codes/),
+  which allow applications to distinguish between different `SERVFAIL` causes.
+  Hopefully, this will lead to more informative error messages in the future.
+
+You can check whether your browser's DNS setup validates DNSSEC by visiting [dnssec-failed.org](http://dnssec-failed.org/),
+a [documented test site](https://www.internetsociety.org/resources/deploy360/2013/dnssec-test-sites/), for which DNSSEC validation fails.
+If you don't get an error message, your browser uses the stub resolver of your operating system
+and none of the involved resolvers validate DNSSEC.
+If you get an error, it might be that your browser uses a [different resolver path](#how-to-configure-your-browser) than your operating system.
+You can check whether any resolver in the resolver path of your operating system validates DNSSEC
+by using the [dig command](https://en.wikipedia.org/wiki/Dig_(command))
+on your [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface):
+
+<figure markdown="block">
+<div id="code-dig-without-dnssec-validation"></div>
+<figcaption markdown="span" style="max-width: 780px;">
+
+When using the default DNS resolver, I get no error
+and `dnssec-failed.org` resolves to an `A` record, which it shouldn't.
+This means that the recursive resolver of my ISP doesn't validate DNSSEC.
+I highlighted the relevant parts of the output in color.
+
+</figcaption>
+</figure>
+
+<figure markdown="block">
+<div id="code-dig-with-dnssec-validation"></div>
+<figcaption markdown="span" style="max-width: 840px;">
+
+When telling `dig` to use [Google's public DNS resolver](https://developers.google.com/speed/public-dns/docs/using) `@8.8.8.8`,
+[which validates DNSSEC](https://developers.google.com/speed/public-dns/docs/security#dnssec),
+you get the output above: The status is `SERVFAIL` and under `OPT PSEUDOSECTION:`
+follows the [Extension Mechanisms for DNS (EDNS)](https://en.wikipedia.org/wiki/Extension_Mechanisms_for_DNS)
+as specified in [RFC 6891](https://datatracker.ietf.org/doc/html/rfc6891).
+In EDNS, the [option code 15](https://datatracker.ietf.org/doc/html/rfc8914#section-2-5.1) (`OPT=15`)
+stands for [Extended DNS Errors (EDE)](https://datatracker.ietf.org/doc/html/rfc8914).
+The EDE data, which I highlighted in blue, is printed in [hexadecimal](#number-encoding) on a single line.
+The [first two bytes](https://datatracker.ietf.org/doc/html/rfc8914#section-2-5.5), which I underlined, contain the EDE error code.
+Error code 9 means [DNSKEY missing](https://datatracker.ietf.org/doc/html/rfc8914#section-4.10).
+The remaining bytes contain a short, human-readable explanation
+[encoded](#text-encoding) [in UTF-8](https://datatracker.ietf.org/doc/html/rfc8914#section-2-5.7).
+`dig` renders the text in parentheses after the raw bytes.
+The two periods represent the error code in the first two bytes, which cannot be printed.
+Since [ASCII is a subset of UTF-8](#text-encoding),
+you can use the [ASCII table](https://en.wikipedia.org/wiki/ASCII#Printable_character_table)
+to decode the remaining bytes: 4e → N, 6f → o, 20 → space, and so on.
+Newer versions of `dig` render the blue line more nicely.
+
+</figcaption>
+</figure>
+
+Google's custom name server replies to requests for the `TXT` record of `o-o.myaddr.l.google.com`
+with the [IP address](#internet-protocol-version-4) of the requester.
+This allows you to determine the IP address of your current recursive resolver with the following command
+on your [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface):
+`dig +short o-o.myaddr.l.google.com TXT`{:.enable-click-to-copy}.
+When you query Google's authoritative name server directly with
+`dig @ns1.google.com +short o-o.myaddr.l.google.com TXT`{:.enable-click-to-copy},
+you get the IP address of your computer
+(or of [your router](#hubs-switches-and-routers)
+after [network address translation](#network-address-translation)).
+([Akamai](https://en.wikipedia.org/wiki/Akamai_Technologies) provides a
+[similar service](https://www.akamai.com/blog/developers/introducing-new-whoami-tool-dns-resolver-information).)
+(Click on the two commands to copy them.)
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="secure-dns-connections">
+Secure DNS connections
+</summary>
+
+
+##### Problems with plaintext DNS
+
+The [classic DNS protocol](#transport-protocol), which is sometimes called
+[DNS over UDP and TCP port 53 (Do53)](https://en.wikipedia.org/wiki/Domain_Name_System#Conventional:_DNS_over_UDP_and_TCP_port_53_(Do53)),
+is neither [encrypted](https://en.wikipedia.org/wiki/Encryption) nor [authenticated](https://en.wikipedia.org/wiki/Message_authentication_code),
+which leads to the following problems:
+- **Privacy**:
+  Since [most Wi-Fi networks aren't secure](#wi-fi-protected-access),
+  all devices in your network can learn about [all the domain names that you look up](#screenshots-of-examples).
+  This is especially bad when using the public Wi-Fi in restaurants, hotels, and airports.
+  While the privacy risk is most acute in your local network for your communication with the [recursive resolver](#dns-stub-resolvers),
+  it still exists for the communication [between the recursive resolver and authoritative servers](#between-recursive-resolvers-and-authoritative-servers),
+  especially [when using ECS](#edns-client-subnet).
+- **Security**:
+  While [DNSSEC](#domain-name-system-security-extensions) prevents bogus and censored DNS replies,
+  it is [rarely validated on your device](#dns-stub-resolvers),
+  which makes [secure DNS protocols](#secure-dns-protocols) essential also for security.
+  There are two scenarios to consider:
+  - **Communication with the router**:
+    If you cannot verify that a reply comes [from the router](#dns-stub-resolvers) (or the recursive resolver behind it),
+    [any device on your Wi-Fi network](#wi-fi-protected-access) can respond to your DNS queries faster than the router,
+    thereby [poisoning your cache](https://en.wikipedia.org/wiki/DNS_spoofing) with malicious records
+    (including malicious [negative responses](https://en.wikipedia.org/wiki/Negative_cache) for censoring).
+    This is known as a DNS race attack.
+  - **Communication with a custom resolver**:
+    By default, your operating system uses the recursive resolver [provided by the router](#dns-stub-resolvers).
+    As you have no idea who operates the router in a public network and whether the router is properly maintained or compromised,
+    you should configure your devices to use a [recursive resolver of your choosing](#dns-configuration-recommendations).
+    Since all communication with the custom resolver passes through the potentially malicious router,
+    a custom resolver improves your security only if the communication with it is secure.
+
+The rest of this box goes into technical details about [secure DNS protocols](#secure-dns-protocols)
+and how to [discover](#discovery-of-designated-resolvers) [them](#discovery-of-network-designated-resolvers).
+If you're not a software engineer, I suggest you continue with [how to configure your device](#dns-configuration-recommendations)
+to improve the privacy and security of your [DNS setup](#dns-stub-resolvers).
+
+
+##### Secure DNS protocols
+
+The [Internet Engineering Task Force (IETF)](#request-for-comments) standardized three encrypted and authenticated
+[transport protocols for DNS](https://en.wikipedia.org/wiki/Domain_Name_System#Transport_protocols):
+
+| Name | RFC | Over | Port | Framing | Authentication | [ALPN](https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation) identifier
+|-
+| [**DNS over TLS (DoT)**](https://en.wikipedia.org/wiki/DNS_over_TLS) | [RFC 7858](https://datatracker.ietf.org/doc/html/rfc7858) | [TLS](#transport-layer-security) | 853 ([TCP](#transmission-control-protocol)) | 2-byte length prefix | Optional | `dot`
+| [**DNS over HTTPS (DoH)**](https://en.wikipedia.org/wiki/DNS_over_HTTPS) | [RFC 8484](https://datatracker.ietf.org/doc/html/rfc8484) | [HTTPS](#hypertext-transfer-protocol) | 443 | HTTP framing | Mandatory | `h2` or `h3`
+| [**DNS over QUIC (DoQ)**](https://en.wikipedia.org/wiki/Domain_Name_System#DNS_over_QUIC_(DoQ)) | [RFC 9250](https://datatracker.ietf.org/doc/html/rfc9250) | [QUIC](#quic) | 853 ([UDP](#user-datagram-protocol)) | 2-byte length prefix | Encouraged | `doq`
+{:.text-nowrap}
+
+All three protocols use the same [binary encoding](#text-based-protocols)
+that is used in the [classic DNS protocol](#problems-with-plaintext-dns) on [port 53](#transport-protocol).
+DoT and DoQ prefix the DNS message with its length [encoded in two bytes](#number-encoding)
+exactly [like DNS over TCP](https://datatracker.ietf.org/doc/html/rfc1035#section-4.2.2).
+DoH works over any [HTTP](#hypertext-transfer-protocol) version with either:
+- [`POST`](https://en.wikipedia.org/wiki/POST_(HTTP)):
+  The binary DNS message is sent in the HTTP message body with the header
+  [`Content-Type:`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type) `application/dns-message`.
+  In HTTP/1.1, its size is conveyed via the [`Content-Length` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Length).
+  In HTTP/2 and HTTP/3, the length of the DNS message is inferred from the [`DATA` frames](https://datatracker.ietf.org/doc/html/rfc9113#section-6.1).
+  Clients should set the [Accept header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Accept) to `Accept: application/dns-message`.
+- [`GET`](https://en.wikipedia.org/wiki/HTTP#Method):
+  The binary DNS message is [base64url](https://datatracker.ietf.org/doc/html/rfc4648#section-5)-encoded
+  (i.e. [Base64](#text-based-protocols)-encoded with `-` instead of `+` and `_` instead of `/`)
+  and passed in the [query parameter](https://en.wikipedia.org/wiki/Query_string) with the name `dns`
+  as part of the [URL](https://en.wikipedia.org/wiki/URL).
+  There is no length indication for this parameter.
+
+Each DoH server [can choose](https://datatracker.ietf.org/doc/html/rfc8484#section-3)
+the [path](https://en.wikipedia.org/wiki/URL#Syntax) at which it provides the service.
+This allows a single server to host several DoH [endpoints](https://en.wikipedia.org/wiki/Web_API#Endpoints) with different properties.
+The path is typically [`/dns-query`](https://datatracker.ietf.org/doc/html/rfc8484#section-4.1.1),
+which results in [URI Templates](https://datatracker.ietf.org/doc/html/rfc6570)
+such as [`https://dns.google/dns-query{?dns}`](https://developers.google.com/speed/public-dns/docs/doh).
+(Google also provides a [JSON](https://en.wikipedia.org/wiki/JSON) [API](https://en.wikipedia.org/wiki/Web_API)
+at [`https://dns.google/resolve?`](https://developers.google.com/speed/public-dns/docs/doh/json),
+which I use in the [DNS tool](#dns-lookup-tool) above.
+While other companies use the same format, the JSON API isn't standardized.
+In particular, the format doesn't adhere to [RFC 8427](https://datatracker.ietf.org/doc/html/rfc8427).)
+Please note that for both endpoints, the [HTTP response status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)
+can be [200 (success)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) even when the DNS lookup failed,
+for example due to `SERVFAIL` or `NXDOMAIN`.
+You have to check the [DNS response code](https://en.wikipedia.org/wiki/Domain_Name_System#DNS_message_format).
+(In the JSON API, the field is called [`Status`](https://developers.google.com/speed/public-dns/docs/doh/json#dns_response_in_json).)
+
+While the outgoing [port](#port-numbers) of DoT and DoQ might get blocked by a [firewall](#firewall) on a [router](#hubs-switches-and-routers),
+DoH looks like normal [web traffic](https://en.wikipedia.org/wiki/Web_traffic),
+which is a form of [tunnelling](https://en.wikipedia.org/wiki/Tunneling_protocol#Circumventing_firewall_policy).
+The additional [round trips](#network-performance) of these secure DNS protocols when compared to classic DNS over [UDP](#user-datagram-protocol)
+can be amortized by keeping the connection to the resolver alive for future queries.
+
+DoH [requires](https://datatracker.ietf.org/doc/html/rfc8484#section-8.1)
+that the client authenticates the [DNS resolver](#dns-stub-resolvers) with a [X.509 certificate](#public-key-infrastructure).
+DoT, on the other hand, can be used [opportunistically](https://datatracker.ietf.org/doc/html/rfc7858#section-4.1),
+for example when only an [IP address](#internet-protocol-version-4) but no [domain name](#name-registration) of the resolver is known.
+While [opportunistic encryption](https://en.wikipedia.org/wiki/Opportunistic_encryption) provides [privacy](#problems-with-plaintext-dns)
+in the presence of a [passive attacker](https://en.wikipedia.org/wiki/Passive_attack)
+and is thus preferable to communicating in [plaintext](https://en.wikipedia.org/wiki/Plaintext),
+not authenticating the resolver leaves the client vulnerable to
+a [man-in-the-middle attack](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) by an active attacker.
+If the resolver's [hostname](https://en.wikipedia.org/wiki/Hostname) is known and the resolver supports DoT,
+the client shouldn't fall back to [classic DNS](#transport-protocol) on (attacker-induced) failure.
+
+
+##### SVCB and HTTPS resource records
+
+[RFC 9460](https://datatracker.ietf.org/doc/html/rfc9460) introduces two new [resource record types](#resource-record-types)
+to improve performance, privacy, and security when accessing services:
+
+{:#svcb-resource-records}
+- `SVCB` (contraction of "service binding") records inform [clients](#client-server-model) how to connect to a given service before opening a connection.
+  When a client wants to connect to the service identified by the [URL](https://en.wikipedia.org/wiki/URL) `scheme://host:port`,
+  it looks up the `SVCB` records [at the domain](https://datatracker.ietf.org/doc/html/rfc9460#section-2.3) `_port._scheme.host`
+  if `SVCB` records are defined for the given `scheme` and the client supports them.
+  Using subdomains starting with an underscore under the domain to which the records actually apply
+  follows the "Attribute Leaves" naming convention formalized in [RFC 8552](https://datatracker.ietf.org/doc/html/rfc8552).
+  Schemes which define the use of `SVCB` records [must be registered](https://datatracker.ietf.org/doc/html/rfc9460#section-11)
+  with the [Internet Assigned Numbers Authority (IANA)](https://en.wikipedia.org/wiki/Internet_Assigned_Numbers_Authority) for inclusion
+  in the ["Underscored and Globally Scoped DNS Node Names"](https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#underscored-globally-scoped-dns-node-names)
+  and ["Uniform Resource Identifier (URI) Schemes"](https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml#uri-schemes-1) registries.
+  Schemes [can specify](https://datatracker.ietf.org/doc/html/rfc9460#section-2.3) not to use the `_port` subdomain or to use it only for non-default ports.
+  The scheme and port subdomains separate the `SVCB` records for different services without having to introduce a new record type for each service.
+  [DNSSEC](#domain-name-system-security-extensions) [is optional](https://datatracker.ietf.org/doc/html/rfc9460#section-12) for `SVCB` records.
+  Before looking at examples of `SVCB` records in the [next bullet point](#https-resource-records) and a [later section](#discovery-of-designated-resolvers),
+  we study their [format](https://datatracker.ietf.org/doc/html/rfc9460#section-2)
+  and the [motivation](https://datatracker.ietf.org/doc/html/rfc9460#section-1.1) for introducing them:
+  - **Alternative endpoints**:
+    One goal of `SVCB` records is to let clients discover alternative endpoints for a given service.
+    In this regard, `SVCB` records are similar to [`MX` records](/email/#address-resolution) and [`SRV` records](/email/#autoconfiguration).
+    But while `MX` and `SRV` records tell clients only where to connect (i.e. the host name and the [port number](#port-numbers)),
+    `SVCB` records also tell clients how to connect (e.g. which protocols are supported and how to encrypt sensitive information).
+    `SVCB` records can be used to indicate fallback servers in case the primary server doesn't respond
+    or to [balance the load](https://en.wikipedia.org/wiki/Load_balancing_(computing)) among several servers,
+    including ones geographically closer to the client via a [content delivery network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network).
+    `SVCB` records consist of [three fields](https://datatracker.ietf.org/doc/html/rfc9460#section-1.2):
+    - **Priority**:
+      A number indicating the priority of this endpoint relative to others.
+      Endpoints with lower priority values are preferred.
+      When a domain has several `SVCB` records for a given scheme and port with the same priority value,
+      clients [should shuffle](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.1) the order of these records.
+      Clients [should try](https://datatracker.ietf.org/doc/html/rfc9460#section-3) higher-priority endpoints (i.e. those with lower priority values),
+      before falling back to lower-priority alternatives.
+      If all endpoints fail and the use of `SVCB` records is optional for the scheme at hand,
+      clients should attempt to connect to the service as if no `SVCB` records exist [before giving up](https://datatracker.ietf.org/doc/html/rfc9460#section-3).
+    - **Target**:
+      The domain name of the endpoint.
+      When connecting to the endpoint, clients must validate that the [TLS](#transport-layer-security) [certificate](#public-key-infrastructure)
+      has been issued to the [original service identity](https://datatracker.ietf.org/doc/html/rfc9460#section-2.3),
+      which is typically the `host` name (without the `_port` and `_scheme` subdomains).
+      Accordingly, clients also have to [indicate the original service name](https://datatracker.ietf.org/doc/html/rfc9460#section-9.4)
+      in the [SNI extension](#wireshark-sni) of TLS.
+      Since the specification doesn't require [DNSSEC](#domain-name-system-security-extensions),
+      it has to assume that [DNS records can be forged](#problems-with-plaintext-dns).
+      By authenticating the endpoint with the service identity instead of the target name,
+      the [public-key infrastructure](#public-key-infrastructure) prevents an attacker from injecting their own endpoint.
+      This validation rule has to be followed [even if the `SVCB` record is DNSSEC-signed](https://datatracker.ietf.org/doc/html/rfc9460#section-12).
+      If the target is [just a period](https://datatracker.ietf.org/doc/html/rfc9460#section-2.5.2) (`.`),
+      it is replaced with the domain to which the `SVCB` record belongs.
+      This [includes potential `_port` and `_scheme` subdomains](https://datatracker.ietf.org/doc/html/rfc9460#section-10.3).
+      If the [owner name](https://datatracker.ietf.org/doc/html/rfc1034#section-3.6) includes a [wildcard](#wildcard-expansion),
+      the [synthesized name](https://datatracker.ietf.org/doc/html/rfc9460#section-2.5.2) is used as the target.
+    - **Parameters**:
+      A [space-separated list](https://datatracker.ietf.org/doc/html/rfc9460#section-2.1) of `key=value` pairs,
+      providing useful information for connecting to this endpoint.
+      The `=value` part is optional, the pairs may appear in any order, and each key should appear only once.
+      This is just the [presentation format](https://datatracker.ietf.org/doc/html/rfc9460#section-2.1);
+      the parameters are [encoded differently](https://datatracker.ietf.org/doc/html/rfc9460#section-2.2),
+      using their identifier from the ["SVCB Service Parameter Keys"](https://www.iana.org/assignments/dns-svcb/dns-svcb.xhtml) registry.
+      By including the connection parameters in the `SVCB` record, different endpoints can have different capabilities.
+      An example of a parameter is [`port`](https://datatracker.ietf.org/doc/html/rfc9460#section-7.2),
+      which makes it possible to serve a service from non-default [ports](#port-numbers).
+  - **Protocol upgrades**:
+    Service endpoints can inform clients about the protocols that they support with the [`alpn` parameter](https://datatracker.ietf.org/doc/html/rfc9460#section-7.1).
+    ALPN stands for [Application-Layer Protocol Negotiation](https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation),
+    which is a [TLS](#transport-layer-security) extension with which the client and the server can agree on which application-layer protocol to use
+    without requiring additional round trips on the [application layer](#application-layer).
+    The value of this parameter consists of a [comma-separated list](https://datatracker.ietf.org/doc/html/rfc9460#section-7.1.1) of ALPN identifiers
+    from [this IANA registry](https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids).
+  - **Public key info**:
+    As explained [earlier](#content-confidentiality),
+    clients typically indicate the name of the server they want to connect to in plaintext during the TLS handshake.
+    The proposal [Encrypted ClientHello (ECH)](https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-25)
+    allows clients to encrypt the server name with the [public key](#public-key-encryption) of the server.
+    This public key can be advertised to clients via the [`ech` parameter](https://datatracker.ietf.org/doc/html/draft-ietf-tls-svcb-ech-08#section-3)
+    of `SVCB` and `HTTPS` records.
+  - **Apex aliasing**:
+    It's quite common on the Internet that you don't run the services provided under your domain yourself.
+    Ideally, you want to leave the decision of how to provide a specific service to your service provider.
+    In particular, the service provider shall decide under which addresses it provides the given service.
+    If the service is served at a [subdomain](https://en.wikipedia.org/wiki/Subdomain) of your main domain (such as `www.`),
+    you can use a [`CNAME` record](https://en.wikipedia.org/wiki/CNAME_record) at this subdomain
+    to point this subdomain to the domain of the service provider.
+    Anyone who resolves an address record (`A` or `AAAA`) of your subdomain will then query the domain of the service provider instead.
+    Since DNS resolvers continue the resolution at the domain name referenced in the `CNAME` record for any record type,
+    a domain name with a `CNAME` record cannot have any other resource records.
+    Since there must be a [start of authority (SOA) record](https://en.wikipedia.org/wiki/SOA_record) at the root of a zone,
+    you cannot use `CNAME` records on your main domain at the root of the zone, which is called the apex domain.
+    For this reason, you typically had to replicate all address records of your service provider when you wanted to use the apex domain.
+    (For example, see [these instructions](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site#configuring-an-apex-domain)
+    for [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).)
+    <br>
+    `SVCB` and `HTTPS` records finally allow you to delegate operational control of apex domains.
+    To do so, you set the priority value of the record to 0 and specify [the alias as the target](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.2).
+    When the priority value is 0, the record is said to be in alias mode.
+    In this mode, any service parameters [are ignored](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.2).
+    When the priority value is greater than 0, the record is in service mode.
+    All resource records of a domain [should have the same mode](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.1)
+    and there should be [only one record in alias mode](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.2).
+    When using alias mode, the resolution of other record types, such as `SOA`, [is not affected](https://datatracker.ietf.org/doc/html/rfc9460#section-2.4.2).
+    Clients continue to resolve the target name only when accessing the specific service.
+    The target name is queried for `SVCB` records [without adding subdomain prefixes](https://datatracker.ietf.org/doc/html/rfc9460#section-3).
+    As long as the target name has address records, clients are supposed to use the target as an endpoint (with default connection parameters)
+    even [when the target has no `SVCB` records](https://datatracker.ietf.org/doc/html/rfc9460#section-3).
+    When an `SVCB` record is in alias mode, a period (`.`) as the target means
+    that [the service is not available](https://datatracker.ietf.org/doc/html/rfc9460#section-2.5.1).
+    Until most clients know how to follow `SVCB` records,
+    you still need to replicate all the address records of your service provider at your domain, unfortunately.
+
+{:#https-resource-records}
+- `HTTPS` resource records:
+  As explained in the [previous bullet point](#svcb-resource-records),
+  `SVCB` records use subdomains for the scheme and the port to keep the records of different services apart.
+  Since [HTTP](#hypertext-transfer-protocol) is such an important service,
+  a special resource record type with the name `HTTPS` [has been introduced](https://datatracker.ietf.org/doc/html/rfc9460#section-9).
+  `HTTPS` records have the same syntax and semantics as `SVCB` records.
+  What makes them special is that no subdomains are used [for the default port 443](https://datatracker.ietf.org/doc/html/rfc9460#section-9.1).
+  By attaching `HTTPS` records directly to the name of the service without any prefixes,
+  they can be used on [wildcard domains](#wildcard-expansion), which are commonly used with HTTP.
+  (The wildcard `*` can be used only as the leftmost DNS label, i.e. you cannot specify `_443._https.*.example.com`.)
+  Another advantage of attaching `HTTPS` records directly to the service name is
+  that the targets of existing `CNAME` delegations can return `HTTPS` records without requiring any changes from the owner of the delegating domain.
+  If, [for example](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site#configuring-a-subdomain),
+  there's a `CNAME` from `www.example.com` to `github.io`,
+  a client which looks for `HTTPS` records at `www.example.com` will find the `HTTPS` records at `github.io`.
+  If there was no special `HTTPS` record type which doesn't require the use of subdomains,
+  a client would look for `SVCB` records at `_443._https.www.example.com` and find nothing
+  because the domain owner hasn't delegated `_443._https.www.example.com` to `_443._https.github.io`.
+  Since `HTTPS` records have been introduced, clients [must not query `SVCB` records for the `https` scheme](https://datatracker.ietf.org/doc/html/rfc9460#section-9).
+  Moreover, clients [must convert the scheme `http` to `https`](https://datatracker.ietf.org/doc/html/rfc9460#section-9.1) before looking up `HTTPS` records.
+  If they find an `HTTPS` record, they should communicate [only over a secure transport protocol](https://datatracker.ietf.org/doc/html/rfc9460#section-9.5)
+  (i.e. via `https` instead of `http`).
+  This security opt-in is similar to [HTTP Strict Transport Security (HSTS)](/email/#http-strict-transport-security)
+  and can be reason enough to use an `HTTPS` record of `1` `.` if your domain name registrar supports `HTTPS` records.
+  If DNS responses are cryptographically protected (by using [DNSSEC](#domain-name-system-security-extensions)
+  or one of the above [secure DNS protocols](#secure-dns-protocols)),
+  clients should not connect to the service if the DNS resolution fails
+  in order to [prevent downgrade attacks](https://datatracker.ietf.org/doc/html/rfc9460#section-3.1).
+  [All major browsers query `HTTPS` records](https://blog.apnic.net/2023/12/18/use-of-https-resource-records/#current-use) before opening a connection.
+  (We saw an [example of this](#wireshark-dns) when we [captured network traffic](#capturing-network-traffic).)
+  <br>
+  Let's look at a few examples of `HTTPS` records using the [DNS lookup tool](#dns-lookup-tool) from above:
+  - **Protocol upgrades**: [google.com](#tool-lookup-dns-records&domainName=google.com&recordType=HTTPS) has an `HTTPS` record of `1 . alpn=h2,h3`,
+    where `h2` stands for `HTTP/2` and `h3` for `HTTP/3`, which is also known as [QUIC](#quic).
+    This allows clients to use `HTTP/3` from the first connection instead of discovering support for `HTTP/3`
+    via the [`Alt-Svc` response header field](https://datatracker.ietf.org/doc/html/rfc7838) on an `HTTP/2` connection.
+    You can see which protocol your browser uses to fetch a particular resource by opening the "Network" tab
+    of your browser's [developer tools](https://en.wikipedia.org/wiki/Web_development_tools)
+    and enabling the "Protocol" column by right-clicking on any column header in the request list.
+  - **Public key info**: [cloudflare-ech.com](#tool-lookup-dns-records&domainName=cloudflare-ech.com&recordType=HTTPS)
+    has an `HTTPS` record with an `ech` parameter for an [Encrypted ClientHello (ECH)](https://datatracker.ietf.org/doc/html/draft-ietf-tls-esni-25).
+  - **Alias mode**: The [Estonian Public Broadcasting](https://en.wikipedia.org/wiki/Eesti_Rahvusringh%C3%A4%C3%A4ling) organization
+    uses an `HTTPS` record at their apex domain [err.ee](#tool-lookup-dns-records&domainName=err.ee&recordType=HTTPS)
+    to announce that its website is served at `www.err.ee`.
+    Since such an alternative endpoint doesn't affect what's displayed in the [address bar](https://en.wikipedia.org/wiki/Address_bar) of your browser,
+    they still redirect visitors to the `www` subdomain by using the [`Location` response header field](https://en.wikipedia.org/wiki/HTTP_location).
+
+
+##### SVCB and HTTPS performance considerations
+
+Ideally, your browser could ask for the `A` and the `HTTPS` records of the website you're visiting in the same query.
+Unfortunately, DNS messages can contain at most one question for now.
+(While it is syntactically possible to have more than one question in a DNS message,
+[RFC 9619](https://datatracker.ietf.org/doc/html/rfc9619) forbids such messages because the semantics of the per-message flags isn't clear in this case.
+There is a [proposal to allow clients to query several record types](https://datatracker.ietf.org/doc/draft-ietf-dnssd-multi-qtypes/)
+in a single message, but so far this is just a proposal.)
+
+The following three techniques are used in practice to increase the performance of `SVCB` and `HTTPS` lookups:
+- **Parallel lookups**: Clients should query the address records of the predicted target name [in parallel](https://datatracker.ietf.org/doc/html/rfc9460#section-5).
+- **Address hints**: `SVCB` and `HTTPS` records can include address hints
+  in the [`ipv4hint` and `ipv6hint` parameters](https://datatracker.ietf.org/doc/html/rfc9460#section-7.3)
+  so that clients can start connecting to the service without having to wait for the address lookups to complete.
+- **Additional section**: [Authoritative servers](#administrative-zones) and [recursive resolvers](#dns-stub-resolvers)
+  are encouraged to include `A`, `AAAA`, and `SVCB`/`HTTPS` records of the target name
+  in the ["Additional" section of the DNS response](https://datatracker.ietf.org/doc/html/rfc9460#section-4).
+
+
+##### SVCB records for DNS
+
+Now that we know [what `SVCB` records are](#svcb-and-https-resource-records),
+we can go back to [secure DNS protocols](#secure-dns-protocols) and how to discover them.
+[RFC 9461](https://datatracker.ietf.org/doc/html/rfc9461) specifies how `SVCB` records are used for [DNS](#domain-name-system).
+Since there's no default (secure) DNS protocol, the [`alpn` parameter](#svcb-resource-records)
+[has to be provided](https://datatracker.ietf.org/doc/html/rfc9461#section-4.1).
+The [ALPN](https://en.wikipedia.org/wiki/Application-Layer_Protocol_Negotiation) identifier is `dot` for [DoT](#secure-dns-protocols)
+and `doq` for [DoQ](#secure-dns-protocols).
+[DoH](#secure-dns-protocols) is indicated by providing the [HTTP](#hypertext-transfer-protocol) version `h2` or `h3`.
+The [RFC](#request-for-comments) also introduces the parameter [`dohpath`](https://datatracker.ietf.org/doc/html/rfc9461#section-5),
+which specifies the [DoH path](#secure-dns-protocols) and has to be provided when DoH is supported.
+
+
+##### Discovery of Designated Resolvers (DDR) {#discovery-of-designated-resolvers}
+
+[RFC 9462](https://datatracker.ietf.org/doc/html/rfc9462) introduces Discovery of Designated Resolvers (DDR).
+DDR allows clients to query their [existing resolver](#dns-stub-resolvers) for a [secure DNS endpoint](#secure-dns-protocols).
+If a client knows only the [IP address](#internet-protocol-version-4) of their current resolver, which is common,
+it queries this resolver for [`SVCB` records](#svcb-and-https-resource-records) at the special name `_dns.resolver.arpa`{:.enable-click-to-copy}.
+If the resolver supports DDR, it answers with [secure DNS endpoints](#svcb-records-for-dns).
+The domain `resolver.arpa` doesn't exist in the [global DNS namespace](#name-registration)
+and DNS resolvers [should not forward queries](https://datatracker.ietf.org/doc/html/rfc9462#section-6.1) for this domain name.
+(Since the domain [`.arpa` is walkable](#tool-lookup-zone-domains&startDomain=arpa.&resultLimit=30),
+it's easy to see that there's no `resolver.arpa` domain.)
+As the client [cannot trust the received `SVCB` records](#problems-with-plaintext-dns)
+([DNSSEC](#domain-name-system-security-extensions) cannot protect such [local domains](https://en.wikipedia.org/wiki/.local)),
+the secure endpoint must either present a valid [TLS certificate](#public-key-infrastructure)
+where the IP address of the original (insecure) resolver
+is listed in the [Subject Alternative Name](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6)
+or have the same IP address as the insecure resolver.
+The former is called [Verified Discovery](https://datatracker.ietf.org/doc/html/rfc9462#section-4.2),
+the latter [Opportunistic Discovery](https://datatracker.ietf.org/doc/html/rfc9462#section-4.3).
+These requirements prevent a local attacker from injecting a malicious resolver (while still being able to block the discovery).
+Alternatively, a secure endpoint can be [confirmed explicitly by the user](https://datatracker.ietf.org/doc/html/rfc9462#section-4.1).
+In a typical home network, the router [acts as the resolver](#dns-stub-resolvers) and also does [network address translation](#network-address-translation).
+As a consequence, your devices address the router with a [private IP address](https://en.wikipedia.org/wiki/Private_network).
+Since [certification authorities](#public-key-infrastructure) don't issue certificates for private IP addresses,
+only Opportunistic Discovery can be used in such a network
+and the client doesn't validate the TLS certificate at all.
+Note that the client is supposed to upgrade only to a secure resolver
+which is operated by the same (or at least a related) entity as the original resolver.
+This is why the new (secure) resolver is called the Designated Resolver.
+By auto-upgrading only to a resolver that your network admin intended you to use,
+any existing policy regarding [internal network names](#side-effects), filtering, parental control, and logging is preserved.
+If a [classic DNS resolver](#problems-with-plaintext-dns) is known with a domain name,
+the client queries `_dns.<resolver-name>` instead of `_dns.resolver.arpa` for `SVCB` records
+and validates that the TLS certificate of the secure endpoint covers the known `<resolver-name>`.
+
+You can check whether your default resolver supports DDR by running `dig _dns.resolver.arpa SVCB +norecurse`{:.enable-click-to-copy}
+on your [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface).
+(`+norecurse` tells the resolver not to ask other resolvers by switching off the Recursion Desired (RD) bit in the query, which is on by default.)
+The [`dig` command](https://en.wikipedia.org/wiki/Dig_(command)) understands `SVCB`
+only from [version 9.16.21](https://bind9.readthedocs.io/en/v9.16.21/notes.html#new-features).
+(You can check your version with `dig -v`{:.enable-click-to-copy}).
+Before that, you have to use `TYPE64` instead of `SVCB` (and `TYPE65` instead of `HTTPS`),
+i.e. `dig _dns.resolver.arpa TYPE64 +norecurse`{:.enable-click-to-copy},
+and the resource records are displayed in the generic representation format
+as specified in [RFC 3597](https://datatracker.ietf.org/doc/html/rfc3597),
+i.e. `\# <length> <hex-encoded data>`.
+Note that you can [look up `_dns.resolver.arpa`](#tool-lookup-dns-records&domainName=_dns.resolver.arpa&recordType=SVCB)
+with the [tool above](#dns-lookup-tool),
+but unless you configured your computer to use [Google's DNS server](https://developers.google.com/speed/public-dns/docs/using),
+the found records are not relevant for you.
+
+[Windows 11](https://techcommunity.microsoft.com/blog/networkingblog/making-doh-discoverable-introducing-ddr/2887289)
+and [Apple's](https://mailarchive.ietf.org/arch/msg/add/rMJOhpvh1zBpnjBMtT8tN4NQFtk/) [devices](https://developer.apple.com/videos/play/wwdc2022/10079/)
+support DDR (and [DNR](#discovery-of-network-designated-resolvers)),
+but even if DDR becomes more widespread on resolvers, you should [configure DNS yourself](#dns-configuration-recommendations) for better security.
+
+
+##### Discovery of Network-designated Resolvers (DNR) {#discovery-of-network-designated-resolvers}
+
+[RFC 9463](https://datatracker.ietf.org/doc/html/rfc9463) introduces Discovery of Network-designated Resolvers (DNR).
+DNR extends [DHCP](#dynamic-host-configuration-protocol) and
+[Router Advertisements (RA)](https://en.wikipedia.org/wiki/Neighbor_Discovery_Protocol) of [IPv6](#internet-protocol-version-6)
+so that the network can designate a [resolver](#dns-stub-resolvers)
+which supports one of the [secure DNS protocols](#secure-dns-protocols).
+The information provided by the router includes a service priority, the domain name used for [TLS authentication](#transport-layer-security),
+the [IP address](#internet-protocol-version-4) of the resolver,
+and [service parameters](https://datatracker.ietf.org/doc/html/rfc9463#section-3.1.5),
+such as the supported protocols, the [port number](#port-numbers), and the [DoH path](#secure-dns-protocols).
+Whereas [DDR](#discovery-of-designated-resolvers) requires the client to query for secure DNS endpoints,
+DNR lets the router announce them to the client (and the information is transported inside of DHCP/RA instead of [DNS](#domain-name-system)).
+Since the client cannot authenticate the router,
+DNR is vulnerable to [spoofing attacks](https://datatracker.ietf.org/doc/html/rfc9463#section-7.1).
+
+
+##### Between recursive resolvers and authoritative servers
+
+So far in this box, we have looked only at how to secure the [last mile from your device to the recursive (or forwarding) resolver](#dns-stub-resolvers).
+However, the [privacy and security issues of the classic DNS protocol](#problems-with-plaintext-dns)
+are also present in the communication between recursive resolvers and authoritative servers.
+When [DNS over TLS (DoT)](#secure-dns-protocols) is used on this link,
+it's called [Authoritative DoT (ADoT)](https://datatracker.ietf.org/doc/html/rfc9499#section-6-4.91).
+Since one can also use [DNS over QUIC (DoQ)](#secure-dns-protocols) on this link,
+which would correspondingly be called Authoritative DoQ (ADoQ),
+some started to use the acronym ADoX [to stand for both](https://dnsprivacy.org/adox_status_and_deployment/).
+[RFC 9539](https://datatracker.ietf.org/doc/html/rfc9539) suggests that recursive resolvers probe authoritative servers [on port 853](#secure-dns-protocols),
+which is used by both DoT (over [TCP](#transmission-control-protocol)) and DoQ (over [UDP](#user-datagram-protocol)).
+If the connection succeeds, the communication is protected from passive network observers.
+Since this approach cannot protect from active attackers,
+the authoritative server [isn't even authenticated](https://datatracker.ietf.org/doc/html/rfc9539#section-3.2).
+There's also a [draft for how authoritative servers can signal their support](https://datatracker.ietf.org/doc/draft-johani-dnsop-transport-signaling/)
+for [secure DNS protocols](#secure-dns-protocols).
+
+</details>
+
+<details markdown="block">
+<summary markdown="span" id="dns-configuration-recommendations">
+DNS configuration recommendations
+</summary>
+
+In the [previous box](#secure-dns-connections),
+we discussed the [privacy and security issues of classic DNS](#problems-with-plaintext-dns),
+what [secure DNS protocols](#secure-dns-protocols) exist,
+and how your devices can [automatically discover](#discovery-of-designated-resolvers) [secure endpoints](#discovery-of-network-designated-resolvers).
+The problem with the [two automatic](#discovery-of-designated-resolvers) [discovery mechanisms](#discovery-of-network-designated-resolvers)
+is that [they are not secure](https://datatracker.ietf.org/doc/html/rfc9463#section-7.1)
+and that there's no reason to [trust the router and default resolver](https://datatracker.ietf.org/doc/html/rfc7626#section-2.5.3) of the networks you join,
+especially in public places like restaurants and airports.
+While you still have to assume that others in the network can learn [what websites you visit](#content-confidentiality),
+I highly recommend that you [configure all your devices](#how-to-configure-your-operating-system)
+to use a [public recursive resolver](#public-recursive-resolver) for [security reasons](#problems-with-plaintext-dns).
+
+
+##### Public recursive resolver
+
+Many companies run [recursive resolvers](#dns-stub-resolvers), which you can use for free and without registration.
+You find an [overview of such providers on Wikipedia](https://en.wikipedia.org/wiki/Public_recursive_name_server).
+By far [the most popular one](https://stats.labs.apnic.net/rvrs) is
+[Google Public DNS](https://developers.google.com/speed/public-dns/docs/using) with around 14% of all DNS queries,
+followed by [Cloudflare](https://www.cloudflare.com/learning/dns/what-is-1.1.1.1/) with around 4%
+and [Cisco OpenDNS](https://www.opendns.com/) with around 0.7%.
+All of them publish clear retention policies, while many ISPs do not.
+(The situation in China is different, but that's not relevant for the rest of the world.)
+If you optimize for speed, [choose Cloudflare](https://www.dnsperf.com/#!dns-resolvers).
+If you care about privacy and security, I recommend the Swiss-based non-profit [Quad9](https://quad9.net/) to you.
+The name comes from the [IP address](#internet-protocol-version-4) of its name server,
+which is `9.9.9.9`, i.e. [quad](https://en.wikipedia.org/wiki/Quad) 9.
+This IP address [was gifted](https://quad9.net/news/blog/quad9-and-your-data/#construction-of-quad9-organization)
+to the [Quad9 Foundation](https://en.wikipedia.org/wiki/Quad9) by [IBM](https://en.wikipedia.org/wiki/IBM).
+Other public resolvers also have similar, easy to remember IP address:
+Cloudflare has `1.1.1.1` and Google has `8.8.8.8`.
+Google, Cloudflare, and Quad9 all validate [DNSSEC](#domain-name-system-security-extensions) (at least on the recommended endpoints),
+whereas the [default resolver of your ISP](#dns-stub-resolvers) might not.
+This is another reason not to rely on the default resolver of arbitrary networks.
+
+
+##### Anycast addresses
+
+Given what you've learned about [routing](#signal-routing) and [propagation delay](#propagation-delay),
+you may think that it's a bad idea if users all over the globe use the same [IP address](#internet-protocol-version-4) to reach a service.
+The memorable IP addresses from the [previous paragraph](#public-recursive-resolver) aren't normal IP addresses, though.
+They are so-called [anycast addresses](https://en.wikipedia.org/wiki/Anycast),
+for which [routers](#network-addresses) forward the [packets](#packet-switching) to the nearest server.
+The largest [public recursive resolvers](#public-recursive-resolver) operate servers in hundreds of locations.
+To give you an impression, [Quad9](https://quad9.net/) lists its locations on [this page](https://quad9.net/service/locations/).
+
+
+##### EDNS Client Subnet (ECS) {#edns-client-subnet}
+
+Before we look at [configuration](#how-to-configure-your-browser) [options](#how-to-configure-your-operating-system),
+we need to discuss one more [Extension Mechanisms for DNS (EDNS)](https://en.wikipedia.org/wiki/Extension_Mechanisms_for_DNS).
+[Content delivery networks (CDNs)](https://en.wikipedia.org/wiki/Content_delivery_network) and many large websites
+let their domain names resolve to different [IP addresses](#internet-protocol-version-4) [based on the user's location](https://en.wikipedia.org/wiki/GeoDNS).
+By routing the traffic of a user to a server which is close to them
+(often within the network of their [Internet service provider (ISP)](https://en.wikipedia.org/wiki/Internet_service_provider);
+see, for example, [Netflix Open Connect](https://openconnect.netflix.com/en/)),
+[latency](#network-performance) and bandwidth costs can be reduced.
+By default, your devices use a [recursive resolver of your ISP](#dns-stub-resolvers).
+By configuring your devices to use a recursive resolver which is most likely not in your ISP's network,
+your Internet traffic can get routed to less optimal servers.
+To prevent this from happening, there's a DNS extension called
+[EDNS Client Subnet (ECS)](https://en.wikipedia.org/wiki/EDNS_Client_Subnet),
+which allows recursive resolvers to indicate to authoritative servers where the DNS query came from.
+ECS is specified in [RFC 7871](https://datatracker.ietf.org/doc/html/rfc7871).
+To improve the user's privacy, the [RFC](#request-for-comments) [encourages recursive resolvers to truncate](https://datatracker.ietf.org/doc/html/rfc7871#section-11.1)
+[IPv4 addresses](#internet-protocol-version-4) to 24 bits (from a total of 32 bits)
+and [IPv6 addresses](#internet-protocol-version-6) to 56 bits (from a total of 128 bits).
+Moreover, recursive resolvers [should never send the ECS option](https://datatracker.ietf.org/doc/html/rfc7871#section-12.1)
+when querying [root](https://en.wikipedia.org/wiki/DNS_root_zone),
+[top-level](https://en.wikipedia.org/wiki/Top-level_domain),
+and [effective top-level](https://publicsuffix.org/) domain servers.
+When you join [another network](#internet-layers),
+the [cache](https://en.wikipedia.org/wiki/Cache_(computing)) of your [stub resolver](#dns-stub-resolvers) is typically erased.
+This (in combination with the often relatively short [time to live](#distributed-database) of DNS records)
+ensures that DNS-based routing is re-evaluated [for your new IP address](#network-addresses).
+
+
+##### Should you use ECS?
+
+Whether or not [ECS](#edns-client-subnet) is being used is often decided by the operator of the [recursive resolver](#public-recursive-resolver).
+Many [ISP](https://en.wikipedia.org/wiki/Internet_service_provider) recursive resolvers don't send ECS
+because [CDNs](https://en.wikipedia.org/wiki/Content_delivery_network) already localize well using the resolver's own IP address,
+which is inside the ISP's network and usually close to you.
+From the public resolvers [mentioned above](#public-recursive-resolver),
+[Cloudflare never sends ECS](https://developers.cloudflare.com/1.1.1.1/faq/#does-1111-send-edns-client-subnet-header) for privacy reasons,
+while [Google always sends ECS](https://developers.google.com/speed/public-dns/docs/ecs#introduction) when querying authoritative name servers which make use of ECS.
+(In principle, you can opt out of ECS [by setting the source prefix-length to 0](https://datatracker.ietf.org/doc/html/rfc7871#section-7.1.2) for your DNS queries,
+which disallows recursive resolvers from adding a longer prefix of your [IP address](#internet-protocol-version-4) to its queries.
+However, [operating systems](#operating-systems) provide no such option for their [stub resolver](#dns-stub-resolvers).
+Only if your router runs [dnsmasq](https://en.wikipedia.org/wiki/Dnsmasq),
+you can configure your [forwarding resolver](#dns-stub-resolvers) to suppress ECS with [`--add-subnet=0,0`](https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html).)
+[Quad9 provides a separate endpoint where ECS is enabled](https://quad9.net/service/service-addresses-and-features/),
+which allows you to choose whether you want better privacy (with ECS disabled) or better DNS-based routing (with ECS enabled).
+Since recursive resolvers have to partition their [cache](https://en.wikipedia.org/wiki/Cache_(computing)) by client prefix when using ECS,
+ECS increases the chance that a query cannot be answered from the cache and that authoritative name servers have to be queried before an answer can be returned.
+Therefore, you typically get the DNS reply faster when you disable ECS,
+but you pay for this by potentially connecting to an endpoint with a higher [latency](#network-performance).
+You may wonder what's the point in hiding your IP address when resolving a domain name if you connect to the service afterwards anyway.
+On one side, authoritative name servers are often run by third parties in a different network from the site you visit,
+which means that more parties learn about your site visit when you choose a recursive resolver which sends ECS.
+On the other hand, not all DNS queries lead to connections,
+which means that ECS lets others associate intent to you which they wouldn't be able to do without ECS.
+In order to minimize the privacy impact of ECS,
+the [RFC recommends](https://datatracker.ietf.org/doc/html/rfc7871#section-12.1)
+that recursive resolvers remember which authoritative name servers didn't return the ECS option in their reply
+and no longer send the IP address of their clients to those name servers in subsequent queries.
+So should you choose a recursive resolver which sends ECS?
+That's up to you.
+I use [Quad9 with ECS](https://quad9.net/service/service-addresses-and-features/).
+
+
+##### How to configure your browser
+
+Since most apps on your computer use the Internet and therefore the [Domain Name System](#domain-name-system),
+I recommend that you [configure your operating system](#how-to-configure-your-operating-system)
+instead of your [web browser](https://en.wikipedia.org/wiki/Web_browser) to use a [secure DNS endpoint](#secure-dns-protocols).
+Since [configuring your browser](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/encrypted-dns-browsers/)
+is much easier than configuring your operating system,
+I still want to mention how to configure some browsers on your computer
+(these options don't exist in the corresponding mobile browsers on [iOS](https://en.wikipedia.org/wiki/IOS)):
+- [**Google Chrome**](https://en.wikipedia.org/wiki/Google_Chrome):
+  Open the settings of Chrome, click on "Privacy and security" in the [sidebar](https://en.wikipedia.org/wiki/Sidebar_(computing)) and then on "Security".
+  Enable ["Use secure DNS"](https://support.google.com/chrome/answer/10468685?hl=en#zippy=%2Cuse-a-secure-connection-to-look-up-a-sites-ip-address) there.
+  Under "Select DNS provider" right below, add a custom DNS service provider
+  or choose a preconfigured one from the [drop-down menu](https://en.wikipedia.org/wiki/Drop-down_list).
+  If you don't do this and leave the DNS provider at "OS default (when available)",
+  Chrome upgrades to [DNS over HTTPS (DoH)](#secure-dns-protocols) only if it finds the [IP address](#internet-protocol-version-4) of the default resolver
+  in its [hard-coded](https://en.wikipedia.org/wiki/Hard_coding)
+  [list of DoH providers](https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/net/dns/public/doh_provider_entry.cc).
+  Since the default resolver is [often your router](#dns-stub-resolvers),
+  Chrome typically doesn't use secure DNS at all unless you select a specific provider in its settings.
+- [**Microsoft Edge**](https://en.wikipedia.org/wiki/Microsoft_Edge):
+  Open the settings of Edge, click on "Privacy, search, and services" in the [sidebar](https://en.wikipedia.org/wiki/Sidebar_(computing)) and then on "Security".
+  Enable ["Use secure DNS"](https://support.microsoft.com/en-us/microsoft-edge/securely-browse-the-web-in-microsoft-edge-c7beb47a-de9e-4aec-839d-28224a13a5d2)
+  and then choose a service provider from the list or enter a custom provider.
+- [**Mozilla Firefox**](https://en.wikipedia.org/wiki/Firefox):
+  Follow [these instructions](https://support.mozilla.org/en-US/kb/dns-over-https)
+  to configure [DNS over HTTPS (DoH)](#secure-dns-protocols) in Firefox.
+- [**Apple Safari**](https://en.wikipedia.org/wiki/Safari_(web_browser)):
+  There is no such option in Safari. It uses the DNS configuration of the operating system.
+
+
+##### How to configure your operating system
+
+[Public recursive resolvers](#public-recursive-resolver) typically have guides for how to configure your devices to use them.
+Since we want to configure a [secure DNS endpoint](#secure-dns-protocols),
+I recommend you to follow the [set-up guides by Quad9](https://docs.quad9.net/)
+instead of the [one by Google](https://developers.google.com/speed/public-dns/docs/using#change_your_dns_servers_settings).
+Just click on your operating system on the left and follow the instructions.
+(Ideally, the title of the guide ends with "(Encrypted)".)
+Two remarks:
+- [**Windows 11**](https://en.wikipedia.org/wiki/Windows_11):
+  When following [these instructions](https://docs.quad9.net/Setup_Guides/Windows/Windows_11_%28Encrypted%29/),
+  you have to click on "Hardware properties" before you can edit the DNS server assignment for all networks of the chosen connection type.
+  (Above "Hardware properties", there's also a "&lt;Network name&gt; properties",
+  where you can edit the "DNS server assignment" for this particular network, which is not what we want.)
+- [**macOS**](https://en.wikipedia.org/wiki/MacOS):
+  You can [enter the IP address of a DNS server](https://support.apple.com/guide/mac-help/enter-dns-and-search-domain-settings-on-mac-mh141272/26/mac/26)
+  in the [System Settings](https://en.wikipedia.org/wiki/System_Settings)
+  (under "Network" &gt; "Wi-Fi" or "Ethernet" &gt; "Details…" &gt; "DNS")
+  and this setting applies to all networks of the same type
+  ([Wi-Fi](https://en.wikipedia.org/wiki/Wi-Fi) or [Ethernet](https://en.wikipedia.org/wiki/Ethernet))
+  as long as you don't use [network locations](https://support.apple.com/en-mk/guide/mac-help/mchlp1175/mac).
+  However, with this approach you rely that macOS upgrades to a secure endpoint using [DDR](#discovery-of-designated-resolvers).
+  What [Quad9 suggests instead](https://docs.quad9.net/Setup_Guides/MacOS/Big_Sur_and_later_%28Encrypted%29/)
+  is to install a [device management profile](https://support.apple.com/guide/deployment/intro-to-device-management-profiles-depc0aadd3fe/web)
+  which contains [DNS Settings](https://support.apple.com/en-az/guide/deployment/dep86469ba99/web).
+  Since [DNS over HTTPS (DoH)](#secure-dns-protocols) is less likely to be blocked than [DNS over TLS (DoT)](#secure-dns-protocols),
+  I recommend that you install the "HTTPS profile" for either `9.9.9.9` (without [ECS](#edns-client-subnet)) or `9.9.9.11` (with ECS).
+  Once you have installed the profile, you find it in the "System Settings" under "General" &gt; "Device Management"
+  as well as under "Network" &gt; "Filters".
+  You can inspect the content of the installed profile by running `sudo /usr/bin/profiles -P -o stdout-xml`{:.enable-click-to-copy}
+  in the [Terminal](https://en.wikipedia.org/wiki/Terminal_(macOS)).
+  Please note that [Apple's App Store](https://en.wikipedia.org/wiki/App_Store_(Apple))
+  as well as the [`dig` command](https://en.wikipedia.org/wiki/Dig_(command))
+  and [`nslookup`](https://en.wikipedia.org/wiki/Nslookup)
+  bypass the encrypted DNS settings in the device management profile,
+  but they do use the resolver configured with an [IP address](#internet-protocol-version-4) in the DNS settings of your network.
+
+To test whether you are using [Quad9](https://quad9.net/), visit [https://on.quad9.net/](https://on.quad9.net/).
+With Quad9, you also get [blocking](https://quad9.net/service/threat-blocking/)
+of [malware](https://en.wikipedia.org/wiki/Malware) and [phishing](https://en.wikipedia.org/wiki/Phishing).
+
+If you use a [virtual private network (VPN)](https://en.wikipedia.org/wiki/Virtual_private_network)
+or [Apple's Private Relay](https://en.wikipedia.org/wiki/ICloud#Private_Relay),
+the DNS settings of your operating system are ignored.
+
+
+##### Side effects
+
+Configuring your [browser](#how-to-configure-your-browser) or [operating system](#how-to-configure-your-operating-system)
+to use a [secure DNS endpoint](#secure-dns-protocols) can have the following, undesirable side effects:
+
+- [**Captive portals**](https://en.wikipedia.org/wiki/Captive_portal):
+  Many public Wi-Fis block access to the Internet until the user completes a process on a special website,
+  such as authenticating themself with an access code that they might receive via [SMS](https://en.wikipedia.org/wiki/SMS)
+  or accepting the provider's [terms of service](https://en.wikipedia.org/wiki/Terms_of_service).
+  In order to show this so-called captive portal to you,
+  the router often replies with the [IP address](#internet-protocol-version-4) of the captive portal to any DNS queries
+  and redirects all [HTTP](#hypertext-transfer-protocol) requests to the captive portal.
+  (Redirecting HTTPS requests requires that the user dismisses the error that the [certificate could not be validated](#transport-layer-security).)
+  If you have [configured your device](#how-to-configure-your-operating-system)
+  to use a [secure DNS protocol](#secure-dns-protocols) to an [external recursive resolver](#public-recursive-resolver),
+  the router can only block but no longer reply to your DNS queries
+  and your device might not be able to resolve the domain name of the captive portal (and the page you wanted to visit in the first place).
+  For this reason, operating systems [and browsers](#how-to-configure-your-browser)
+  typically ignore secure DNS configurations until a request to a special website, such as [http://captive.apple.com](http://captive.apple.com), succeeds.
+  If a captive portal isn't detected and displayed automatically for some reason,
+  you might have to disable your secure DNS configuration until you have unrestricted access to the Internet.
+- **Internal domains**:
+  Many companies use internal domain names which resolve only inside the corporate network
+  (including via [VPN](https://en.wikipedia.org/wiki/Virtual_private_network)).
+  (Sometimes, the same domains are resolved differently for internal and external users,
+  which is known as [split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS).)
+  If you configure your device not to use the company's recursive resolver, such internal domains no longer work.
+  Therefore, the recommendations in this box are intended for your personally owned devices.
+  (Many companies also use a so-called [search domain](https://en.wikipedia.org/wiki/Search_domain)
+  so that employees can type shorter domain names.
+  However, it's usually the employee's device which adds the company's DNS suffix to a relative domain name
+  in order to form a [fully qualified domain name (FQDN)](https://en.wikipedia.org/wiki/Fully_qualified_domain_name),
+  and this [can also be configured](https://en.wikipedia.org/wiki/Search_domain#Manually_configuring_domain_search_lists)
+  when using an external recursive resolver.)
+- **Router configuration**:
+  Many [routers](#hubs-switches-and-routers) advertise a special domain name to manage them via a web interface.
+  Since this domain name is no longer resolved by the router to its own IP address
+  when you use a [public recursive resolver](#public-recursive-resolver),
+  you can no longer access your router under this name.
+  Instead of the special domain name, you have to enter the [IP address of the router](#dhcp-configuration)
+  in the [address bar](https://en.wikipedia.org/wiki/Address_bar) of your browser.
 
 </details>
 
@@ -2904,7 +4191,7 @@ Keep up your curiosity! 🤓
 ## Internet history
 
 There are many nice articles about the
-[history of the Internet](https://en.wikipedia.org/wiki/History_of_the_Internet)
+[history of the Internet](https://en.wikipedia.org/wiki/History_of_the_Internet),
 and there's no point in replicating their content here.
 Instead, I would like to give you a timeline
 of important milestones in the history of
@@ -2943,11 +4230,11 @@ and [computing](https://en.wikipedia.org/wiki/History_of_computing_hardware):
 | 2010 | Deployment of DNSSEC [in the root zone](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions#Deployment_at_the_DNS_root), eliminating intermediary [trust anchors](https://en.wikipedia.org/wiki/Trust_anchor).
 | 2018 | The [UN](https://en.wikipedia.org/wiki/International_Telecommunication_Union) estimates that [more than half](https://www.itu.int/en/ITU-D/Statistics/Documents/facts/FactsFigures2019.pdf) of the global population uses the Internet.
 
----
 
-I would like to thank Stephanie Stroka for proofreading this article
-and for supporting me in this project! ❤️
-
+*[ADoQ]: Authoritative DNS over QUIC
+*[ADoT]: Authoritative DNS over TLS
+*[ADoX]: Authoritative DNS over TLS or QUIC
+*[ALPN]: Application-Layer Protocol Negotiation
 *[API]: Application Programming Interface
 *[ARP]: Address Resolution Protocol
 *[ARPANET]: Advanced Research Projects Agency Network
@@ -2956,22 +4243,37 @@ and for supporting me in this project! ❤️
 *[CA]: Certification Authority
 *[CAs]: Certification Authorities
 *[CDN]: Content Delivery Network
+*[CDNs]: Content Delivery Networks
 *[CERN]: European Organization for Nuclear Research
 *[CIA]: Confidentiality, Integrity, and Availability
 *[CPU]: Central Processing Unit
 *[DANE]: DNS-Based Authentication of Named Entities
+*[DDR]: Discovery of Designated Resolvers
 *[DHCP]: Dynamic Host Configuration Protocol
 *[DNS]: Domain Name System
 *[DNSSEC]: Domain Name System Security Extensions
+*[Do53]: (Classic) DNS over UDP and TCP port 53
+*[DoH]: DNS over HTTPS
+*[DoQ]: DNS over QUIC
+*[DoT]: DNS over TLS
+*[DPP]: Device Provisioning Protocol
+*[EAP]: Extensible Authentication Protocol
+*[EAPOL]: Extensible Authentication Protocol over LAN
 *[ECDSA]: Elliptic Curve Digital Signature Algorithm
+*[ECH]: Encrypted ClientHello
+*[ECS]: EDNS Client Subnet
+*[EDE]: Extended DNS Errors
+*[EDNS]: Extension Mechanisms for DNS
 *[ENIAC]: Electronic Numerical Integrator and Computer
 *[ETLA]: Extended Three-Letter Acronym
+*[FAQ]: Frequently Asked Questions
 *[FQDN]: Fully Qualified Domain Name
 *[FTP]: File Transfer Protocol
 *[FTPS]: File Transfer Protocol Secure
 *[GCHQ]: Government Communications Headquarters
 *[GPU]: Graphics Processing Unit
 *[HSM]: Hardware Security Module
+*[HSTS]: HTTP Strict Transport Security
 *[HTML]: HyperText Markup Language
 *[HTTP]: HyperText Transfer Protocol
 *[HTTPS]: HyperText Transfer Protocol Secure
@@ -2990,17 +4292,25 @@ and for supporting me in this project! ❤️
 *[ISO]: International Organization for Standardization
 *[ISOC]: Internet Society
 *[ISP]: Internet Service Provider
+*[ISPs]: Internet Service Providers
 *[IT]: Information Technology
 *[ITU]: International Telecommunication Union
 *[I/O]: Input/Output
+*[JSON]: JavaScript Object Notation
 *[KSK]: Key-Signing Key
 *[KSKs]: Key-Signing Keys
+*[LAN]: local area network
+*[LEO]: low Earth orbit
+*[LLM]: Large Language Model
 *[MAC]: Media Access Control
 *[Mbit]: megabits (one million bits)
 *[Mbps]: megabits per second
+*[mDNS]: Multicast DNS
 *[MERIT]: Michigan Educational Research Information Triad
+*[MHz]: megahertz (a unit of frequency)
 *[MITM]: Man-In-The-Middle Attack
 *[ms]: milliseconds
+*[MSDU]: MAC service data unit
 *[MS-DOS]: Microsoft Disk Operating System
 *[MTU]: Maximum Transmission Unit
 *[NAT]: Network Address Translation
@@ -3008,13 +4318,20 @@ and for supporting me in this project! ❤️
 *[OpenPGP]: The open standard for Pretty Good Privacy
 *[OS]: Operating System
 *[OWD]: One-Way Delay
+*[OWE]: Opportunistic Wireless Encryption
 *[PC]: Personal Computer
+*[PDF]: Portable Document Format
 *[PKI]: Public Key Infrastructure
+*[PMF]: Protected Management Frames
 *[POP]: Post Office Protocol
+*[QNAME]: Query Name (the domain name being queried)
+*[RA]: Router Advertisement
+*[RD]: Recursion Desired (a DNS flag)
 *[RFC]: Request for Comments, typically published by the Internet Engineering Task Force
 *[RFCs]: Several Requests for Comments as published by the Internet Engineering Task Force
 *[RIR]: Regional Internet Registry
 *[RR]: Resource Record
+*[RRL]: Response Rate Limiting
 *[RRset]: Resource Record Set
 *[RSA]: Rivest–Shamir–Adleman, a public-key cryptosystem
 *[RTT]: Round-Trip Time
@@ -3022,6 +4339,8 @@ and for supporting me in this project! ❤️
 *[SHA]: Secure Hash Algorithm
 *[SMTP]: Simple Mail Transfer Protocol
 *[SMTPS]: Simple Mail Transfer Protocol Secure
+*[SNI]: Server Name Indication
+*[SOA]: Start Of Authority
 *[SSD]: Solid-State Drive
 *[SSH]: Secure Shell Protocol
 *[SSL]: Secure Sockets Layer
@@ -3032,12 +4351,18 @@ and for supporting me in this project! ❤️
 *[TTL]: Time To Live
 *[UDP]: User Datagram Protocol
 *[UN]: United Nations
+*[URI]: Uniform Resource Identifier
 *[URL]: Uniform Resource Locator
 *[UTF]: Unicode Transformation Format
 *[VPN]: Virtual Private Network
 *[Wi-Fi]: A family of wireless networking protocols (formally called IEEE 802.11)
+*[WPA]: Wi-Fi Protected Access
+*[WPA2]: Wi-Fi Protected Access version 2
+*[WPA3]: Wi-Fi Protected Access version 3
+*[WPS]: Wi‑Fi Protected Setup
 *[WWW]: World Wide Web
 *[X.509]: A standard defining the format of public key certificates
+*[XML]: Extensible Markup Language
 *[ZIP]: Zone Improvement Plan
 *[ZSK]: Zone-Signing Key
 *[ZSKs]: Zone-Signing Keys
