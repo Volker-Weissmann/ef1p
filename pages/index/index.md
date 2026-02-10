@@ -300,7 +300,7 @@ to get a [tooltip](https://en.wikipedia.org/wiki/Tooltip) with their full name.
 I work independently, and I'm supported only by donations from my readers.
 I pledge to disclose all conflicts of interest which might bias the content on this blog.
 The text on this website is generally written by me and not by a
-[large language model (LLM)](https://en.wikipedia.org/wiki/Language_model#Notable_language_models),
+[large language model (LLM)](https://en.wikipedia.org/wiki/Large_language_model),
 such as [ChatGPT](https://openai.com/blog/chatgpt).
 I use LLMs heavily for research and coding.
 Occasionally, I also use them for proofreading, which blurs the line a bit.
@@ -476,7 +476,7 @@ The main reasons for publishing my content on my own website are:
   which leads to undesirable gaps and repetitions in the learning experience.
 - **Artistic freedom**: By being fully independent, I can make up better terms and concepts, which make it easier to grasp new ideas.
   A great example for this is the [security layer](/internet/#security-layer) in the [article about the Internet](/internet/),
-  which makes a lot of sense, but which you won't find in the [classic literature](https://en.wikipedia.org/wiki/Internet_protocol_suite).
+  which makes a lot of sense, but which you won't find in the [technical literature](https://en.wikipedia.org/wiki/Internet_protocol_suite).
   Being independent also allows me to give advice and to state my opinion even on controversial topics.
 - **Software stack**: By building my own publishing platform, I can implement [all ideas that I have](#navigation)
   and make my articles [interactive](#interactive-tools).
