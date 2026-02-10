@@ -24,7 +24,7 @@ export const prompt: DynamicTextEntry = {
     validateIndependently: input => input.length === 0 && 'The prompt may not be empty.',
 };
 
-function renderPrompt(text: string, noNewline: boolean | undefined, children: ReactNode): JSX.Element {
+function renderPrompt(text: string, newline: boolean | undefined, children: ReactNode): JSX.Element {
     return <div className="prompt">
         {text !== '' && <Fragment>
             <span
@@ -35,7 +35,7 @@ function renderPrompt(text: string, noNewline: boolean | undefined, children: Re
             </span>
             {' '}
         </Fragment>}
-        <ClickToCopy newline={!noNewline}>
+        <ClickToCopy newline={newline ?? false}>
             {children}
         </ClickToCopy>
     </div>;
@@ -49,21 +49,22 @@ export interface PromptProps {
     readonly text?: string;
 
     /**
-     * Append no newline character when copying the prompt to the clipboard.
+     * Append a newline character when copying the prompt to the clipboard.
+     * Defaults to false.
      */
-    readonly noNewline?: boolean;
+    readonly newline?: boolean;
 }
 
-export function StaticPrompt({ text, noNewline, children }: PromptProps & Children): JSX.Element {
-    return renderPrompt(text ?? prompt.defaultValue, noNewline, children);
+export function StaticPrompt({ text, newline, children }: PromptProps & Children): JSX.Element {
+    return renderPrompt(text ?? prompt.defaultValue, newline, children);
 }
 
 export interface StateWithPrompt {
     readonly prompt: string;
 }
 
-function RawPrompt<State extends BasicState<State> & StateWithPrompt>({ store, children, noNewline }: ProvidedStore<VersionedState<State>, VersioningEvent, VersionedStore<State>> & PromptProps & Children): JSX.Element {
-    return renderPrompt(store.getCurrentState().prompt, noNewline, children);
+function RawPrompt<State extends BasicState<State> & StateWithPrompt>({ store, children, newline }: ProvidedStore<VersionedState<State>, VersioningEvent, VersionedStore<State>> & PromptProps & Children): JSX.Element {
+    return renderPrompt(store.getCurrentState().prompt, newline, children);
 }
 
 export function getPrompt<State extends BasicState<State> & StateWithPrompt>(store: VersionedStore<State>) {
