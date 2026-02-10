@@ -8,6 +8,7 @@
     "fenced-code-language": false,
     "first-header-h1": false,
     "first-line-h1": false,
+    "heading-increment": false,
     "line-length": false,
     "link-fragments": false,
     "no-alt-text": false,
