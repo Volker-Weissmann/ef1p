@@ -1,4 +1,4 @@
-<svg width="124.095" height="64.972" viewBox="-9.343 -25.736 124.095 64.972" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
+<svg width="124.096" height="64.972" viewBox="-62.048 -31.486 124.096 64.972" preserveAspectRatio="xMidYMid" xmlns="http://www.w3.org/2000/svg">
 
     <metadata>
         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/">
@@ -13,7 +13,7 @@
         @import url("https://fonts.googleapis.com/css?family=Lato:400,700,400italic");
 
         svg {
-            font-family: Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            font-family: Lato, Arial, STIXGeneral, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             font-size: 1rem;
             font-weight: 400;
             line-height: 1.5;
@@ -34,17 +34,17 @@
         }
     </style>
 
-    <rect class="filled" x="-9.343" y="-25.736" width="124.095" height="64.972" style="fill: #1A181B;"></rect>
+    <rect class="filled" x="-62.048" y="-31.486" width="124.096" height="64.972" style="fill: #1A181B;"></rect>
 
-    <text text-anchor="start">
-        <tspan x="0" y="11.5">Page not found</tspan>
+    <text text-anchor="middle">
+        <tspan x="0" y="5.9">Page not found</tspan>
     </text>
 
     <mask id="mask">
-        <rect class="filled" x="-1.25" y="23.05" width="8.093" height="8.093" style="fill: white;"></rect>
-        <line x1="1.448" y1="25.748" x2="1.448" y2="28.446" style="stroke-width: 2.024; stroke-linecap: round; stroke: black;"></line>
-        <circle class="filled" cx="4.146" cy="28.446" r="1.012" style="fill: black;"></circle>
+        <rect class="filled" x="-53.955" y="17.3" width="8.093" height="8.093" style="fill: white;"></rect>
+        <line x1="-51.257" y1="19.998" x2="-51.257" y2="22.696" style="stroke-width: 2.024; stroke-linecap: round; stroke: black;"></line>
+        <circle class="filled" cx="-48.559" cy="22.696" r="1.012" style="fill: black;"></circle>
     </mask>
-    <circle class="filled" cx="2.797" cy="27.097" r="4.047" style="fill: white;" mask="url(#mask)"/>
+    <circle class="filled" cx="-49.908" cy="21.347" r="4.047" style="fill: white;" mask="url(#mask)"/>
 
 </svg>
