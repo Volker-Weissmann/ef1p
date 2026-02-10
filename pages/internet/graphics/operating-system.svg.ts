@@ -30,8 +30,8 @@ const x1 = 175;
 const x2 = x1 + 182;
 const x3 = x2 + 153;
 
-elements.push(...new Line({ start: P(x1, halfRowDistance), end: P(x1, halfRowDistance + rowDistance), marker: 'end', color }).withText(['Please forward to me', 'all traffic on port 25']));
-elements.push(...new Line({ start: P(x2, halfRowDistance + 2 * rowDistance), end: P(x2, halfRowDistance + rowDistance), marker: 'end', color }).withText(['I received a new', 'packet on port 25'], 'right'));
+elements.push(...new Line({ start: P(x1, halfRowDistance), end: P(x1, halfRowDistance + rowDistance), marker: 'end', color }).withText(['Please forward to me', 'all traffic on port 80']));
+elements.push(...new Line({ start: P(x2, halfRowDistance + 2 * rowDistance), end: P(x2, halfRowDistance + rowDistance), marker: 'end', color }).withText(['I received a new', 'packet on port 80'], 'right'));
 elements.push(...new Line({ start: P(x3, halfRowDistance + rowDistance), end: P(x3, halfRowDistance), marker: 'end', color }).withText(['I have a new', 'packet for you'], 'right'));
 
 printSVG(...elements);
