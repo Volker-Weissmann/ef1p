@@ -6,6 +6,8 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 
 import { report } from '../utility/analytics';
 import { copyToClipboardWithAnimation } from '../utility/animation';
+import { copyToClipboard } from '../utility/clipboard';
+import { generateTextFragmentFromCurrentSelection } from '../utility/fragment';
 import { getTitle, originalTitle, scrollToAnchor } from '../utility/scrolling';
 
 const production = window.location.hostname !== 'localhost';
@@ -17,7 +19,8 @@ if (production || window.location.hash.includes('&')) { // The second part ensur
     $(window).on('scroll', scrollToTop);
     window.addEventListener('load', () => {
         $(window).off('scroll', scrollToTop);
-        scrollToAnchor(window.location.hash, 'load');
+        // If a browser doesn't support text fragments, we have to remove it from the hash ourselves.
+        scrollToAnchor(window.location.hash.split(':~:', 1)[0], 'load');
     });
 }
 
@@ -173,6 +176,74 @@ function copy(event: JQuery.TriggeredEvent): void {
 }
 $('.enable-click-to-copy').removeClass('enable-click-to-copy').addClass('click-to-copy').prop('title', 'Click to copy.').on('click', copy);
 
+// Clear the highlighting of a potential text fragment on the first mouse down.
+const hideTextFragment = () => {
+    document.documentElement.style.setProperty('--text-fragment', '0');
+    window.removeEventListener('mousedown', hideTextFragment);
+};
+window.addEventListener('mousedown', hideTextFragment, { passive: true });
+
+// Allow the reader to link directly to the selected text.
+const copyLinkToSelectionButton = $('<a>').attr('id', 'copy-link-to-selection-button').prop('title', 'Copy a link to the selected text.').on('click', async event => {
+    const fragment = generateTextFragmentFromCurrentSelection();
+    if (fragment !== null) {
+        let address = '';
+        if (production) {
+            address += window.location.origin;
+        }
+        if (published || true) {
+            address += window.location.pathname;
+        }
+        let anchor = '#';
+
+        // Find the preceding id for the selection
+        const selection = window.getSelection();
+        if (selection !== null && selection.rangeCount > 0) {
+            const startContainer = selection.getRangeAt(0).startContainer;
+            let element = startContainer.nodeType === Node.TEXT_NODE ? startContainer.parentElement : startContainer as Element;
+            while (element !== null) {
+                if (element.id !== '') {
+                    anchor += element.id;
+                    break;
+                } else if (element.previousElementSibling !== null) {
+                    element = element.previousElementSibling;
+                } else {
+                    element = element.parentElement;
+                }
+            }
+        }
+
+        address += anchor;
+        address += fragment;
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            await copyToClipboard(address);
+            // Showing an alert reveals the user selection again on iOS devices (and nothing else worked reliably).
+            alert('A link to the selected text has been copied to clipboard.');
+        } else {
+            copyToClipboardWithAnimation(address, copyLinkToSelectionButton[0], 'scale200');
+        }
+        report('Copy link', { Anchor: anchor, Fragment: fragment });
+    }
+    event.preventDefault();
+}).on('mousedown', event => event.preventDefault()).appendTo('body');
+
+function updateCopyLinkToSelectionButton() {
+    const selection = window.getSelection();
+    if (selection !== null && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect(); // coordinates relative to the viewport
+        copyLinkToSelectionButton.css({
+            left: window.scrollX + rect.left + rect.width / 2 - 15,
+            top: window.scrollY + rect.top - 39,
+        }).show();
+    } else {
+        copyLinkToSelectionButton.hide();
+    }
+}
+
+$(document).on('selectionchange', updateCopyLinkToSelectionButton);
+$(window).on('resize', updateCopyLinkToSelectionButton);
+
 // Allow the reader to download embedded SVG figures.
 const downloadAsPNG = $('<a>').addClass('dropdown-item').attr('download', '').html('<i class="icon-left fas fa-file-image"></i>Download as a pixel image (PNG)');
 const downloadAsSVG = $('<a>').addClass('dropdown-item').attr('download', '').html('<i class="icon-left fas fa-file-code"></i>Download as a vector graphic (SVG)');
@@ -201,7 +272,7 @@ if (isTouchDevice) {
     $('figure svg.figure').on('contextmenu', showDownloadMenu);
 }
 
-$(document).on('click', hideDownloadMenu);
+$(document).on('mousedown', hideDownloadMenu);
 
 // Prevent the following elements from becoming focused when clicked.
 $('a, button, summary').on('click', function() { $(this).trigger('blur'); });
