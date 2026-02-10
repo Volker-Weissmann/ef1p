@@ -11,7 +11,7 @@ import { insertThousandSeparator } from '../utility/string';
 // $('<script>').attr('src', '/assets/scripts/internal/rfcs.min.js?nocache=' + Math.random()).appendTo('head')
 
 if (window.location.pathname === '/email/') {
-    $('#all-referenced-rfcs').parent().remove();
+    $('#list-of-referenced-rfcs').parent().remove();
 }
 
 const host = 'https://datatracker.ietf.org';

@@ -69,7 +69,7 @@ function dnssecParagraph(dnssec: boolean): JSX.Element {
     return dnssec ?
         <p className="text-center">
             <i className="mr-1 fas fa-info-circle color-green"></i>
-            The entries are authenticated with DNSSEC but this tool doesn't verify the signatures.
+            The entries are authenticated with DNSSEC, but this tool doesn't verify the signatures.
         </p>
     :
         <p className="text-center">
@@ -2002,7 +2002,7 @@ const domain: DynamicTextEntry = {
 const dkimSelector: DynamicTextEntry = {
     label: 'Selector',
     tooltip: 'The name of the DKIM key you want to query.',
-    defaultValue: '20161025',
+    defaultValue: '20230601',
     inputType: 'text',
     inputWidth: inputWidth / 2,
     validateIndependently: input => !/^([a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?\.)*[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$/i.test(input) && 'The selector has the same format as a domain name.',

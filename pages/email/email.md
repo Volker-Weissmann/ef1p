@@ -4,7 +4,7 @@ category: Technologies
 author: Kaspar Etter
 license: CC BY 4.0
 published: 2021-05-07
-modified: 2022-12-09
+modified: 2026-02-10
 teaser: Modern email is a patchwork of protocols and extensions. Here is one article to understand them all.
 reddit: https://www.reddit.com/r/ef1p/comments/n6ydf2/email_explained_from_first_principles/
 icon: envelope
@@ -60,7 +60,7 @@ Before we roll up our sleeves and change this, here are a few things that you sh
   If you want to do that, [Mail-in-a-Box](https://mailinabox.email/) seems like a good place to start.
 - During my research for this article,
   I made [responsible disclosures](https://en.wikipedia.org/wiki/Responsible_disclosure)
-  to [Gandi](#spoofed-sender-during-submission), [Microsoft](#outlook.com-example-exploit),
+  to [Gandi](#spoofed-sender-during-submission), [Microsoft](#outlook-com-example-exploit),
   [and](#origination-date) [Mozilla](#sender-towards-recipients) [Thunderbird](#thunderbird-example-exploit).
   I also submitted [quite a few RFC errata](https://www.rfc-editor.org/errata_search.php?submitter_name=Kaspar+Etter).
 
@@ -146,7 +146,7 @@ You can either start a new conversation or continue an existing one by replying 
 ### Mailbox
 
 A [mailbox](https://en.wikipedia.org/wiki/Email_box) is a box for incoming mail (also called an inbox),
-into which everyone can deposit messages but ideally only the intended recipient can retrieve them.
+into which everyone can deposit messages, but ideally only the intended recipient can retrieve them.
 In some countries, the privacy of such messages is legally protected by the
 [secrecy of correspondence](https://en.wikipedia.org/wiki/Secrecy_of_correspondence).
 
@@ -204,7 +204,7 @@ but it's not known how many of those use its email functionality.
 
 [Email addresses](https://en.wikipedia.org/wiki/Email_address)
 are used to identify the sender and the recipient(s) of a message.
-They consist of a username followed by the [@ symbol](#the-@-symbol) and a domain name.
+They consist of a username followed by the [@ symbol](#the-at-symbol) and a domain name.
 The domain name allows the sender to first [determine](#address-resolution)
 and then [connect](#simple-mail-transfer-protocol) to the mail server of each recipient.
 The username allows the mail server to determine the mailbox to which a message should be delivered.
@@ -232,7 +232,7 @@ it has serious [privacy](#sender-towards-recipients) and [security](#malicious-d
 </details>
 
 <details markdown="block">
-<summary markdown="span" id="the-@-symbol">
+<summary markdown="span" id="the-at-symbol">
 The @ symbol
 </summary>
 
@@ -436,8 +436,8 @@ have to contain at least one character and at most [63 characters](https://datat
 The length of the whole domain name is limited to [255 characters](https://datatracker.ietf.org/doc/html/rfc1035#section-2.3.4),
 including the dots.
 Domain names are explicitly [case-insensitive](https://datatracker.ietf.org/doc/html/rfc1035#section-2.3.3).
-Only fully-qualified domain names may be used in email addresses on the public Internet
-and the domain part of an email address is always written without the trailing dot.
+Only [fully qualified domain names](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) may be used in email addresses on the public Internet,
+and the domain part of an email address is always written [without the trailing dot](/internet/#administrative-zones).
 The domain name in an email address must have an `MX`, `A`, or `AAAA` resource record.
 According to [RFC 5321](https://datatracker.ietf.org/doc/html/rfc5321#section-5.1), a `CNAME` record is also permitted
 as long as its target can be resolved to an IP address through one of the just mentioned record types.
@@ -995,7 +995,7 @@ in which case the domains of the two servers are likely
 completely different from the organization's domain.
 This is the case for my email configuration:
 
-{% include image.md source="email-settings-automatic.png" caption="The simplified email architecture corresponds to what mail clients like Apple Mail display to you.<br>The domain of the address (`ef1p.com`) is different from the domain of the servers (`mail.gandi.net`).<br>The host names of the incoming mail server and the outgoing mail server are usually not the same." themed="true" image-max-width="550" %}
+{% include image.md source="email-settings-automatic.png" caption="The simplified email architecture corresponds to what mail clients like Apple Mail display to you.<br>The domain of the address (`ef1p.com`) is different from the domain of the servers (`mail.gandi.net`).<br>The host names of the incoming mail server and the outgoing mail server are usually not the same.<br>**Update**: I changed my [mailbox provider](#provider) from [Gandi](https://www.gandi.net/en-US) to [Infomaniak](https://www.infomaniak.com/en) in July 2024 because of price hikes." themed="true" image-max-width="550" %}
 
 One more thing that users need to be informed about is whether to use the full email address
 or only the local part before the @ symbol (or even something completely different) as the username.
@@ -1465,12 +1465,13 @@ The Courier IMAP server can deliver emails.
 
 - [**Lemonade profile**](https://datatracker.ietf.org/doc/html/rfc5550):
   The only standardized solution to the double-submission problem
+  besides [JSON Meta Application Protocol (JMAP)](#json-meta-application-protocol)
   is a collection of extensions to [IMAP](#internet-message-access-protocol)
   and [SMTP submission](#submission-versus-relay),
   which is called the [lemonade profile](https://en.wikipedia.org/wiki/Lemonade_Profile).
   The [`URLAUTH` extension](https://datatracker.ietf.org/doc/html/rfc4467) to IMAP
-  allows mail clients to create references to mailbox data,
-  which include the required authorization to access the data.
+  allows mail clients to create references to mailbox data
+  that include the required authorization to access the data.
   The [`BURL` extension](https://datatracker.ietf.org/doc/html/rfc4468) to SMTP submission
   allows mail clients to instruct the outgoing mail server to fetch data from the user's mailbox.
   If the mail servers support these two extensions,
@@ -1532,7 +1533,7 @@ incoming mail servers to drop received messages silently.
 If the receiving address is an [alias](#alias-address),
 the incoming mail server forwards the message to the configured email address
 instead of delivering it to an inbox.
-In case the address denotes a [mailing list](#mailing-list),
+If the address denotes a [mailing list](#mailing-list),
 the incoming mail server sends the message to all subscribers of the list.
 The incoming mail server also applies [filters](#email-filtering)
 and generates [automatic responses](#automatic-responses),
@@ -1551,7 +1552,7 @@ The [scopes offered by Gmail](https://developers.google.com/gmail/api/auth/scope
 are an example of what limited access can look like.
 While restricted authorization is common for other services, it's not yet the norm for email.
 Once the client is authenticated, it can retrieve, deposit, and delete messages.
-It can also mark them as read or flag them for later attention.
+It can also [mark them as read or flag them](#message-flags) for later attention.
 
 <details markdown="block" open>
 <summary markdown="span" id="address-resolution">
@@ -1559,7 +1560,8 @@ Address resolution
 </summary>
 
 How do outgoing mail servers find the incoming mail server of a recipient?
-As we learned above, an [email address](#address) consists of a username and a domain name, separated by the @ symbol.
+As we learned above, an [email address](#address) consists of a username and a domain name,
+separated by the [@ symbol](#the-at-symbol).
 A sender finds the incoming mail server of a recipient
 by querying the [Domain Name System (DNS)](/internet/#domain-name-system)
 for mail exchange (`MX`) records of the used domain name.
@@ -2141,7 +2143,7 @@ The information relevant for handling the message,
 such as the addresses to deliver the message to and the address to report failures to,
 belongs to the so-called [envelope](https://datatracker.ietf.org/doc/html/rfc5321#section-2.3.1).
 The envelope belongs to the [Simple Mail Transfer Protocol (SMTP)](#simple-mail-transfer-protocol),
-and it can change completely during the delivery of a message.
+and it [can change completely](#diverging-envelope-example) during the delivery of a message.
 The message, on the other hand, mostly stays the same during delivery,
 and its format is also used by two [access protocols](#access-protocols).
 The important thing to remember is that emails are delivered based on the addresses in the envelope
@@ -2574,7 +2576,7 @@ The reason for building this tool, however,
 is that you can copy the commands to your [command-line interface](#command-line-interface)
 and send messages without the assistance of a mail client.
 Since you shouldn't enter your email password on a random website like this one,
-I recommend that you use the mode for submission only with demo accounts which you've created for this purpose.
+I recommend that you use the mode for submission only with test accounts which you've created for this purpose.
 The password is stored in the [local storage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
 of your browser without any protections until you [erase the history](/#history-of-values).
 Having said that, the tool is [open source](https://github.com/KasparEtter/ef1p/blob/main/code/tools/protocol/esmtp.tsx)
@@ -2855,6 +2857,7 @@ If we open a TCP connection on port 587, `STARTTLS` is listed as well:
 <figcaption markdown="span">
 
 The `STARTTLS` extension is listed when we connect without TLS to Gmail's outgoing mail server.
+(`nc` stands for the networking utility [netcat](https://en.wikipedia.org/wiki/Netcat).)
 
 </figcaption>
 </figure>
@@ -3180,8 +3183,9 @@ Limitations of the above tool
   - No [quoted strings](#address-syntax) in the local part,
   - No support for the [group construct](#group-construct),
   - No support for [folding whitespace and comments](https://datatracker.ietf.org/doc/html/rfc5322#section-3.2.2),
-  - Only ASCII characters supported in addresses and [display names](#display-name)<br>
-    (i.e. you have to do [header encoding](#header-encoding) and [domain encoding](#punycode-encoding) yourself).
+  - Only [ASCII characters](https://en.wikipedia.org/wiki/ASCII) in the [local part](#address-syntax) of email addresses<br>
+    (the tool supports [internationalized domain names](#internationalized-domain-names)
+    and arbitrary [display names](#display-name) when they are quoted).
   {:.compact}
 {:.compact}
 
@@ -3361,7 +3365,7 @@ Two techniques address this issue:
   Since non-delivery reports include the header fields of the original message,
   this could be recovered from the [trace information](#trace-information).
 - [**Variable envelope return path (VERP)**](https://en.wikipedia.org/wiki/Variable_envelope_return_path):
-  Since the `MAIL` `FROM` address of the envelope can be [different](#diverging-envelope-example)
+  Since the `MAIL` `FROM` address of the envelope [can be different](#diverging-envelope-example)
   from the `From` address of the message, it can encode the recipient's address.
   For example, when the mailing list server at `list@example.com` sends a message to `alice@example.org`,
   it can choose the `MAIL` `FROM` address as `list-owner+alice=example.org@example.com`.
@@ -3755,6 +3759,7 @@ Before moving on to authentication mechanisms,
 I first want to mention [some applications](https://en.wikipedia.org/wiki/Cryptographic_hash_function#Applications)
 of cryptographic hash functions:
 
+{:#data-integrity}
 - [**Data integrity**](https://en.wikipedia.org/wiki/File_verification):
   Due to their collision resistance, cryptographic hash functions produce a unique
   [fingerprint](https://en.wikipedia.org/wiki/Fingerprint_(computing)) of the data which was fed into them.
@@ -3779,6 +3784,7 @@ the delivery of the file can be outsourced to an untrusted third party.
 </figcaption>
 </figure>
 
+{:#password-protection}
 - [**Password protection**](https://en.wikipedia.org/wiki/Password_cracking):
   In order to verify whether a user provided the correct password,
   a server doesn't have to store the password of the user.
@@ -3794,6 +3800,7 @@ A server can reduce the damage of a leaked database by storing individually salt
 </figcaption>
 </figure>
 
+{:#key-derivation}
 - [**Key derivation**](https://en.wikipedia.org/wiki/Key_derivation_function):
   Cryptographic hash functions are designed to run as fast as possible.
   While good performance is desirable for many applications,
@@ -3822,6 +3829,7 @@ By hashing an input repeatedly, you can turn an efficient hash function into an 
 </figcaption>
 </figure>
 
+{:#independent-values}
 - [**Independent values**](https://en.wikipedia.org/wiki/Random_seed):
   Another use case of cryptographic hash functions is
   to generate a sequence of unrelatable values from a single source value.
@@ -3831,7 +3839,7 @@ By hashing an input repeatedly, you can turn an efficient hash function into an 
   As long as the seed remains secret,
   others cannot compute the next value from the previous one and vice versa.
   Hash functions are used for this purpose in
-  [contact tracing apps](https://en.wikipedia.org/wiki/COVID-19_apps),
+  [contact-tracing apps](https://en.wikipedia.org/wiki/COVID-19_apps),
   [cryptocurrency wallets](https://en.wikipedia.org/wiki/Cryptocurrency_wallet),
   and [one-time passwords (OTP)](https://en.wikipedia.org/wiki/One-time_password).
   If a hash function fulfills the [strict avalanche criterion](https://en.wikipedia.org/wiki/Avalanche_effect#Strict_avalanche_criterion),
@@ -3856,7 +3864,8 @@ but they cannot be related to one another (in red).
 </figcaption>
 </figure>
 
-- [**Commitment schemes**](https://en.wikipedia.org/wiki/Commitment_scheme):
+{:#commitment-scheme}
+- [**Commitment scheme**](https://en.wikipedia.org/wiki/Commitment_scheme):
   A commitment scheme allows you to commit yourself to a value
   while keeping the value secret until you reveal it later.
   You can think of it as giving a locked box to a recipient
@@ -3888,6 +3897,7 @@ If `CoinFlipAlice ≠ CoinFlipBob`, Bob wins.
 </figcaption>
 </figure>
 
+{:#message-authentication}
 - [**Message authentication**](https://en.wikipedia.org/wiki/Message_authentication):
   How can two parties be sure that no one tampered with their communication?
   They can achieve this by extending each message with a value
@@ -3944,6 +3954,7 @@ A message authentication code is appended to each message.
 </figcaption>
 </figure>
 
+{:#proof-of-inclusion}
 - [**Proof of inclusion**](https://en.wikipedia.org/wiki/Merkle_tree):
   When collaborating online,
   it's sometimes useful to be able to prove to others that a
@@ -3976,6 +3987,7 @@ a verifier needs to know only the hashes and the positions of the blue nodes.
 </figcaption>
 </figure>
 
+{:#proof-of-work}
 - [**Proof of work**](https://en.wikipedia.org/wiki/Proof_of_work):
   In publicly accessible systems,
   you want to discourage participants from using a shared and limited resource beyond their fair share.
@@ -4996,7 +5008,7 @@ The following IMAP tool works just like the [ESMTP](#esmtp-tool)
 and [POP3](#post-office-protocol-version-3) tools above.
 As you might mess up your mailbox or delete messages you still wanted by accident,
 you should run the [following commands](#imap-commands) on test accounts only.
-If you want to use your real account, you do so at your own risk.
+If you use your real account, you do so at your own risk.
 Certain commands have side effects, such as marking messages as read.
 Make sure you fully understand a command before using it.
 This tool also uses [Thunderbird's configuration database](https://autoconfig.thunderbird.net/v1.1/)
@@ -5409,7 +5421,7 @@ such as [support for UTF-8](https://datatracker.ietf.org/doc/html/rfc6855)):
   [its appendix](https://datatracker.ietf.org/doc/html/draft-ietf-extra-imap4rev2-30#appendix-E).
 - `STARTTLS` ([RFC 2595](https://datatracker.ietf.org/doc/html/rfc2595#section-3)):
   This extension allows the client to upgrade the connection from TCP to TLS with `. STARTTLS`.
-  You have to use `telnet {ServerDomain} 143` to see this capability listed by the server.
+  You have to use `nc -c {ServerDomain} 143` to see this capability listed by the server.
   (143 is [IMAP's port](#port-numbers) for [Explicit TLS](#use-of-tls).)
 - `SASL-IR` ([RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)):
   If the server has this capability,
@@ -5905,7 +5917,7 @@ You can check what you have with `openssl version`.
 How to install OpenSSL on macOS
 </summary>
 
-The easiest way to install [OpenSSL](https://www.openssl.org/) on macOS is with [Homebrew](https://brew.sh/).
+The easiest way to install [OpenSSL](https://www.openssl.org/) on [macOS](https://en.wikipedia.org/wiki/MacOS) is with [Homebrew](https://brew.sh/).
 You can check whether Homebrew is already installed with:
 
 <div id="code-brew-version"></div>
@@ -5922,7 +5934,7 @@ By default, OpenSSL is installed in the following location without replacing the
 
 <div id="code-installed-openssl"></div>
 
-<a href="#tool-protocol-managesieve&openssl=%2Fusr%2Flocal%2Fopt%2Fopenssl%2Fbin%2Fopenssl">Click here</a>
+[Click here](#tool-protocol-managesieve&openssl=%2Fopt%2Fhomebrew%2Fopt%2Fopenssl%403%2Fbin%2Fopenssl)
 to use this as the OpenSSL command in the [tool above](#tool-protocol-managesieve).
 
 </details>
@@ -6715,7 +6727,7 @@ Punycode encodes Unicode strings in three steps:
    Let's look at our example again.
    There are six positions where a character might be inserted: `1Z2r3i4c5h6`.
    The first (and only) character to insert is `ü` with the
-   [code point 252](https://unicode-table.com/en/00FC/).
+   [code point 252](https://unicodeplus.com/U+00FC).
    The decoder has to loop through the string 252 – 128 = 124 many times
    before it is ready to insert the character `ü`.
    Since the string has six positions and we want to insert the `ü` at the second position,
@@ -6826,7 +6838,7 @@ Unicode normalization
 </summary>
 
 [Unicode](https://en.wikipedia.org/wiki/Unicode) is designed to be as inclusive as possible.
-[Any character and symbol that people want to express](https://unicode-table.com/en/) gets included in the standard.
+[Any character and symbol that people want to express](https://unicodeplus.com/) gets included in the standard.
 While a unified encoding of all [writing systems](https://en.wikipedia.org/wiki/Writing_system)
 and earlier [character encodings](https://en.wikipedia.org/wiki/Character_encoding)
 is great for interoperability, it's really bad for comparing strings because
@@ -6897,22 +6909,22 @@ which means that you can specify a code point with two, four, or a variable numb
 {:.compact}
 
 [**Examples of compatibility equivalence**](https://unicode.org/reports/tr15/#Compatibility_Equivalence_Figure):
-- [Style variants](https://unicode-table.com/en/search/?q=Mathematical+N):
+- [Style variants](https://unicodeplus.com/search?q=Mathematical+N):
   <a href="#tool-encoding-normalization&input=%E2%84%95&normalization=NFKC">ℕ → N</a>,
   <a href="#tool-encoding-normalization&input=%F0%9D%90%8D&normalization=NFKC">𝐍 → N</a>
-- [Enclosed alphanumerics](https://unicode-table.com/en/blocks/enclosed-alphanumerics/):
+- [Enclosed alphanumerics](https://unicodeplus.com/block/2460):
   <a href="#tool-encoding-normalization&input=%E2%92%88&normalization=NFKC">⒈ → 1.</a>,
   <a href="#tool-encoding-normalization&input=%E2%91%B4&normalization=NFKC">⑴ → (1)</a>,
   <a href="#tool-encoding-normalization&input=%E2%91%A0&normalization=NFKC">① → 1</a>,
   <a href="#tool-encoding-normalization&input=%E2%92%9C&normalization=NFKC">⒜ → (a)</a>,
   <a href="#tool-encoding-normalization&input=%E2%93%90&normalization=NFKC">ⓐ → a</a>
-- [Halfwidth and fullwidth forms](https://unicode-table.com/en/blocks/halfwidth-and-fullwidth-forms/):
+- [Halfwidth and fullwidth forms](https://unicodeplus.com/block/FF00):
   <a href="#tool-encoding-normalization&input=%EF%BC%A1&normalization=NFKC">Ａ → A</a>,
   <a href="#tool-encoding-normalization&input=%EF%BD%B6&normalization=NFKC">ｶ → カ</a>
-- [Superscripts and subscripts](https://unicode-table.com/en/blocks/superscripts-and-subscripts/):
+- [Superscripts and subscripts](https://unicodeplus.com/block/2070):
   <a href="#tool-encoding-normalization&input=%C2%B9&normalization=NFKC">¹ → 1</a>,
   <a href="#tool-encoding-normalization&input=%E2%82%81&normalization=NFKC">₁ → 1</a>
-- [Number forms](https://unicode-table.com/en/blocks/number-forms/):
+- [Number forms](https://unicodeplus.com/block/2150):
   <a href="#tool-encoding-normalization&input=%E2%85%94&normalization=NFKC">⅔ → 2⁄3</a>,
   <a href="#tool-encoding-normalization&input=%E2%85%A3&normalization=NFKC">Ⅳ → IV</a>
 - [Ligatures](https://en.wikipedia.org/wiki/Orthographic_ligature):
@@ -6922,14 +6934,14 @@ which means that you can specify a code point with two, four, or a variable numb
 - [Digraphs](https://en.wikipedia.org/wiki/Digraph_(orthography)):
   <a href="#tool-encoding-normalization&input=%C4%B3&normalization=NFKC">ĳ → ij</a>,
   <a href="#tool-encoding-normalization&input=%C7%86&normalization=NFKC">ǆ → dž</a>
-- [Letter-like symbols](https://unicode-table.com/en/blocks/letterlike-symbols/):
+- [Letter-like symbols](https://unicodeplus.com/block/2100):
   <a href="#tool-encoding-normalization&input=%E2%84%83&normalization=NFKC">℃ → °C</a>,
   <a href="#tool-encoding-normalization&input=%E2%84%85&normalization=NFKC">℅ → c/o</a>,
   <a href="#tool-encoding-normalization&input=%E2%84%A2&normalization=NFKC">™ → TM</a>
 - [Line-breaking behavior](https://en.wikipedia.org/wiki/Non-breaking_space):
   <a href="#tool-encoding-normalization&input=%5CxA0&normalization=NFKC">non-breaking space → space</a>,
   <a href="#tool-encoding-normalization&input=%5Cu2011&normalization=NFKC">non-breaking hyphen → hyphen</a>
-  (≠ [hyphen-minus](https://unicode-table.com/en/002D/))
+  (≠ [hyphen-minus](https://unicodeplus.com/U+002D))
 {:.compact}
 
 A few additional remarks:
@@ -6951,15 +6963,15 @@ A few additional remarks:
   Even if two strings are normalized, their concatenation
   [might not be normalized](https://unicode.org/reports/tr15/#Concatenation).
 - [**Growth through NFC normalization**](https://unicode.org/faq/normalization.html#11):
-  In [rare situations](http://www.macchiato.com/unicode/nfc-faq#TOC-What-are-the-cases-where-combining-marks-separate-),
+  In [rare situations](https://www.macchiato.com/unicode-intl-sw/nfc-faq#h.5hgfq7isxjzp),
   NFC normalization can make a string longer.
 - **Surprises**: While most NFKC normalizations are quite reasonable,
   you will get unexpected results if you play long enough with the [above tool](#tool-encoding-normalization).
   For example, `⅔` normalizes to `2⁄3`, but the latter uses
-  the [fraction slash](https://unicode-table.com/en/2044/)
-  and not the [ASCII slash](https://unicode-table.com/en/002F/).
-  Similarly, the [hyphen](https://unicode-table.com/en/2010/)
-  doesn't normalize to the [ASCII hyphen or minus](https://unicode-table.com/en/002D/).
+  the [fraction slash](https://unicodeplus.com/U+2044)
+  and not the [ASCII slash](https://unicodeplus.com/U+002F).
+  Similarly, the [hyphen](https://unicodeplus.com/U+2010)
+  doesn't normalize to the [ASCII hyphen or minus](https://unicodeplus.com/U+002D).
   And while the [trademark symbol](https://en.wikipedia.org/wiki/Trademark_symbol) normalizes to `TM`,
   the [copyright symbol](https://en.wikipedia.org/wiki/Copyright_symbol) stays the same.
   Depending on your requirements, you may thus want to replace additional characters.
@@ -6979,8 +6991,8 @@ A few additional remarks:
 - **Programming**: If you copy `'mañana'` `===` `'mañana'` to the JavaScript console of your
   [web development tools](https://en.wikipedia.org/wiki/Web_development_tools),
   you get `false` because `'ma\xF1ana'` `!==` `'man\u0303ana'`.
-  If you want to prank a friend, replace the [ordinary semicolon](https://unicode-table.com/en/003B/) `;`
-  with the [Greek question mark](https://unicode-table.com/en/037E/) `;` in their
+  If you want to prank a friend, replace the [ordinary semicolon](https://unicodeplus.com/U+003B) `;`
+  with the [Greek question mark](https://unicodeplus.com/U+037E) `;` in their
   [source code](https://en.wikipedia.org/wiki/Source_code).
   These two problems could be solved by normalizing source code to NFC.
   However, `'hi'.normalize('NFKC') === 'h​i'.normalize('NFKC')` would still be `false`
@@ -6999,7 +7011,7 @@ A few additional remarks:
   [invisible variables](https://certitude.consulting/blog/en/invisible-backdoor/),
   [confusable Unicode characters](https://unicode.org/reports/tr36/#visual_spoofing)
   in variable names can make conditions pass or fail unexpectedly
-  (e.g. the [alveolar click character](https://unicode-table.com/en/01C3/) `ǃ` makes `environmentǃ=PRODUCTION`
+  (e.g. the [alveolar click character](https://unicodeplus.com/U+01C3) `ǃ` makes `environmentǃ=PRODUCTION`
   an [assignment](https://en.wikipedia.org/wiki/Assignment_(computer_science))
   instead of a [comparison](https://en.wikipedia.org/wiki/Relational_operator)),
   Unicode control characters can turn what appears to be a comment
@@ -7019,13 +7031,13 @@ A few additional remarks:
   The [zero-width joiner (ZWJ)](https://en.wikipedia.org/wiki/Zero-width_joiner)
   is used to combine characters which also exist separately,
   and the [variation selector 16](https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block))
-  with the code point [FE0F](https://unicode-table.com/en/FE0F/)
+  with the code point [FE0F](https://unicodeplus.com/U+FE0F)
   is used to render the preceding character as an emoji rather than as a text symbol.
   For example, `\u26A0` gives you <span class="emoji">⚠</span>,
   whereas `\u26A0\uFE0F` gives you <span class="emoji">⚠️</span> .
   Please note that such emojification is not supported by all fonts.
 - **Artistic use**: Unicode can also be used to change the appearance of ASCII text.
-  For example, you can [flip text upside down](https://unicode-table.com/en/tools/flip/)
+  For example, you can [flip text upside down](https://symbl.cc/en/tools/flip/)
   or overuse diacritics, which results in so-called
   [Zalgo text](https://en.wikipedia.org/wiki/Combining_character#Zalgo_text).
 - **Sources**: To learn more about normalization,
@@ -7078,7 +7090,7 @@ the [Greek sigma `ς`](https://en.wikipedia.org/wiki/Sigma).
 The former existed only in lowercase until 2017,
 at which point the [capital eszett `ẞ`](https://en.wikipedia.org/wiki/Capital_%E1%BA%9E) was officially adopted.
 While the capital eszett has already been added to Unicode
-with the code point [1E9E](https://unicode-table.com/en/1E9E/) in 2008,
+with the code point [1E9E](https://unicodeplus.com/U+1E9E) in 2008,
 the capitalization of `ß` is still defined as `SS`:
 `'ß'.toUpperCase()` `===` `'SS'` but `'ẞ'.toLowerCase()` `===` `'ß'`.
 Therefore, neither `x.toUpperCase().toLowerCase()` `===` `x` nor
@@ -7099,30 +7111,30 @@ A few additional remarks:
   and [Cyrillic](https://en.wikipedia.org/wiki/Cyrillic_script) scripts
   have [separate code points in Unicode](https://www.unicode.org/notes/tn26/)
   even for optically identical characters.
-  For example, Unicode has a [Latin `B`](https://unicode-table.com/en/0042/),
-  a [Greek `Β`](https://unicode-table.com/en/0392/),
-  and a [Cyrillic `В`](https://unicode-table.com/en/0412/),
-  which map to [`b`](https://unicode-table.com/en/0062/),
-  [`β`](https://unicode-table.com/en/03B2/),
-  and [`в`](https://unicode-table.com/en/0432/).
+  For example, Unicode has a [Latin `B`](https://unicodeplus.com/U+0042),
+  a [Greek `Β`](https://unicodeplus.com/U+0392),
+  and a [Cyrillic `В`](https://unicodeplus.com/U+0412),
+  which map to [`b`](https://unicodeplus.com/U+0062),
+  [`β`](https://unicodeplus.com/U+03B2),
+  and [`в`](https://unicodeplus.com/U+0432).
   While this is great for case operations,
   it's [bad for internationalized domain names](#homograph-attack).
 - **Localization**: For some characters, the case mapping still depends on the language.
   This is why JavaScript has a [`toLocaleLowerCase`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLocaleLowerCase)
   and a [`toLocaleUpperCase`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLocaleUpperCase) method.
   For example, in the [Turkish language](https://en.wikipedia.org/wiki/Turkish_language),
-  `'I'.toLocaleLowerCase('tr')` `===` [`'ı'`](https://unicode-table.com/en/0131/) and
-  `'i'.toLocaleUpperCase('tr')` `===` [`'İ'`](https://unicode-table.com/en/0130/).
+  `'I'.toLocaleLowerCase('tr')` `===` [`'ı'`](https://unicodeplus.com/U+0131) and
+  `'i'.toLocaleUpperCase('tr')` `===` [`'İ'`](https://unicodeplus.com/U+0130).
 - **Titlecase**: [Digraphs](https://en.wikipedia.org/wiki/Digraph_(orthography)),
   such as the [dž](https://en.wikipedia.org/wiki/D%C5%BE) used in Eastern European alphabets,
   usually exist in lowercase, uppercase, and
   [titlecase](https://en.wikipedia.org/wiki/Capitalization#Digraphs_and_ligatures).
-  For example, Unicode defines [ǆ](https://unicode-table.com/en/01C6/),
-  [Ǆ](https://unicode-table.com/en/01C4/), and [ǅ](https://unicode-table.com/en/01C5/).
+  For example, Unicode defines [ǆ](https://unicodeplus.com/U+01C6),
+  [Ǆ](https://unicodeplus.com/U+01C4), and [ǅ](https://unicodeplus.com/U+01C5).
   The Dutch digraph [ij](https://en.wikipedia.org/wiki/IJ_(digraph)), on the other hand,
   is capitalized together, such as in [IJsselmeer](https://en.wikipedia.org/wiki/IJsselmeer),
-  which is why only [ĳ](https://unicode-table.com/en/0133/)
-  and [Ĳ](https://unicode-table.com/en/0132/) exist.
+  which is why only [ĳ](https://unicodeplus.com/U+0133)
+  and [Ĳ](https://unicodeplus.com/U+0132) exist.
   Since digraphs are usually written as two separate characters in practice,
   titlecase algorithms which simply capitalize the first letter get this wrong.
 
@@ -7205,7 +7217,7 @@ So how does IDNA2008 differ from IDNA2003? Let's look at a few examples:
   in domain names, which is a special variant of a [homograph attack](#homograph-attack).
   For example,
   [`ef1p.com∕email.article.example`](https://util.unicode.org/UnicodeJsps/idna.jsp?a=ef1p.com%E2%88%95email.article.example),
-  which uses a [division slash](https://unicode-table.com/en/2215/) in the domain label `com∕email`
+  which uses a [division slash](https://unicodeplus.com/U+2215) in the domain label `com∕email`
   under the top-level domain [`.example`](https://en.wikipedia.org/wiki/.example),
   was also valid under IDNA2003 but is no longer valid under IDNA2008.
 - [**Emojis**](https://en.wikipedia.org/wiki/Emoji):
@@ -7222,8 +7234,8 @@ So how does IDNA2008 differ from IDNA2003? Let's look at a few examples:
   Emojis were intentionally disallowed in IDNA2008 because humans likely confuse different emojis
   even without [combining characters](https://en.wikipedia.org/wiki/Combining_character),
   such as skin tones and hair styles.
-  For example, [❤](https://unicode-table.com/en/2764/)&nbsp;
-  and <span class="emoji">[♥️](https://unicode-table.com/en/2665/)</span>&nbsp;
+  For example, [❤](https://unicodeplus.com/U+2764)&nbsp;
+  and <span class="emoji">[♥️](https://unicodeplus.com/U+2665)</span>&nbsp;
   are two different hearts, where both of them were
   [valid under IDNA2003](https://util.unicode.org/UnicodeJsps/idna.jsp?a=%E2%9D%A4%EF%B8%8F.com%0D%0A%E2%99%A5%EF%B8%8F.com).
 - [**German eszett ß**](https://en.wikipedia.org/wiki/%C3%9F):
@@ -7289,9 +7301,9 @@ can easily be mistaken for one another depending on the font,
 and so can the capital letter O and the number 0.
 While the problem already existed with ASCII-only domain names,
 internationalized domain names made the situation considerably worse.
-For example, the [Latin `B`](https://unicode-table.com/en/0042/),
-the [Greek `Β`](https://unicode-table.com/en/0392/),
-and the [Cyrillic `В`](https://unicode-table.com/en/0412/) all look the same.
+For example, the [Latin `B`](https://unicodeplus.com/U+0042),
+the [Greek `Β`](https://unicodeplus.com/U+0392),
+and the [Cyrillic `В`](https://unicodeplus.com/U+0412) all look the same.
 While [BBC.com](http://BBC.com) takes you to the website of the
 [British Broadcasting Corporation (BBC)](https://en.wikipedia.org/wiki/BBC),
 <a href="http://ВВС.com" rel="nofollow">ВВС.com</a> takes you to a completely different website.
@@ -8167,8 +8179,8 @@ Remarks on the above tool and the Extended-Parameter encoding:
   and normalizes filenames in [macOS](https://en.wikipedia.org/wiki/MacOS) to NFD.
   If you send a file called `¡Buenos días!.txt` with Apple Mail,
   the filename is encoded as <a href="#tool-encoding-extended-parameter&decoded=filename%3D%22%C2%A1Buenos+di%CC%81as%21.txt%22&encoded=filename%2a%3Dutf-8%27%27%25C2%25A1Buenos%2520di%25CC%2581as%2521.txt" title="Set the value of the Extended-Parameter tool.">`filename*=utf-8''%C2%A1Buenos%20di%CC%81as%21.txt`</a>.
-  `i%CC%81` encodes the [Latin small letter i](https://unicode-table.com/en/0069/)
-  followed by the [combining acute accent](https://unicode-table.com/en/0301/).
+  `i%CC%81` encodes the [Latin small letter i](https://unicodeplus.com/U+0069)
+  followed by the [combining acute accent](https://unicodeplus.com/U+0301).
   You don't even need to send an email to verify this:
   You can just paste an NFC normalized string into a filename on macOS
   and then copy the filename back to the [Unicode normalization tool](#tool-encoding-normalization)
@@ -9672,7 +9684,7 @@ When quoting an HTML message, mail clients need to ensure the following two thin
   Thunderbird only moves the `<style>` element from the `<head>` into the `<body>`
   and thus [fails to scope the styles](#thunderbird-example-exploit).
   Outlook.com behaves differently for replies and forwarded messages:
-  It [fails like Thunderbird](#outlook.com-example-exploit) in the former case
+  It [fails like Thunderbird](#outlook-com-example-exploit) in the former case
   and inline styles incorrectly in the latter case.
 - **No overlays**: CSS can be used to move HTML elements away from their default position in a document.
   This becomes a problem when HTML elements in the quoted message can be moved above the
@@ -9763,7 +9775,7 @@ which I'll cover in the [next subsection](#different-appearances).
 </details>
 
 <details markdown="block">
-<summary markdown="span" id="outlook.com-example-exploit">
+<summary markdown="span" id="outlook-com-example-exploit">
 Outlook.com example exploit
 </summary>
 
@@ -10064,7 +10076,7 @@ Otherwise, an attacker can simply replace `opacity: 0` with `opacity: calc(1 - 1
 
 Since you made it to this paragraph, I probably don't need to convince you that email is incredibly complex.
 Email is a system that has been retrofitted to modern requirements for 40 years.
-It's no wonder then that what we have today is a complicated patchwork of extensions.
+It's no wonder then that what we have today is a complicated [patchwork of extensions](#list-of-referenced-rfcs).
 Just to be clear: I don't want to criticize anyone in this section.
 Most of the design decisions that led us to the current situation were reasonable at the time.
 I still think it's a good idea to assess what brought us here
@@ -10271,6 +10283,229 @@ If you want to have something added to or removed from this list, [let me know](
 
 </details>
 
+<details markdown="block">
+<summary markdown="span" id="list-of-referenced-rfcs">
+List of referenced RFCs
+</summary>
+
+This article references 194 RFCs.
+If we ignore obsolete ones, we're still left with 163 RFCs.
+While not all RFCs are equally relevant and I go off on a tangent
+[every](#password-based-authentication-mechanisms)
+[now](#http-public-key-pinning)
+[and](#http-strict-transport-security)
+[then](#sshfp-resource-record),
+these numbers still underline the complexity of modern email.
+The goal of this article was to offer you a more accessible introduction to modern email
+than if you had to read all these RFCs yourself.
+
+What follows is a list of all RFCs referenced in this article.
+For historical context, obsolete RFCs are included in the list, with their titles shown in italics.
+At the end of each line, I link to the section where the RFC is first referenced in this article.
+
+| RFC | Date | Title | Words | Pages | <span title="Where the RFC is first referenced in this article.">Ref.</span>
+|-:|-:|-|-:|-:|:-:
+| [821](https://datatracker.ietf.org/doc/html/rfc821) | 1982-08 | *Simple Mail Transfer Protocol* | 12'889 | 72 | [↗](#terminology)
+| [822](https://datatracker.ietf.org/doc/html/rfc822) | 1982-08 | *Standard for the Format of ARPA Internet Text Messages* | 12'666 | 49 | [↗](#webmail)
+| [918](https://datatracker.ietf.org/doc/html/rfc918) | 1984-10 | *Post Office Protocol* | 1'052 | 5 | [↗](#webmail)
+| [1035](https://datatracker.ietf.org/doc/html/rfc1035) | 1987-11 | Domain names - implementation and specification | 15'736 | 55 | [↗](#address-syntax)
+| [1341](https://datatracker.ietf.org/doc/html/rfc1341) | 1992-06 | *MIME (Multipurpose Internet Mail Extensions): Mechanisms for Specifying and Describing the Format of Internet Message Bodies* | 22'376 | 80 | [↗](#enriched-text)
+| [1425](https://datatracker.ietf.org/doc/html/rfc1425) | 1993-02 | *SMTP Service Extensions* | 2'647 | 10 | [↗](#extended-simple-mail-transfer-protocol)
+| [1523](https://datatracker.ietf.org/doc/html/rfc1523) | 1993-09 | *The text/enriched MIME Content-type* | 4'036 | 15 | [↗](#enriched-text)
+| [1651](https://datatracker.ietf.org/doc/html/rfc1651) | 1994-07 | *SMTP Service Extensions* | 2'870 | 11 | [↗](#extended-simple-mail-transfer-protocol)
+| [1734](https://datatracker.ietf.org/doc/html/rfc1734) | 1994-12 | *POP3 AUTHentication command* | 980 | 5 | [↗](#pop3-extensions)
+| [1847](https://datatracker.ietf.org/doc/html/rfc1847) | 1995-10 | Security Multiparts for MIME: Multipart/Signed and Multipart/Encrypted | 3'042 | 11 | [↗](#other-multipart-subtypes)
+| [1849](https://datatracker.ietf.org/doc/html/rfc1849) | 2010-03 | *"Son of 1036": News Article Format and Transmission* | 34'306 | 106 | [↗](#quoting-the-previous-message)
+| [1869](https://datatracker.ietf.org/doc/html/rfc1869) | 1995-11 | *SMTP Service Extensions* | 3'135 | 11 | [↗](#extended-simple-mail-transfer-protocol)
+| [1870](https://datatracker.ietf.org/doc/html/rfc1870) | 1995-11 | SMTP Service Extension for Message Size Declaration | 2'582 | 9 | [↗](#common-smtp-extensions)
+| [1896](https://datatracker.ietf.org/doc/html/rfc1896) | 1996-02 | The text/enriched MIME Content-type | 5'904 | 21 | [↗](#enriched-text)
+| [1939](https://datatracker.ietf.org/doc/html/rfc1939) | 1996-05 | Post Office Protocol - Version 3 | 5'689 | 23 | [↗](#post-office-protocol-version-3)
+| [1945](https://datatracker.ietf.org/doc/html/rfc1945) | 1996-05 | Hypertext Transfer Protocol -- HTTP/1.0 | 17'960 | 60 | [↗](#content-type)
+| [1950](https://datatracker.ietf.org/doc/html/rfc1950) | 1996-05 | ZLIB Compressed Data Format Specification version 3.3 | 2'462 | 11 | [↗](#message-compression)
+| [1952](https://datatracker.ietf.org/doc/html/rfc1952) | 1996-05 | GZIP file format specification version 4.3 | 2'946 | 12 | [↗](#aggregate-reports)
+| [2026](https://datatracker.ietf.org/doc/html/rfc2026) | 1996-10 | The Internet Standards Process -- Revision 3 | 11'507 | 36 | [↗](#no-reply)
+| [2033](https://datatracker.ietf.org/doc/html/rfc2033) | 1996-10 | Local Mail Transfer Protocol | 1'930 | 7 | [↗](#local-mail-transfer-protocol)
+| [2034](https://datatracker.ietf.org/doc/html/rfc2034) | 1996-10 | SMTP Service Extension for Returning Enhanced Error Codes | 1'248 | 6 | [↗](#common-smtp-extensions)
+| [2045](https://datatracker.ietf.org/doc/html/rfc2045) | 1996-11 | Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies | 9'829 | 31 | [↗](#content-encoding)
+| [2046](https://datatracker.ietf.org/doc/html/rfc2046) | 1996-11 | Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types | 13'932 | 44 | [↗](#content-type)
+| [2047](https://datatracker.ietf.org/doc/html/rfc2047) | 1996-11 | MIME (Multipurpose Internet Mail Extensions) Part Three: Message Header Extensions for Non-ASCII Text | 4'467 | 15 | [↗](#header-encoding)
+| [2077](https://datatracker.ietf.org/doc/html/rfc2077) | 1997-01 | The Model Primary Content Type for Multipurpose Internet Mail Extensions | 3'722 | 13 | [↗](#content-type)
+| [2087](https://datatracker.ietf.org/doc/html/rfc2087) | 1997-01 | *IMAP4 QUOTA extension* | 1'019 | 5 | [↗](#imap-extensions)
+| [2119](https://datatracker.ietf.org/doc/html/rfc2119) | 1997-03 | Key words for use in RFCs to Indicate Requirement Levels | 608 | 3 | [↗](#unreasonable-decisions)
+| [2142](https://datatracker.ietf.org/doc/html/rfc2142) | 1997-05 | Mailbox Names for Common Services, Roles and Functions | 1'476 | 6 | [↗](#common-addresses)
+| [2177](https://datatracker.ietf.org/doc/html/rfc2177) | 1997-06 | IMAP4 IDLE command | 874 | 4 | [↗](#imap-extensions)
+| [2181](https://datatracker.ietf.org/doc/html/rfc2181) | 1997-07 | Clarifications to the DNS Specification | 5'532 | 14 | [↗](#name-checks)
+| [2183](https://datatracker.ietf.org/doc/html/rfc2183) | 1997-08 | Communicating Presentation Information in Internet Messages: The Content-Disposition Header Field | 2'908 | 12 | [↗](#content-disposition)
+| [2195](https://datatracker.ietf.org/doc/html/rfc2195) | 1997-09 | IMAP/POP AUTHorize Extension for Simple Challenge/Response | 1'344 | 5 | [↗](#user-authentication)
+| [2231](https://datatracker.ietf.org/doc/html/rfc2231) | 1997-11 | MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations | 2'469 | 10 | [↗](#internationalized-parameter-values)
+| [2244](https://datatracker.ietf.org/doc/html/rfc2244) | 1997-11 | ACAP -- Application Configuration Access Protocol | 18'363 | 71 | [↗](#filter-management-protocol)
+| [2317](https://datatracker.ietf.org/doc/html/rfc2317) | 1998-03 | Classless IN-ADDR.ARPA delegation | 2'110 | 10 | [↗](#reverse-dns-entry)
+| [2342](https://datatracker.ietf.org/doc/html/rfc2342) | 1998-05 | IMAP4 Namespace | 2'589 | 10 | [↗](#imap-extensions)
+| [2369](https://datatracker.ietf.org/doc/html/rfc2369) | 1998-07 | The Use of URLs as Meta-Syntax for Core Mail List Commands and their Transport through Message Header Fields | 4'034 | 15 | [↗](#one-click-unsubscribe)
+| [2387](https://datatracker.ietf.org/doc/html/rfc2387) | 1998-08 | The MIME Multipart/Related Content-type | 2'178 | 10 | [↗](#aggregate-documents)
+| [2397](https://datatracker.ietf.org/doc/html/rfc2397) | 1998-08 | The "data" URL scheme | 1'227 | 5 | [↗](#verified-mark-certificate)
+| [2449](https://datatracker.ietf.org/doc/html/rfc2449) | 1998-11 | POP3 Extension Mechanism | 4'832 | 19 | [↗](#pop3-extensions)
+| [2476](https://datatracker.ietf.org/doc/html/rfc2476) | 1998-12 | *Message Submission* | 4'459 | 15 | [↗](#submission-versus-relay)
+| [2487](https://datatracker.ietf.org/doc/html/rfc2487) | 1999-01 | *SMTP Service Extension for Secure SMTP over TLS* | 2'172 | 8 | [↗](#smtp-for-relay-with-implicit-tls)
+| [2554](https://datatracker.ietf.org/doc/html/rfc2554) | 1999-03 | *SMTP Service Extension for Authentication* | 2'550 | 11 | [↗](#submission-versus-relay)
+| [2557](https://datatracker.ietf.org/doc/html/rfc2557) | 1999-03 | MIME Encapsulation of Aggregate Documents, such as HTML (MHTML) | 7'296 | 28 | [↗](#aggregate-documents)
+| [2595](https://datatracker.ietf.org/doc/html/rfc2595) | 1999-06 | Using TLS with IMAP, POP3 and ACAP | 4'028 | 15 | [↗](#implicit-tls-versus-explicit-tls)
+| [2671](https://datatracker.ietf.org/doc/html/rfc2671) | 1999-08 | *Extension Mechanisms for DNS (EDNS0)* | 1'978 | 7 | [↗](#txt-size-limits)
+| [2782](https://datatracker.ietf.org/doc/html/rfc2782) | 2000-02 | A DNS RR for specifying the location of services (DNS SRV) | 3'315 | 12 | [↗](#autoconfiguration)
+| [2817](https://datatracker.ietf.org/doc/html/rfc2817) | 2000-05 | Upgrading to TLS Within HTTP/1.1 | 4'057 | 13 | [↗](#encryption-on-the-web)
+| [2821](https://datatracker.ietf.org/doc/html/rfc2821) | 2001-04 | *Simple Mail Transfer Protocol* | 26'584 | 79 | [↗](#dotless-domains)
+| [2854](https://datatracker.ietf.org/doc/html/rfc2854) | 2000-06 | The 'text/html' Media Type | 1'982 | 8 | [↗](#html-emails)
+| [2920](https://datatracker.ietf.org/doc/html/rfc2920) | 2000-09 | SMTP Service Extension for Command Pipelining | 2'303 | 9 | [↗](#double-submission-problem)
+| [2971](https://datatracker.ietf.org/doc/html/rfc2971) | 2000-10 | IMAP4 ID extension | 1'979 | 8 | [↗](#imap-extensions)
+| [3030](https://datatracker.ietf.org/doc/html/rfc3030) | 2000-12 | SMTP Service Extensions for Transmission of Large and Binary MIME Messages | 3'127 | 12 | [↗](#common-smtp-extensions)
+| [3156](https://datatracker.ietf.org/doc/html/rfc3156) | 2001-08 | MIME Security with OpenPGP | 3'235 | 15 | [↗](#end-to-end-security)
+| [3206](https://datatracker.ietf.org/doc/html/rfc3206) | 2002-02 | The SYS and AUTH POP Response Codes | 1'479 | 6 | [↗](#pop3-extensions)
+| [3207](https://datatracker.ietf.org/doc/html/rfc3207) | 2002-02 | SMTP Service Extension for Secure SMTP over Transport Layer Security | 2'737 | 9 | [↗](#starttls-extension)
+| [3348](https://datatracker.ietf.org/doc/html/rfc3348) | 2002-07 | *The Internet Message Action Protocol (IMAP4) Child Mailbox Extension* | 1'596 | 6 | [↗](#imap-extensions)
+| [3370](https://datatracker.ietf.org/doc/html/rfc3370) | 2002-09 | Cryptographic Message Syntax (CMS) Algorithms | 5'908 | 24 | [↗](#end-to-end-security)
+| [3454](https://datatracker.ietf.org/doc/html/rfc3454) | 2003-01 | *Preparation of Internationalized Strings ("stringprep")* | 18'182 | 91 | [↗](#internationalized-domain-names)
+| [3463](https://datatracker.ietf.org/doc/html/rfc3463) | 2003-01 | Enhanced Mail System Status Codes | 3'989 | 16 | [↗](#common-smtp-extensions)
+| [3464](https://datatracker.ietf.org/doc/html/rfc3464) | 2003-01 | An Extensible Message Format for Delivery Status Notifications | 10'470 | 40 | [↗](#bounce-messages)
+| [3490](https://datatracker.ietf.org/doc/html/rfc3490) | 2003-03 | *Internationalizing Domain Names in Applications (IDNA)* | 6'969 | 22 | [↗](#internationalized-domain-names)
+| [3491](https://datatracker.ietf.org/doc/html/rfc3491) | 2003-03 | *Nameprep: A Stringprep Profile for Internationalized Domain Names (IDN)* | 1'238 | 7 | [↗](#internationalized-domain-names)
+| [3492](https://datatracker.ietf.org/doc/html/rfc3492) | 2003-03 | Punycode: A Bootstring encoding of Unicode for Internationalized Domain Names in Applications (IDNA) | 9'092 | 35 | [↗](#punycode-encoding)
+| [3501](https://datatracker.ietf.org/doc/html/rfc3501) | 2003-03 | *Internet Message Access Protocol - Version 4rev1* | 26'984 | 108 | [↗](#internet-message-access-protocol)
+| [3597](https://datatracker.ietf.org/doc/html/rfc3597) | 2003-09 | Handling of Unknown DNS Resource Record (RR) Types | 2'485 | 8 | [↗](#sshfp-resource-record)
+| [3676](https://datatracker.ietf.org/doc/html/rfc3676) | 2004-02 | The Text/Plain Format and DelSp Parameters | 6'303 | 20 | [↗](#quoting-the-previous-message)
+| [3691](https://datatracker.ietf.org/doc/html/rfc3691) | 2004-02 | Internet Message Access Protocol (IMAP) UNSELECT command | 1'227 | 5 | [↗](#protocol-states)
+| [3709](https://datatracker.ietf.org/doc/html/rfc3709) | 2004-02 | *Internet X.509 Public Key Infrastructure: Logotypes in X.509 Certificates* | 6'307 | 21 | [↗](#verified-mark-certificate)
+| [3833](https://datatracker.ietf.org/doc/html/rfc3833) | 2004-08 | Threat Analysis of the Domain Name System (DNS) | 5'761 | 16 | [↗](#name-chaining-attacks)
+| [3834](https://datatracker.ietf.org/doc/html/rfc3834) | 2004-08 | Recommendations for Automatic Responses to Electronic Mail | 7'401 | 22 | [↗](#mail-loops)
+| [3848](https://datatracker.ietf.org/doc/html/rfc3848) | 2004-07 | ESMTP and LMTP Transmission Types Registration | 1'053 | 4 | [↗](#trace-information)
+| [3864](https://datatracker.ietf.org/doc/html/rfc3864) | 2004-09 | Registration Procedures for Message Header Fields | 5'106 | 17 | [↗](#custom-header-fields)
+| [3912](https://datatracker.ietf.org/doc/html/rfc3912) | 2004-09 | WHOIS Protocol Specification | 1'017 | 4 | [↗](#domain-owner)
+| [3986](https://datatracker.ietf.org/doc/html/rfc3986) | 2005-01 | Uniform Resource Identifier (URI): Generic Syntax | 19'928 | 61 | [↗](#percent-encoding)
+| [4021](https://datatracker.ietf.org/doc/html/rfc4021) | 2005-03 | Registration of Mail and MIME Header Fields | 8'181 | 54 | [↗](#format-innovation)
+| [4035](https://datatracker.ietf.org/doc/html/rfc4035) | 2005-03 | Protocol Modifications for the DNS Security Extensions | 16'948 | 53 | [↗](#client-behavior)
+| [4122](https://datatracker.ietf.org/doc/html/rfc4122) | 2005-07 | *A Universally Unique IDentifier (UUID) URN Namespace* | 7'740 | 32 | [↗](#universally-unique-identifier)
+| [4155](https://datatracker.ietf.org/doc/html/rfc4155) | 2005-09 | The application/mbox Media Type | 2'644 | 9 | [↗](#storage-format)
+| [4255](https://datatracker.ietf.org/doc/html/rfc4255) | 2006-01 | Using DNS to Securely Publish Secure Shell (SSH) Key Fingerprints | 2'392 | 9 | [↗](#sshfp-resource-record)
+| [4290](https://datatracker.ietf.org/doc/html/rfc4290) | 2005-12 | Suggested Practices for Registration of Internationalized Domain Names (IDN) | 9'729 | 28 | [↗](#homograph-attack)
+| [4315](https://datatracker.ietf.org/doc/html/rfc4315) | 2005-12 | Internet Message Access Protocol (IMAP) - UIDPLUS extension | 2'218 | 8 | [↗](#imap-extensions)
+| [4343](https://datatracker.ietf.org/doc/html/rfc4343) | 2006-01 | Domain Name System (DNS) Case Insensitivity Clarification | 3'071 | 10 | [↗](#unicode-case-folding)
+| [4408](https://datatracker.ietf.org/doc/html/rfc4408) | 2006-04 | *Sender Policy Framework (SPF) for Authorizing Use of Domains in E-Mail, Version 1* | 13'413 | 48 | [↗](#protecting-subdomains)
+| [4422](https://datatracker.ietf.org/doc/html/rfc4422) | 2006-06 | Simple Authentication and Security Layer (SASL) | 8'977 | 33 | [↗](#user-authentication)
+| [4467](https://datatracker.ietf.org/doc/html/rfc4467) | 2006-05 | Internet Message Access Protocol (IMAP) - URLAUTH Extension | 4'706 | 18 | [↗](#double-submission-problem)
+| [4468](https://datatracker.ietf.org/doc/html/rfc4468) | 2006-05 | Message Submission BURL Extension | 3'554 | 14 | [↗](#double-submission-problem)
+| [4469](https://datatracker.ietf.org/doc/html/rfc4469) | 2006-04 | Internet Message Access Protocol (IMAP) CATENATE Extension | 2'714 | 13 | [↗](#double-submission-problem)
+| [4549](https://datatracker.ietf.org/doc/html/rfc4549) | 2006-06 | Synchronization Operations for Disconnected IMAP4 Clients | 9'987 | 35 | [↗](#message-numbers)
+| [4551](https://datatracker.ietf.org/doc/html/rfc4551) | 2006-06 | *IMAP Extension for Conditional STORE Operation or Quick Flag Changes Resynchronization* | 6'183 | 25 | [↗](#imap-extensions)
+| [4616](https://datatracker.ietf.org/doc/html/rfc4616) | 2006-08 | The PLAIN Simple Authentication and Security Layer (SASL) Mechanism | 2'564 | 11 | [↗](#user-authentication)
+| [4648](https://datatracker.ietf.org/doc/html/rfc4648) | 2006-10 | The Base16, Base32, and Base64 Data Encodings | 4'634 | 18 | [↗](#authorized-third-party-signatures)
+| [4731](https://datatracker.ietf.org/doc/html/rfc4731) | 2006-11 | IMAP4 Extension to SEARCH Command for Controlling What Kind of Information Is Returned | 1'907 | 6 | [↗](#imap-extensions)
+| [4735](https://datatracker.ietf.org/doc/html/rfc4735) | 2006-10 | Example Media Types for Use in Documentation | 1'236 | 6 | [↗](#content-type)
+| [4880](https://datatracker.ietf.org/doc/html/rfc4880) | 2007-11 | *OpenPGP Message Format* | 27'821 | 90 | [↗](#end-to-end-security)
+| [4954](https://datatracker.ietf.org/doc/html/rfc4954) | 2007-07 | SMTP Service Extension for Authentication | 5'355 | 20 | [↗](#common-smtp-extensions)
+| [4959](https://datatracker.ietf.org/doc/html/rfc4959) | 2007-09 | IMAP Extension for Simple Authentication and Security Layer (SASL) Initial Client Response | 1'603 | 7 | [↗](#imap-extensions)
+| [4978](https://datatracker.ietf.org/doc/html/rfc4978) | 2007-08 | The IMAP COMPRESS Extension | 2'260 | 9 | [↗](#message-compression)
+| [5054](https://datatracker.ietf.org/doc/html/rfc5054) | 2007-11 | Using the Secure Remote Password (SRP) Protocol for TLS Authentication | 5'722 | 24 | [↗](#password-authenticated-key-exchange)
+| [5083](https://datatracker.ietf.org/doc/html/rfc5083) | 2007-11 | Cryptographic Message Syntax (CMS) Authenticated-Enveloped-Data Content Type | 2'801 | 10 | [↗](#deniable-authentication)
+| [5161](https://datatracker.ietf.org/doc/html/rfc5161) | 2008-03 | The IMAP ENABLE Extension | 1'572 | 7 | [↗](#imap-extensions)
+| [5162](https://datatracker.ietf.org/doc/html/rfc5162) | 2008-03 | *IMAP4 Extensions for Quick Mailbox Resynchronization* | 7'081 | 23 | [↗](#imap-extensions)
+| [5182](https://datatracker.ietf.org/doc/html/rfc5182) | 2008-03 | IMAP Extension for Referencing the Last SEARCH Result | 3'167 | 13 | [↗](#imap-extensions)
+| [5228](https://datatracker.ietf.org/doc/html/rfc5228) | 2008-01 | Sieve: An Email Filtering Language | 11'356 | 42 | [↗](#mail-filtering-language)
+| [5230](https://datatracker.ietf.org/doc/html/rfc5230) | 2008-01 | Sieve Email Filtering: Vacation Extension | 4'335 | 16 | [↗](#out-of-office-replies)
+| [5234](https://datatracker.ietf.org/doc/html/rfc5234) | 2008-02 | Augmented BNF for Syntax Specifications: ABNF | 3'579 | 16 | [↗](#line-length-limit)
+| [5280](https://datatracker.ietf.org/doc/html/rfc5280) | 2008-05 | Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile | 42'783 | 151 | [↗](#verified-mark-certificate)
+| [5321](https://datatracker.ietf.org/doc/html/rfc5321) | 2008-10 | Simple Mail Transfer Protocol | 33'370 | 95 | [↗](#normalization)
+| [5322](https://datatracker.ietf.org/doc/html/rfc5322) | 2008-10 | Internet Message Format | 16'947 | 57 | [↗](#display-name)
+| [5429](https://datatracker.ietf.org/doc/html/rfc5429) | 2009-03 | Sieve Email Filtering: Reject and Extended Reject Extensions | 3'897 | 14 | [↗](#email-filtering)
+| [5550](https://datatracker.ietf.org/doc/html/rfc5550) | 2009-08 | The Internet Email to Support Diverse Service Environments (Lemonade) Profile | 9'893 | 41 | [↗](#double-submission-problem)
+| [5598](https://datatracker.ietf.org/doc/html/rfc5598) | 2009-07 | Internet Mail Architecture | 14'818 | 54 | [↗](#provider)
+| [5617](https://datatracker.ietf.org/doc/html/rfc5617) | 2009-08 | DomainKeys Identified Mail (DKIM) Author Domain Signing Practices (ADSP) | 5'524 | 21 | [↗](#author-domain-signing-practices)
+| [5646](https://datatracker.ietf.org/doc/html/rfc5646) | 2009-09 | Tags for Identifying Languages | 28'749 | 84 | [↗](#internationalized-parameter-values)
+| [5652](https://datatracker.ietf.org/doc/html/rfc5652) | 2009-09 | Cryptographic Message Syntax (CMS) | 14'721 | 56 | [↗](#end-to-end-security)
+| [5737](https://datatracker.ietf.org/doc/html/rfc5737) | 2010-01 | IPv4 Address Blocks Reserved for Documentation | 862 | 4 | [↗](#trace-information)
+| [5802](https://datatracker.ietf.org/doc/html/rfc5802) | 2010-07 | Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms | 7'075 | 28 | [↗](#user-authentication)
+| [5804](https://datatracker.ietf.org/doc/html/rfc5804) | 2010-07 | A Protocol for Remotely Managing Sieve Scripts | 11'919 | 49 | [↗](#filter-management-protocol)
+| [5890](https://datatracker.ietf.org/doc/html/rfc5890) | 2010-08 | Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework | 7'580 | 23 | [↗](#internationalized-domain-names)
+| [5891](https://datatracker.ietf.org/doc/html/rfc5891) | 2010-08 | Internationalized Domain Names in Applications (IDNA): Protocol | 5'564 | 17 | [↗](#internationalized-domain-names)
+| [5892](https://datatracker.ietf.org/doc/html/rfc5892) | 2010-08 | The Unicode Code Points and Internationalized Domain Names for Applications (IDNA) | 25'486 | 70 | [↗](#internationalized-domain-names)
+| [5893](https://datatracker.ietf.org/doc/html/rfc5893) | 2010-08 | Right-to-Left Scripts for Internationalized Domain Names for Applications (IDNA) | 5'796 | 17 | [↗](#internationalized-domain-names)
+| [5894](https://datatracker.ietf.org/doc/html/rfc5894) | 2010-08 | Internationalized Domain Names for Applications (IDNA): Background, Explanation, and Rationale | 16'747 | 43 | [↗](#internationalized-domain-names)
+| [5929](https://datatracker.ietf.org/doc/html/rfc5929) | 2010-07 | Channel Bindings for TLS | 3'989 | 15 | [↗](#tls-channel-bindings)
+| [5965](https://datatracker.ietf.org/doc/html/rfc5965) | 2010-08 | An Extensible Format for Email Feedback Reports | 5'647 | 25 | [↗](#failure-reports)
+| [6125](https://datatracker.ietf.org/doc/html/rfc6125) | 2011-03 | *Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)* | 18'040 | 57 | [↗](#name-checks)
+| [6152](https://datatracker.ietf.org/doc/html/rfc6152) | 2011-03 | SMTP Service Extension for 8-bit MIME Transport | 1'646 | 7 | [↗](#common-smtp-extensions)
+| [6154](https://datatracker.ietf.org/doc/html/rfc6154) | 2011-03 | IMAP LIST Extension for Special-Use Mailboxes | 3'542 | 12 | [↗](#imap-extensions)
+| [6170](https://datatracker.ietf.org/doc/html/rfc6170) | 2011-05 | *Internet X.509 Public Key Infrastructure -- Certificate Image* | 2'673 | 12 | [↗](#bimi-dns-record)
+| [6186](https://datatracker.ietf.org/doc/html/rfc6186) | 2011-03 | Use of SRV Records for Locating Email Submission/Access Services | 2'759 | 9 | [↗](#autoconfiguration)
+| [6278](https://datatracker.ietf.org/doc/html/rfc6278) | 2011-06 | Use of Static-Static Elliptic Curve Diffie-Hellman Key Agreement in Cryptographic Message Syntax | 4'303 | 16 | [↗](#deniable-authentication)
+| [6376](https://datatracker.ietf.org/doc/html/rfc6376) | 2011-09 | DomainKeys Identified Mail (DKIM) Signatures | 24'747 | 76 | [↗](#domainkeys-identified-mail)
+| [6409](https://datatracker.ietf.org/doc/html/rfc6409) | 2011-11 | Message Submission for Mail | 5'113 | 20 | [↗](#submission-versus-relay)
+| [6522](https://datatracker.ietf.org/doc/html/rfc6522) | 2012-01 | The Multipart/Report Media Type for the Reporting of Mail System Administrative Messages | 1'926 | 9 | [↗](#other-multipart-subtypes)
+| [6530](https://datatracker.ietf.org/doc/html/rfc6530) | 2012-02 | Overview and Framework for Internationalized Email | 8'930 | 26 | [↗](#email-address-internationalization)
+| [6531](https://datatracker.ietf.org/doc/html/rfc6531) | 2012-02 | SMTP Extension for Internationalized Email | 5'717 | 18 | [↗](#address-syntax)
+| [6532](https://datatracker.ietf.org/doc/html/rfc6532) | 2012-02 | Internationalized Email Headers | 3'078 | 11 | [↗](#email-address-internationalization)
+| [6533](https://datatracker.ietf.org/doc/html/rfc6533) | 2012-02 | Internationalized Delivery Status and Disposition Notifications | 4'854 | 19 | [↗](#email-address-internationalization)
+| [6541](https://datatracker.ietf.org/doc/html/rfc6541) | 2012-02 | DomainKeys Identified Mail (DKIM) Authorized Third-Party Signatures | 4'202 | 16 | [↗](#authorized-third-party-signatures)
+| [6591](https://datatracker.ietf.org/doc/html/rfc6591) | 2012-04 | Authentication Failure Reporting Using the Abuse Reporting Format | 3'541 | 16 | [↗](#failure-reports)
+| [6605](https://datatracker.ietf.org/doc/html/rfc6605) | 2012-04 | Elliptic Curve Digital Signature Algorithm (DSA) for DNSSEC | 1'694 | 8 | [↗](#coexistence-with-dane)
+| [6698](https://datatracker.ietf.org/doc/html/rfc6698) | 2012-08 | The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA | 10'821 | 37 | [↗](#dns-based-authentication-of-named-entities)
+| [6797](https://datatracker.ietf.org/doc/html/rfc6797) | 2012-11 | HTTP Strict Transport Security (HSTS) | 13'263 | 46 | [↗](#http-strict-transport-security)
+| [6838](https://datatracker.ietf.org/doc/html/rfc6838) | 2013-01 | Media Type Specifications and Registration Procedures | 10'344 | 32 | [↗](#content-type)
+| [6851](https://datatracker.ietf.org/doc/html/rfc6851) | 2013-01 | Internet Message Access Protocol (IMAP) - MOVE Extension | 2'141 | 8 | [↗](#imap-extensions)
+| [6854](https://datatracker.ietf.org/doc/html/rfc6854) | 2013-03 | Update to Internet Message Format to Allow Group Syntax in the "From:" and "Sender:" Header Fields | 2'772 | 9 | [↗](#no-reply)
+| [6855](https://datatracker.ietf.org/doc/html/rfc6855) | 2013-03 | *IMAP Support for UTF-8* | 3'224 | 12 | [↗](#imap-extensions)
+| [6856](https://datatracker.ietf.org/doc/html/rfc6856) | 2013-03 | Post Office Protocol Version 3 (POP3) Support for UTF-8 | 3'653 | 14 | [↗](#email-address-internationalization)
+| [6857](https://datatracker.ietf.org/doc/html/rfc6857) | 2013-03 | Post-Delivery Message Downgrading for Internationalized Email Messages | 4'973 | 20 | [↗](#no-reply)
+| [6858](https://datatracker.ietf.org/doc/html/rfc6858) | 2013-03 | Simplified POP and IMAP Downgrading for Internationalized Email | 1'533 | 6 | [↗](#email-address-internationalization)
+| [6891](https://datatracker.ietf.org/doc/html/rfc6891) | 2013-04 | Extension Mechanisms for DNS (EDNS(0)) | 4'727 | 16 | [↗](#txt-size-limits)
+| [6960](https://datatracker.ietf.org/doc/html/rfc6960) | 2013-06 | X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP | 9'256 | 41 | [↗](#pki-comparison)
+| [6962](https://datatracker.ietf.org/doc/html/rfc6962) | 2013-06 | *Certificate Transparency* | 6'941 | 27 | [↗](#verified-mark-certificate)
+| [7085](https://datatracker.ietf.org/doc/html/rfc7085) | 2013-12 | Top-Level Domains That Are Already Dotless | 1'628 | 6 | [↗](#dotless-domains)
+| [7162](https://datatracker.ietf.org/doc/html/rfc7162) | 2014-05 | IMAP Extensions: Quick Flag Changes Resynchronization (CONDSTORE) and Quick Mailbox Resynchronization (QRESYNC) | 14'876 | 52 | [↗](#imap-extensions)
+| [7208](https://datatracker.ietf.org/doc/html/rfc7208) | 2014-04 | Sender Policy Framework (SPF) for Authorizing Use of Domains in Email, Version 1 | 18'516 | 64 | [↗](#sender-policy-framework)
+| [7218](https://datatracker.ietf.org/doc/html/rfc7218) | 2014-04 | Adding Acronyms to Simplify Conversations about DNS-Based Authentication of Named Entities (DANE) | 1'209 | 5 | [↗](#tlsa-record-type)
+| [7250](https://datatracker.ietf.org/doc/html/rfc7250) | 2014-06 | Using Raw Public Keys in Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) | 4'628 | 18 | [↗](#tlsa-record-type)
+| [7372](https://datatracker.ietf.org/doc/html/rfc7372) | 2014-09 | Email Authentication Status Codes | 1'875 | 8 | [↗](#sender-policy-framework)
+| [7435](https://datatracker.ietf.org/doc/html/rfc7435) | 2015-01 | Opportunistic Security: Some Protection Most of the Time | 3'652 | 11 | [↗](#server-authentication)
+| [7468](https://datatracker.ietf.org/doc/html/rfc7468) | 2015-04 | Textual Encodings of PKIX, PKCS, and CMS Structures | 4'415 | 20 | [↗](#verified-mark-certificate)
+| [7469](https://datatracker.ietf.org/doc/html/rfc7469) | 2015-04 | Public Key Pinning Extension for HTTP | 8'373 | 28 | [↗](#http-public-key-pinning)
+| [7489](https://datatracker.ietf.org/doc/html/rfc7489) | 2015-03 | Domain-based Message Authentication, Reporting, and Conformance (DMARC) | 19'786 | 73 | [↗](#protecting-subdomains)
+| [7505](https://datatracker.ietf.org/doc/html/rfc7505) | 2015-06 | A "Null MX" No Service Resource Record for Domains That Accept No Mail | 1'786 | 6 | [↗](#null-mx-record)
+| [7508](https://datatracker.ietf.org/doc/html/rfc7508) | 2015-04 | Securing Header Fields with S/MIME | 4'646 | 19 | [↗](#securing-header-fields)
+| [7578](https://datatracker.ietf.org/doc/html/rfc7578) | 2015-07 | Returning Values from Forms: multipart/form-data | 4'023 | 15 | [↗](#one-click-unsubscribe)
+| [7616](https://datatracker.ietf.org/doc/html/rfc7616) | 2015-09 | HTTP Digest Access Authentication | 9'805 | 32 | [↗](#desirable-properties-of-authentication-mechanisms)
+| [7671](https://datatracker.ietf.org/doc/html/rfc7671) | 2015-10 | The DNS-Based Authentication of Named Entities (DANE) Protocol: Updates and Operational Guidance | 10'543 | 33 | [↗](#dns-based-authentication-of-named-entities)
+| [7672](https://datatracker.ietf.org/doc/html/rfc7672) | 2015-10 | SMTP Security via Opportunistic DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) | 11'856 | 34 | [↗](#dns-based-authentication-of-named-entities)
+| [7673](https://datatracker.ietf.org/doc/html/rfc7673) | 2015-10 | Using DNS-Based Authentication of Named Entities (DANE) TLSA Records with SRV Records | 4'209 | 16 | [↗](#client-behavior)
+| [7677](https://datatracker.ietf.org/doc/html/rfc7677) | 2015-11 | SCRAM-SHA-256 and SCRAM-SHA-256-PLUS Simple Authentication and Security Layer (SASL) Mechanisms | 1'897 | 8 | [↗](#tls-channel-bindings)
+| [7924](https://datatracker.ietf.org/doc/html/rfc7924) | 2016-07 | Transport Layer Security (TLS) Cached Information Extension | 4'779 | 19 | [↗](#pki-comparison)
+| [7929](https://datatracker.ietf.org/doc/html/rfc7929) | 2016-08 | DNS-Based Authentication of Named Entities (DANE) Bindings for OpenPGP | 6'314 | 20 | [↗](#openpgpkey-resource-record)
+| [8018](https://datatracker.ietf.org/doc/html/rfc8018) | 2017-01 | PKCS #5: Password-Based Cryptography Specification Version 2.1 | 10'595 | 40 | [↗](#applications-of-cryptographic-hash-functions)
+| [8032](https://datatracker.ietf.org/doc/html/rfc8032) | 2017-01 | Edwards-Curve Digital Signature Algorithm (EdDSA) | 11'699 | 60 | [↗](#generating-the-signing-key)
+| [8058](https://datatracker.ietf.org/doc/html/rfc8058) | 2017-01 | Signaling One-Click Functionality for List Email Headers | 2'480 | 9 | [↗](#one-click-unsubscribe)
+| [8080](https://datatracker.ietf.org/doc/html/rfc8080) | 2017-02 | Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC | 1'704 | 7 | [↗](#coexistence-with-dane)
+| [8081](https://datatracker.ietf.org/doc/html/rfc8081) | 2017-03 | The "font" Top-Level Media Type | 4'813 | 18 | [↗](#content-type)
+| [8126](https://datatracker.ietf.org/doc/html/rfc8126) | 2017-06 | Guidelines for Writing an IANA Considerations Section in RFCs | 14'583 | 47 | [↗](#custom-header-fields)
+| [8162](https://datatracker.ietf.org/doc/html/rfc8162) | 2017-05 | Using Secure DNS to Associate Certificates with Domain Names for S/MIME | 3'709 | 11 | [↗](#smimea-resource-record)
+| [8314](https://datatracker.ietf.org/doc/html/rfc8314) | 2018-01 | Cleartext Considered Obsolete: Use of Transport Layer Security (TLS) for Email Submission and Access | 12'991 | 26 | [↗](#official-architecture)
+| [8437](https://datatracker.ietf.org/doc/html/rfc8437) | 2018-08 | IMAP UNAUTHENTICATE Extension for Connection Reuse | – | 11 | [↗](#protocol-states)
+| [8460](https://datatracker.ietf.org/doc/html/rfc8460) | 2018-09 | SMTP TLS Reporting | 5'140 | 34 | [↗](#smtp-tls-reporting-tlsrpt)
+| [8461](https://datatracker.ietf.org/doc/html/rfc8461) | 2018-09 | SMTP MTA Strict Transport Security (MTA-STS) | 5'117 | 29 | [↗](#mail-transfer-agent-strict-transport-security)
+| [8463](https://datatracker.ietf.org/doc/html/rfc8463) | 2018-09 | A New Cryptographic Signature Method for DomainKeys Identified Mail (DKIM) | 1'476 | 7 | [↗](#dkim-signature-header-field)
+| [8550](https://datatracker.ietf.org/doc/html/rfc8550) | 2019-05 | Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Certificate Handling | 7'847 | 29 | [↗](#end-to-end-security)
+| [8551](https://datatracker.ietf.org/doc/html/rfc8551) | 2019-05 | Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Message Specification | 16'088 | 63 | [↗](#message-compression)
+| [8601](https://datatracker.ietf.org/doc/html/rfc8601) | 2019-05 | Message Header Field for Indicating Message Authentication Status | – | 54 | [↗](#authentication-results-header-field)
+| [8615](https://datatracker.ietf.org/doc/html/rfc8615) | 2019-05 | Well-Known Uniform Resource Identifiers (URIs) | – | 12 | [↗](#mta-sts-policy-file)
+| [8616](https://datatracker.ietf.org/doc/html/rfc8616) | 2019-07 | Email Authentication for Internationalized Mail | – | 6 | [↗](#spf-macros)
+| [8617](https://datatracker.ietf.org/doc/html/rfc8617) | 2019-07 | The Authenticated Received Chain (ARC) Protocol | 9'367 | 35 | [↗](#authenticated-received-chain)
+| [8620](https://datatracker.ietf.org/doc/html/rfc8620) | 2019-07 | The JSON Meta Application Protocol (JMAP) | 13'974 | 90 | [↗](#json-meta-application-protocol)
+| [8621](https://datatracker.ietf.org/doc/html/rfc8621) | 2019-08 | The JSON Meta Application Protocol (JMAP) for Mail | 19'253 | 108 | [↗](#json-meta-application-protocol)
+| [8689](https://datatracker.ietf.org/doc/html/rfc8689) | 2019-11 | SMTP Require TLS Option | – | 16 | [↗](#requiretls-extension)
+|-
+| Total: | 194 | RFCs, of which 31 are obsolete | 1'366'655 | 5'069 |
+| | 163 | non-obsolete RFCs | 1'076'544 | 3'999 |
+{:.clipped-cells .referenced-rfcs}
+
+</details>
+
 
 ### Innovation
 
@@ -10422,7 +10657,9 @@ There are three complementary standards for domain authentication:
 - [**Domain-based Message Authentication, Reporting, and Conformance (DMARC)**](#domain-based-message-authentication-reporting-and-conformance):
   Publish a policy, which tells recipients what to do with messages
   that fail both SPF and DKIM, in a DNS record at your domain.
-  Without a DMARC record, the recipient [cannot know](#author-domain-signing-practices) whether the sender uses DKIM.
+  Recipients of messages without a valid DKIM signature from a domain with no DMARC record [cannot know](#author-domain-signing-practices)
+  whether such a message was spoofed or the sender doesn't use DKIM for all their outgoing messages.
+  As a consequence, the absence of a DKIM signature isn't enough to reject a message.
   By publishing a DMARC policy, you also require the domain in the `From` address
   to match the SPF-authenticated domain in the `MAIL` `FROM` address or the domain of a valid DKIM signature.
   Moreover, you can specify an email address
@@ -10506,8 +10743,7 @@ For example, this is how you find the WHOIS information of `ef1p.com`:
 
 How to perform WHOIS queries yourself.
 Once the TCP connection is established, you just enter the domain name of interest followed by a new line.
-([Telnet should convert "return"](https://www.freesoft.org/CIE/RFC/1123/31.htm)
-into [`{CR}{LF}`](#newline-characters) automatically.)
+(The option `-c` converts newline characters into [`{CR}{LF}`](#newline-characters).)
 As soon as the server has sent the answer, it closes the connection.
 
 </figcaption>
@@ -10553,7 +10789,7 @@ Email leaves more traces with domain authentication than without.
 
 <details markdown="block">
 <summary markdown="span" id="name-chaining-attacks">
-Name chaining attacks
+Name-chaining attacks
 </summary>
 
 [Remote content](#remote-content) and [domain authentication](#domain-authentication)
@@ -10569,7 +10805,7 @@ The attacker could also redirect the victim's DNS resolver to the name server of
 and provide their own IP address
 [as the name server's address](https://en.wikipedia.org/wiki/DNS_spoofing#Redirect_the_target_domain's_name_server)
 in the additional section of the response.
-This is known as a [name chaining attack](https://datatracker.ietf.org/doc/html/rfc3833#section-2.3).
+This is known as a [name-chaining attack](https://datatracker.ietf.org/doc/html/rfc3833#section-2.3).
 In the absence of [DNSSEC](/internet/#domain-name-system-security-extensions),
 any records in the additional section may not be cached by DNS resolvers.
 (In case you are wondering, [`.example`](https://en.wikipedia.org/wiki/.example)
@@ -10623,7 +10859,7 @@ On domains from which you don't send any emails,
 you [should use](https://datatracker.ietf.org/doc/html/rfc7208#section-10.1.2) `v=spf1 -all`.
 The full syntax of SPF records is much more powerful than this but rarely needed.
 I will cover SPF in more detail in the [boxes below](#spf-qualifiers).
-There are <a href="#tool-lookup-spf-record&domain=bad.spf.ef1p.com" title="Look up the SPF record of bad.spf.ef1p.com, which has lots of issues.">a lot of things</a>
+There are <a href="#tool-lookup-spf-record&domain=bad-spf.ef1p.com" title="Look up the SPF record of bad-spf.ef1p.com, which has lots of issues.">a lot of things</a>
 that can go wrong when configuring an SPF record.
 For a start, a domain may have [at most one SPF record](https://datatracker.ietf.org/doc/html/rfc7208#section-3.2)
 and the number of additional DNS lookups an SPF record may trigger
@@ -11702,7 +11938,8 @@ All dates are provided in [Unix time](#unix-time).
 
 Since having compressed XML files in your inbox isn't very useful,
 you want to use a service which aggregates the aggregate reports for you.
-I use the [DMARC analyzer from Postmark](https://dmarc.postmarkapp.com/) for my domains.
+I use the [DMARC analyzer from Postmark](https://dmarc.postmarkapp.com/) for my domains;
+you find a list of alternatives at [dmarcvendors.com](https://dmarcvendors.com/).
 Once configured, you get a weekly email with insights into the sources which send emails on behalf of your domain
 and the percentage of emails which passed DMARC authentication.
 While the service provider learns neither the local part of email addresses nor the content of emails,
@@ -12049,7 +12286,10 @@ BIMI records are identified with a selector just like [DKIM records](#domainkeys
 so that companies can use different logos for different purposes.
 The default selector is `default`.
 Google, Yahoo, and Fastmail are running [BIMI pilots](https://bimigroup.org/bimi-adoption-october-2020/).
-Companies which already have a BIMI record include `cnn.com`, `linkedin.com`, and `ebay.com`.
+Companies which already have a BIMI record include
+[`cnn.com`](#tool-lookup-bimi-record&domain=cnn.com&bimiSelector=default),
+[`linkedin.com`](#tool-lookup-bimi-record&domain=linkedin.com&bimiSelector=default),
+and [`ebay.com`](#tool-lookup-bimi-record&domain=ebay.com&bimiSelector=default).
 
 <div id="tool-lookup-bimi-record"></div>
 
@@ -14211,9 +14451,10 @@ records allow others to detect [when a key has been revoked](https://datatracker
 
 The following tool queries the `OPENPGPKEY` record of an email address with
 [Google's DNS API](https://developers.google.com/speed/public-dns/docs/doh/json).
-You can test the tool with the email address `security@ef1p.com`.
+You can test the tool with the email address
+[`fedora-44-primary@fedoraproject.org`](#tool-lookup-openpgpkey-records&emailAddress=fedora-44-primary%40fedoraproject.org).
 The [key's fingerprint](https://en.wikipedia.org/wiki/Public_key_fingerprint)
-is `7044 3D35 13F7 9AD9 2527  667F 6B14 3BF1 470C 9367`.
+is [`36F6 12DC F27F 7D1A 48A8 35E4 DBFC F71C 6D9F 90A6`](https://fedoraproject.org/security/).
 You can use this key if you want to report security-related issues to me.
 The tool displays the key in [ASCII armor](https://datatracker.ietf.org/doc/html/rfc4880#section-6.2).
 The first two lines and the last two lines are not part of the `OPENPGPKEY` record.

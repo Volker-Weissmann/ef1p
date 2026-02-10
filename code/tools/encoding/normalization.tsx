@@ -120,7 +120,7 @@ function RawNormalizationOutput({ input, normalization }: State): JSX.Element {
             <DynamicOutput
                 className="d-inline-block ml-1 align-middle text-center"
                 title="Click to look up this code point in a new window."
-                onClick={() => window.open(`https://unicode-table.com/en/${toHex(point, 4)}/`, '_blank')}
+                onClick={() => window.open('https://unicodeplus.com/U+' + toHex(point, 4), '_blank')}
             >
                 <div>{renderCodePoint(point)}</div>
                 <div className="small color-gray">{toHex(point)}</div>
