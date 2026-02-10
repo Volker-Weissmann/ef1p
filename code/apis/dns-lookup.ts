@@ -34,6 +34,8 @@ const internalQueryRecordTypes = {
     NSEC3PARAM: 'NSEC3PARAM[eters]',
     CDS: 'CDS: DS in child zone',
     CDNSKEY: 'CDNSKEY: child DNSKEY',
+    SVCB: 'SVCB: service binding',
+    HTTPS: 'HTTPS: SVCB for HTTPS',
 };
 
 /**
@@ -47,12 +49,11 @@ const internalReplyRecordTypes = {
     CERT: 'CERT: certificate (RFC 4398)',
     HINFO: 'HINFO: host information (RFC 1035)',
     HIP: 'HIP: Host Identity Protocol (RFC 8005)',
-    HTTPS: 'HTTPS: SVCB-compatible type for use with HTTP (RFC 9460)',
     LOC: 'LOC: geographic location (RFC 1876)',
     NAPTR: 'NAPTR: Naming Authority Pointer (RFC 3403)',
     NXNAME: 'NXNAME: NXDOMAIN indicator for Compact Denial of Existence',
-    SVCB: 'SVCB: general-purpose service binding (RFC 9460)',
     URI: 'URI: Uniform Resource Identifier (RFC 7553)',
+    ZONEMD: 'ZONEMD: Zone Message Digest (RFC 8976)',
 };
 
 /**
@@ -102,6 +103,7 @@ export const recordTypesById: { [key: number]: RecordType | undefined } = {
     128: 'NXNAME',
     64: 'SVCB',
     256: 'URI',
+    63: 'ZONEMD',
 }
 
 // Construct the reverse lookup table (with ids as strings).
@@ -110,7 +112,7 @@ for (const [id, recordType] of Object.entries(recordTypesById)) {
     idsByRecordType[recordType!] = id;
 }
 
-const recordTypesNotUnderstoodByGoogle: RecordType[] = ['OPENPGPKEY', 'SMIMEA', 'HIP', 'LOC', 'URI', 'NXNAME'];
+const recordTypesNotUnderstoodByGoogle: RecordType[] = ['OPENPGPKEY', 'SMIMEA', 'HIP', 'LOC', 'URI', 'NXNAME', 'ZONEMD'];
 
 function mapRecordTypeToGoogle(type: RecordType): string {
     if (recordTypesNotUnderstoodByGoogle.includes(type)) {

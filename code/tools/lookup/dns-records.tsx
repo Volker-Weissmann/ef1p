@@ -196,6 +196,48 @@ const openDomainInBrowser: Action = {
     handler: field => window.open('http://' + field.slice(0, -1)),
 };
 
+const SVCB: Parser = record => {
+    const match = record.data.match(/^(\d+) (\S+)(?: (.+))?$/);
+    if (!match) {
+        return <span title="The format of this record is not as expected.">{record.data}</span>;
+    }
+    const [, svcPriority, targetName, svcParams] = match;
+    return <>
+        <ClickToCopy title={`The priority of this record. ${svcPriority === '0' ?
+            'A priority of 0 means that this domain is an alias, which is to be resolved to the target name. Unlike a CNAME record, this record can also be used at the so-called apex domain at the root of a zone. Any parameters are ignored.' :
+            'A lower number means higher priority. Equal priorities are shuffled for load-balancing.'
+        } Click to copy.`}>
+            <span className="static-output">{svcPriority}</span>
+        </ClickToCopy>{' '}
+        <ClickToCopy title={`The target name of this record. ${targetName === '.' ?
+            (svcPriority === '0' ?
+                'In alias mode (with a priority of 0), a period means that the service is not available.' :
+                'In service mode (with a priority greater than 0), a period means that the service is provided at the domain itself.'
+            ) : (svcPriority === '0' ?
+                "It's the domain name to which this domain is an alias." :
+                "It's where the service with the following parameters is provided."
+            )} Click to copy.`}>
+            <span className="static-output">{targetName}</span>
+        </ClickToCopy>
+        {svcPriority === '0' && targetName !== '.' && <i
+            className="action fa-sm fa-solid fa-magnifying-glass"
+            title="Look up the records of the same type for the target name."
+            onClick={() => store.setNewStateFromInput('domainName', targetName)}
+        ></i>}
+        {svcParams && <>
+            {' '}
+            <ClickToCopy title="The service parameters of this record. It's a space-separated list of key=value pairs. They describe the supported application protocols ('alpn'), alternative ports ('port'), address hints, and so on. Click to copy.">
+                <span className="static-output">{svcParams}</span>
+            </ClickToCopy>
+            <i
+                className="action fa-sm fa-solid fa-arrow-up-right-from-square"
+                title="Look up the registered SVCB service parameter keys with their specifications."
+                onClick={() => window.open('https://www.iana.org/assignments/dns-svcb/dns-svcb.xhtml#dns-svcparamkeys')}
+            ></i>
+        </>}
+    </>;
+};
+
 const recordTypePatterns: { [key in RecordType]?: Pattern | Parser } = {
     A: {
         regexp: /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
@@ -326,6 +368,8 @@ const recordTypePatterns: { [key in RecordType]?: Pattern | Parser } = {
             },
         ],
     },
+    SVCB,
+    HTTPS: SVCB,
     TLSA: {
         regexp: /^\d+ \d+ \d+ [0-9A-Fa-f]+$/,
         fields: [
@@ -432,6 +476,16 @@ const recordTypePatterns: { [key in RecordType]?: Pattern | Parser } = {
     },
     CDS: DS,
     CDNSKEY: DNSKEY,
+    ZONEMD: record => /^\\# [0-9]+ [0-9a-f]+$/.test(record.data) ? <>
+        <ClickToCopy title="This record type contains a hash of the whole zone (excluding this resource record). Click to copy.">
+            <span className="static-output">{record.data.split(' ')[2]}</span>
+        </ClickToCopy>
+        <i
+            className="action fa-sm fa-solid fa-arrow-up-right-from-square"
+            title="Look up RFC 8976, which introduces the ZONEMD record type."
+            onClick={() => window.open('https://datatracker.ietf.org/doc/html/rfc8976')}
+        ></i>
+    </> : <span title="The format of this record is not as expected.">{record.data}</span>,
 };
 
 function parseDnsData(record: DnsRecord): ReactNode {
@@ -563,7 +617,7 @@ export const domainName: DynamicTextEntry = {
         input.length > 253 && 'The domain name may be at most 253 characters long.' ||
         !input.split('.').every(label => label.length < 64) && 'Each label may be at most 63 characters long.' || // Redundant to the regular expression, just a more specific error message.
         !/^[-a-z0-9_\.\\]+$/i.test(input) && 'You can use only English letters, digits, hyphens, underlines, dots, and backslashes.' || // Redundant to the regular expression, just a more specific error message.
-        !/^(((\\000|[a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?)\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
+        !/^(((\\000|[a-z0-9_]([-a-z0-9]{0,61}[a-z0-9])?(\\000)?)\.)*[a-z][-a-z0-9]{0,61}[a-z0-9])?\.?$/i.test(input) && 'The pattern of the domain name is invalid.',
 };
 
 const recordType: DynamicSingleSelectEntry = {
