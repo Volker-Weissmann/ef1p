@@ -169,7 +169,7 @@ export class DiscreteLogarithms<State extends DiscreteLogarithmState & BasicStat
 
                 return <Fragment>
                     <p className="text-center">k = {kBin}<sub>2</sub> ({kBinArray.length} bits)</p>
-                    <table className="table-with-vertical-border-after-column-1 text-break">
+                    <table className="table-with-vertical-border-after-column-1 text-nowrap">
                         <thead>
                             <tr className="text-nowrap">
                                 <th>k<sub>i</sub></th>
@@ -177,7 +177,7 @@ export class DiscreteLogarithms<State extends DiscreteLogarithmState & BasicStat
                                 <th className="pl-space pr-space">{abstractEquality}</th>
                                 <th className="pl-space">K</th>
                                 <th>Action</th>
-                                <th>{toolPrefix === 'elliptic-curve' ? 'Coefficient' : 'Exponent'} in binary</th>
+                                <th>{toolPrefix === 'elliptic-curve' ? 'Coefficient' : 'Exponent'} k in binary</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -718,7 +718,7 @@ export class DiscreteLogarithms<State extends DiscreteLogarithmState & BasicStat
                             <td>k</td>
                             <td>
                                 =<sub><Integer integer={state.n} format={state.format}/></sub> <ClickToCopy><Integer integer={state.k} format={state.format} color="green"/></ClickToCopy>{' '}
-                                <a href={`#tool-discrete-logarithm-${toolPrefix}-montgomerys-ladder${encodeGenerator(state.G!, state.n, state.format)}&k=${encodePercent(encodeInteger(state.k, state.format))}&K=${encodePercent(state.K!.to(state.format))}`} title="Use Montgomery's ladder to verify this solution.">↗</a>
+                                <a href={`#tool-discrete-logarithm-${toolPrefix}-binary-repetition${encodeGenerator(state.G!, state.n, state.format)}&k=${encodePercent(encodeInteger(state.k, state.format))}`} title="Verify this solution.">↗</a>
                             </td>
                         </tr>
                     </table>}
