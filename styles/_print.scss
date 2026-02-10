@@ -44,8 +44,14 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
     border-top: 1px solid #000;
   }
 
+  a:not(.btn) {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
   a[href^="#"] {
-    text-decoration: underline dashed;
+    text-decoration-style: dashed;
   }
 
   div.container-fluid {

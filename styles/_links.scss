@@ -7,13 +7,15 @@ License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 a {
   color: $info;
   cursor: pointer; // Necessary for links without href.
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 
   @include hover() {
     color: darken($info, 19%);
   }
 
   &:focus {
-    text-decoration: underline;
+    text-decoration-line: underline;
     outline: none;
   }
 }
