@@ -31,7 +31,7 @@ export const vectorWithSeveralCoefficientsRegex = regex(`(\\[ *${vectorWithSever
 const variable = `[a-z]`;
 export const variableRegex = new RegExp(variable);
 
-const monomialCoefficient = `({[0-9]+}|[0-9]+)`;
+const monomialCoefficient = `(\\{[0-9]+\\}|[0-9]+)`;
 const variableWithExponent = `${variable}(\\^?[0-9]+)?`;
 const monomial = `(${monomialCoefficient} *\\*? *${variableWithExponent}|${monomialCoefficient}|${variableWithExponent})`;
 
