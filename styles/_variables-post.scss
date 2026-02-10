@@ -18,8 +18,8 @@ $hr-border-color: $body-color !default;
 // Navbar
 
 // Revert: https://github.com/thomaspark/bootswatch/commit/75794debc6c40ef7c511bc4e04fd6cddf1a78c27
-$navbar-dark-color: $white; // Cannot only be default as already set by Bootswatch.
-$navbar-dark-hover-color: $success; // Cannot only be default as already set by Bootswatch.
+$navbar-dark-color: $white; // Cannot be just the default as already set by Bootswatch.
+$navbar-dark-hover-color: $success; // Cannot be just the default as already set by Bootswatch.
 
 // Forms
 
@@ -50,4 +50,4 @@ $custom-control-indicator-focus-box-shadow: 0 0 0 2px $link-color !default;
 
 // Dropdowns
 
-$dropdown-link-color: $body-color; // Cannot only be default as already set by Bootswatch.
+$dropdown-link-color: $body-color; // Cannot be just the default as already set by Bootswatch.

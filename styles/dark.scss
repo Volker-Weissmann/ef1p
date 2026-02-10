@@ -24,6 +24,8 @@ $jumbotron-bg: hsl(280deg, 5%, 15%) !default;
 $pre-bg: darken($body-bg, 5%) !default;
 $select-color: hsl(45deg, 100%, 20%) !default;
 
+$dropdown-bg: $body-bg !default;
+
 @import "variables-pre";
 @import "../node_modules/bootswatch/dist/darkly/variables";
 $custom-control-color: $body-color !default;
