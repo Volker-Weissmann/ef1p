@@ -16,8 +16,10 @@
         "sourceMap": true,
         "strict": true,
         "target": "es2016",
-        "typeRoots": ["./node_modules/@types/"],
     },
+    "include": [
+        "./code/**/*",
+    ],
     "exclude": [
         "./_site/**/*",
         "./assets/**/*",
