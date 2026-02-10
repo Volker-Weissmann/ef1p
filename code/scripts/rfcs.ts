@@ -54,7 +54,7 @@ function getSectionId(element: HTMLElement): string {
 }
 
 const ignoreMissingNonObsoleteRfcsPerArticle: { [key in string]: number[] } = {
-    '/internet/': [349, 821, 882, 883, 918, 1064, 1541, 1883, 2460, 2535],
+    '/internet/': [349, 821, 882, 883, 918, 1064, 1541, 1883, 2460, 2535, 7626],
     '/email/': [],
 };
 
@@ -136,6 +136,7 @@ async function generateTable() {
     rows.push('|-');
     rows.push(`| Total: | ${rfcs.size} | RFCs, of which ${obsoleteRfcs.length} are obsolete | ${insertThousandSeparator(totalWordsAll)} | ${insertThousandSeparator(totalPagesAll)} |`);
     rows.push(`| | ${rfcs.size - obsoleteRfcs.length} | non-obsolete RFCs | ${insertThousandSeparator(totalWordsNonObsolete)} | ${insertThousandSeparator(totalPagesNonObsolete)} |`);
+    rows.push('{:.clipped-cells .referenced-rfcs}');
 
     console.log(rows.join('\n') + '\n');
 
