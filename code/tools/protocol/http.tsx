@@ -46,40 +46,30 @@ function RawHttpCommand({ webAddress }: State): JSX.Element {
         <StaticPrompt>
             {
                 protocol === 'http' ?
-                <StaticOutput title="A common command to open a TCP channel to the specified server.">
-                    telnet
-                </StaticOutput> :
-                <StaticOutput title="A common command with some options to open a TLS channel to the specified server.">
-                    openssl s_client -quiet -crlf -connect
-                </StaticOutput>
+                <>
+                    <StaticOutput title="This command opens a TCP connection to the specified server. (nc stands for netcat.)">nc</StaticOutput>{' '}
+                    <StaticOutput title="This option translates newlines from the command-line interface into carriage-return and line-feed characters (CR+LF) as required by HTTP.">-c</StaticOutput>
+                </> :
+                <>
+                    <StaticOutput title="This command opens a TLS connection to the specified server.">openssl s_client</StaticOutput>{' '}
+                    <StaticOutput title="This option tells OpenSSL not to output session and certificate information.">-quiet</StaticOutput>{' '}
+                    <StaticOutput title="This option translates newlines from the command-line interface into carriage-return and line-feed characters (CR+LF) as required by HTTP.">-crlf</StaticOutput>{' '}
+                    <StaticOutput title="This option is followed by the server address and the port number to connect to.">-connect</StaticOutput>
+                </>
             }
             {' '}
-            <DynamicOutput title="The domain name of the server, which is resolved to an IP address using DNS.">
-                {domain}
-            </DynamicOutput>
+            <DynamicOutput title="The domain name of the server, which is resolved to an IP address using DNS.">{domain}</DynamicOutput>
             {protocol === 'http' ? ' ' : ':'}
-            <DynamicOutput title="The port number of the server process.">
-                {port ?? (protocol === 'http' ? '80' : '443')}
-            </DynamicOutput>
+            <DynamicOutput title="The port number of the server process.">{port ?? (protocol === 'http' ? '80' : '443')}</DynamicOutput>
         </StaticPrompt>
         <div>
             <ClickToCopy>
-                <StaticOutput title="The HTTP request method to retrieve a document.">
-                    GET
-                </StaticOutput>{' '}
-                <DynamicOutput title="The path of the resource which is requested.">
-                    {path ?? '/'}
-                </DynamicOutput>{' '}
-                <StaticOutput title="The used version of the HTTP protocol.">
-                    HTTP/1.0
-                </StaticOutput>
+                <StaticOutput title="The HTTP request method to retrieve a document.">GET</StaticOutput>{' '}
+                <DynamicOutput title="The path of the resource which is requested.">{path ?? '/'}</DynamicOutput>{' '}
+                <StaticOutput title="The used version of the HTTP protocol.">HTTP/1.0</StaticOutput>
                 {'\n'}
-                <StaticOutput title="The host header allows the server to serve multiple websites from the same IP address and port number.">
-                    Host:
-                </StaticOutput>{' '}
-                <DynamicOutput title="The domain name of the web server.">
-                    {domain}
-                </DynamicOutput>
+                <StaticOutput title="The host header allows the server to serve multiple websites from the same IP address and port number.">Host:</StaticOutput>{' '}
+                <DynamicOutput title="The domain name of the web server.">{domain}</DynamicOutput>
                 {'\n\n'}
             </ClickToCopy>
         </div>

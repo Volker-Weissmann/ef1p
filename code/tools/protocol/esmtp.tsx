@@ -571,15 +571,21 @@ export function setBody(content: string, body: string): void {
 
 /* ------------------------------ Prompt entries ------------------------------ */
 
-const telnet: Entry<string> = {
+const nc: Entry<string> = {
     label: 'Command',
-    tooltip: 'The command to open a TCP channel to the given server.',
-    defaultValue: 'telnet',
+    tooltip: 'This command opens a TCP connection to the given server. (nc stands for netcat.)',
+    defaultValue: 'nc',
+};
+
+const c: Entry<string> = {
+    label: 'Option',
+    tooltip: 'This option translates newlines from the command-line interface into carriage-return and line-feed characters (CR+LF) as required by the standard.',
+    defaultValue: '-c',
 };
 
 export const openssl: Entry<string> = {
     label: 'Command',
-    tooltip: 'The command to open a TLS channel to the given server as a client.',
+    tooltip: 'This command opens a TLS connection to the given server as a client.',
     defaultValue: 'openssl s_client',
 };
 
@@ -591,20 +597,20 @@ export const quiet: Entry<string> = {
 
 export const crlf: Entry<string> = {
     label: 'Option',
-    tooltip: 'This option translates newlines from the command-line interface into carriage return and line feed characters (CR+LF) as required by the standard.',
+    tooltip: 'This option translates newlines from the command-line interface into carriage-return and line-feed characters (CR+LF) as required by the standard.',
     defaultValue: '-crlf',
 };
 
 const starttls: Entry<string, State> = {
     label: 'Option',
-    tooltip: 'Send the SMTP-specific command sequence to start TLS for the rest of the communication.',
+    tooltip: 'This option makes OpenSSL send the SMTP-specific command sequence to start TLS for the rest of the communication.',
     defaultValue: '-starttls smtp',
     skip: state => state.security !== 'explicit',
 };
 
 export const connect: Entry<string> = {
     label: 'Option',
-    tooltip: 'The next argument specifies the server address and the port number to connect to.',
+    tooltip: 'This option is followed by the server address and the port number to connect to.',
     defaultValue: '-connect',
 };
 
@@ -928,7 +934,7 @@ export const toolProtocolEsmtp: Tool = [
         <CodeBlock>
             <StaticPrompt>
                 <IfCase entry="security" value="none">
-                    <OutputEntries entries={{ telnet, server, port }}/>
+                    <OutputEntries entries={{ nc, c, server, port }}/>
                 </IfCase>
                 <IfCase entry="security" value="none" not>
                     <OutputEntries entries={{ openssl, quiet, crlf, starttls, connect, server }}/>:<OutputEntries entries={{ port }}/>
