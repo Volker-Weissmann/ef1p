@@ -11,7 +11,7 @@ import { singleQuote } from '../../utility/string';
 
 import { CodeBlock, DynamicOutput } from '../../react/code';
 import { ClickToCopy } from '../../react/copy';
-import { DynamicBooleanEntry, DynamicEntries, DynamicSingleSelectEntry, DynamicTextEntry } from '../../react/entry';
+import { DynamicEntries, DynamicSingleSelectEntry, DynamicTextEntry } from '../../react/entry';
 import { Tool } from '../../react/injection';
 import { getInput } from '../../react/input';
 import { StaticPrompt } from '../../react/prompt';
@@ -45,23 +45,14 @@ const algorithm: DynamicSingleSelectEntry = {
     selectOptions: hashFunctions,
 };
 
-const uppercase: DynamicBooleanEntry = {
-    label: 'Uppercase',
-    tooltip: 'Whether to output the hexadecimal characters in uppercase.',
-    defaultValue: false,
-    inputType: 'switch',
-};
-
 interface State {
     input: string;
     algorithm: string;
-    uppercase: boolean;
 }
 
 const entries: DynamicEntries<State> = {
     input,
     algorithm,
-    uppercase,
 };
 
 const store = new VersionedStore(entries, 'instruction-hashing');
@@ -69,14 +60,14 @@ const Input = getInput(store);
 
 /* ------------------------------ Output ------------------------------ */
 
-function RawHashOutput({ input, algorithm, uppercase }: State): JSX.Element {
+function RawHashOutput({ input, algorithm }: State): JSX.Element {
     // https://nodejs.org/api/crypto.html#crypto_hash_update_data_inputencoding ('utf-8' is enforced.)
     const hash = createHash(algorithm as any).update(input).digest('hex');
     return <CodeBlock>
-        <StaticPrompt>printf '%s' {singleQuote(input)} | openssl {algorithm}{uppercase && ' | tr [:lower:] [:upper:]'}</StaticPrompt>
+        <StaticPrompt>printf '%s' {singleQuote(input)} | openssl {algorithm} -r | awk '{'{print toupper($1)}'}'</StaticPrompt>
         <ClickToCopy>
             <DynamicOutput title={`The ${hashFunctions[algorithm as keyof typeof hashFunctions]} hash of the given input. Click to copy.`}>
-                {uppercase ? hash.toUpperCase() : hash}
+                {hash.toUpperCase()}
             </DynamicOutput>
         </ClickToCopy>
     </CodeBlock>;
