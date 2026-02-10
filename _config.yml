@@ -14,8 +14,8 @@ permalink: pretty
 date_format: '%-e %B %Y' # http://strftime.net
 
 external_version: 3
-scripts_version: 23
-styles_version: 15
+scripts_version: 24
+styles_version: 16
 
 repository: KasparEtter/ef1p
 xdotcom_handle: ExplainedFrom1P
